@@ -9,8 +9,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
 		LICENSE = LICENSE
+		NOTICE.md = NOTICE.md
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gouter", "Gouter\Gouter.csproj", "{F064CF3F-DB1E-41DE-BF6E-A352059D0D9D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -22,6 +25,10 @@ Global
 		{38088C27-EAFA-4F6F-94A6-C66BC7669DDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{38088C27-EAFA-4F6F-94A6-C66BC7669DDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{38088C27-EAFA-4F6F-94A6-C66BC7669DDC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F064CF3F-DB1E-41DE-BF6E-A352059D0D9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F064CF3F-DB1E-41DE-BF6E-A352059D0D9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F064CF3F-DB1E-41DE-BF6E-A352059D0D9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F064CF3F-DB1E-41DE-BF6E-A352059D0D9D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
