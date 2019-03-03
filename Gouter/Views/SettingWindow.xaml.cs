@@ -10,19 +10,18 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace Gouter.Views
 {
     /// <summary>
-    /// MainWindow.xaml の相互作用ロジック
+    /// SettingWindow.xaml の相互作用ロジック
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class SettingWindow : Window
     {
-        public MainWindow()
+        public SettingWindow()
         {
-            this.InitializeComponent(); 
+            this.InitializeComponent();
         }
     }
 }

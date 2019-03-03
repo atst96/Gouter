@@ -5,6 +5,14 @@
     xmlns:local="clr-namespace:Gouter"
     StartupUri="Views/MainWindow.xaml">
     <Application.Resources>
-         
+        <ResourceDictionary>
+            <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Xaml/Themes/General.xaml" />
+                <ResourceDictionary Source="/Xaml/Templates/CustomStyles.xaml" />
+                <ResourceDictionary Source="/Xaml/Templates/DataTemplates.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>
