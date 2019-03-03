@@ -15,8 +15,8 @@ namespace Gouter.Services
 
         private Window _view;
         private IntPtr _hwnd;
-        private ViewModelBase _viewModel;
-        private Components.MessageBox _messageBox;
+        private readonly ViewModelBase _viewModel;
+        private readonly Components.MessageBox _messageBox;
 
         public DialogService()
         {
@@ -52,10 +52,12 @@ namespace Gouter.Services
 
         private void OnViewUnregister(Window view)
         {
-            view.Loaded -= this.OnViewLoaded;
-            view.Closed -= this.OnViewClosed;
-
-            this._messageBox.Dispose();
+            if (view != null)
+            {
+                view.Loaded -= this.OnViewLoaded;
+                view.Closed -= this.OnViewClosed;
+                this._messageBox.SetHandle(IntPtr.Zero);
+            }
         }
 
         private void OnViewLoaded(object sender, RoutedEventArgs e)
