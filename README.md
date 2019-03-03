@@ -8,3 +8,4 @@ Windows向けの音楽再生アプリです。
   - CSCore - .NET Audio Library
   - MessagePack for C#
   - System.Threading.Tasks.Extensions
+  - Windows-API-Code-Pack-1.1

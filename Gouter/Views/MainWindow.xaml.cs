@@ -22,7 +22,7 @@ namespace Gouter.Views
     {
         public MainWindow()
         {
-            this.InitializeComponent(); 
+            this.InitializeComponent();
         }
     }
 }
