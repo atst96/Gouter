@@ -7,10 +7,74 @@
     xmlns:app="clr-namespace:Gouter"
     xmlns:vm="clr-namespace:Gouter.ViewModels"
     mc:Ignorable="d"
-    Title="設定" Height="450" Width="800"
+    Title="設定" Height="450" Width="620"
+    FontFamily="Meiryo"
+    SnapsToDevicePixels="True"
+    TextOptions.TextFormattingMode="Display"
     DataContext="{app:ViewModelConnector vm:SettingWindowViewModel}"
     d:DataContext="{d:DesignInstance vm:SettingWindowViewModel, IsDesignTimeCreatable=True}">
-    <Grid>
+    <Window.Resources>
+        <Thickness x:Key="PanelPadding">16,10</Thickness>
+        <Thickness x:Key="TopAdjacentMargin">0,8,0,0</Thickness>
+        <Thickness x:Key="LeftAdjacentMargin">8,0,0,0</Thickness>
+
+
+        <Style x:Key="HeaderTitleStyle" TargetType="{x:Type Label}">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="FontSize" Value="18" />
+        </Style>
+    </Window.Resources>
+    <DockPanel LastChildFill="True">
+        <Border
+            DockPanel.Dock="Bottom"
+            Padding="{StaticResource PanelPadding}"
+            BorderThickness="0,1,0,0"
+            BorderBrush="{StaticResource ToolBar.Static.BorderBrush}"
+            Background="{StaticResource ToolBar.Static.Background}">
+            <StackPanel
+                DockPanel.Dock="Bottom"
+                Orientation="Horizontal"
+                HorizontalAlignment="Right">
+                <Button
+                    Padding="24 2"
+                    Content="閉じる"/>
+            </StackPanel>
+        </Border>
         
-    </Grid>
+        <TabControl Style="{StaticResource LeftHeaderTabControlStyle}">
+            <TabItem Header="一般">
+                <StackPanel Margin="{StaticResource PanelPadding}">
+                    <Label
+                        Content="一般設定"
+                        Style="{StaticResource HeaderTitleStyle}" />
+                </StackPanel>
+            </TabItem>
+
+            <TabItem Header="ディレクトリ">
+                <StackPanel Margin="{StaticResource PanelPadding}">
+                    <Label
+                        Content="ディレクトリ設定"
+                        Style="{StaticResource HeaderTitleStyle}" />
+
+                    <ListBox
+                        Height="140"
+                        BorderThickness="1"
+                        Margin="{StaticResource TopAdjacentMargin}" />
+
+                    <StackPanel
+                        Margin="{StaticResource TopAdjacentMargin}"
+                        Orientation="Horizontal">
+                        <Button
+                            Padding="24 3"
+                            Content="フォルダの追加" />
+                        <Button
+                            Padding="24 3"
+                            Content="削除"
+                            Margin="{StaticResource LeftAdjacentMargin}"/>
+                    </StackPanel>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
 </Window>
