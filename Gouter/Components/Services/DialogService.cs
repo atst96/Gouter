@@ -218,6 +218,7 @@ namespace Gouter.Services
             {
                 Title = caption,
                 InitialDirectory = initialDirectory,
+                IsFolderPicker = true,
                 Multiselect = false,
             };
 

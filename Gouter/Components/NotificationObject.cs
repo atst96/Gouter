@@ -19,7 +19,7 @@ namespace Gouter
 
         protected bool SetProperty<T>(ref T changedValue, T newValue, [CallerMemberName] string propertyName = "")
         {
-            if (!object.Equals(changedValue, newValue))
+            if (object.Equals(changedValue, newValue))
             {
                 return false;
             }
