@@ -9,6 +9,7 @@
     mc:Ignorable="d"
     Title="設定" Height="450" Width="620"
     FontFamily="Meiryo"
+    ResizeMode="NoResize"
     SnapsToDevicePixels="True"
     TextOptions.TextFormattingMode="Display"
     DataContext="{app:ViewModelConnector vm:SettingWindowViewModel}"
@@ -17,7 +18,6 @@
         <Thickness x:Key="PanelPadding">16,10</Thickness>
         <Thickness x:Key="TopAdjacentMargin">0,8,0,0</Thickness>
         <Thickness x:Key="LeftAdjacentMargin">8,0,0,0</Thickness>
-
 
         <Style x:Key="HeaderTitleStyle" TargetType="{x:Type Label}">
             <Setter Property="Padding" Value="0" />
@@ -43,36 +43,47 @@
         </Border>
         
         <TabControl Style="{StaticResource LeftHeaderTabControlStyle}">
-            <TabItem Header="一般">
-                <StackPanel Margin="{StaticResource PanelPadding}">
-                    <Label
-                        Content="一般設定"
-                        Style="{StaticResource HeaderTitleStyle}" />
-                </StackPanel>
-            </TabItem>
-
             <TabItem Header="ディレクトリ">
                 <StackPanel Margin="{StaticResource PanelPadding}">
                     <Label
                         Content="ディレクトリ設定"
                         Style="{StaticResource HeaderTitleStyle}" />
 
+                    <TextBlock
+                        Text="次の場所から音楽ファイルを探します"
+                        Margin="{StaticResource TopAdjacentMargin}"/>
+
                     <ListBox
-                        Height="140"
+                        Height="80"
                         BorderThickness="1"
-                        Margin="{StaticResource TopAdjacentMargin}" />
+                        Margin="{StaticResource TopAdjacentMargin}"
+                        ItemsSource="{Binding MusicDirectories, Mode=OneTime}"
+                        SelectedValue="{Binding SelectedMusicDirectory, Mode=TwoWay}" />
 
                     <StackPanel
                         Margin="{StaticResource TopAdjacentMargin}"
                         Orientation="Horizontal">
                         <Button
                             Padding="24 3"
-                            Content="フォルダの追加" />
+                            Content="フォルダの追加"
+                            Command="{Binding AddMusicDirectoryCommand, Mode=OneTime}"/>
+                        
                         <Button
                             Padding="24 3"
                             Content="削除"
-                            Margin="{StaticResource LeftAdjacentMargin}"/>
+                            Margin="{StaticResource LeftAdjacentMargin}"
+                            Style="{StaticResource Button.Danger}"
+                            Command="{Binding RemoveMusicDirectoryCommand, Mode=OneTime}"
+                            CommandParameter="{Binding SelectedMusicDirectory, Mode=OneWay}" />
                     </StackPanel>
+                </StackPanel>
+            </TabItem>
+            
+            <TabItem Header="一般">
+                <StackPanel Margin="{StaticResource PanelPadding}">
+                    <Label
+                        Content="一般設定"
+                        Style="{StaticResource HeaderTitleStyle}" />
                 </StackPanel>
             </TabItem>
         </TabControl>

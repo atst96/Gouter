@@ -11,12 +11,12 @@ namespace Gouter
     internal class ApplicationSetting : NotificationObject
     {
         [Key("directory.musics")]
-        private List<string> _musicDirectories;
+        private NotifiableCollection<string> _musicDirectories;
 
         [IgnoreMember]
-        public List<string> MusicDirectories
+        public NotifiableCollection<string> MusicDirectories
         {
-            get => this._musicDirectories ?? (this._musicDirectories = new List<string>());
+            get => this._musicDirectories ?? (this._musicDirectories = new NotifiableCollection<string>());
         }
     }
 }

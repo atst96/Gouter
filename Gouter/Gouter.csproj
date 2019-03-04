@@ -83,9 +83,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Commands\SettingWindow\AddMusicDirectoryCommand.cs" />
+    <Compile Include="Commands\SettingWindow\RemoveMusicDirectoryCommand.cs" />
+    <Compile Include="Config.cs" />
     <Compile Include="Controls\BusyIndicator.xaml.cs">
       <DependentUpon>BusyIndicator.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Extensions\ExceptionExtension.cs" />
     <Compile Include="Settings\ApplicationSetting.cs" />
     <Compile Include="Utilities\FileContentUtility.cs" />
     <Compile Include="Utilities\MessagePackUtility.cs" />

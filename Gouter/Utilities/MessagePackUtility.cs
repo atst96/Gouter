@@ -39,7 +39,7 @@ namespace Gouter.Utilities
 
                 using (var outputStream = FileContentUtility.OpenCreate(path))
                 {
-                    bufferStream.Position = 0;
+                    bufferStream.Seek(0, SeekOrigin.Begin);
 
                     await bufferStream.CopyToAsync(outputStream).ConfigureAwait(false);
                 }
