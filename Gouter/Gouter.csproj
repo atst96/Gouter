@@ -85,6 +85,7 @@
     <Compile Include="Controls\BusyIndicator.xaml.cs">
       <DependentUpon>BusyIndicator.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Settings\ApplicationSetting.cs" />
     <Compile Include="ViewModels\ImportWindowViewModel.cs" />
     <Compile Include="ViewModels\SettingWindowViewModel.cs" />
     <Compile Include="Views\ImportWindow.xaml.cs">
