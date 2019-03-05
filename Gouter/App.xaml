@@ -10,6 +10,7 @@
             <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
 
             <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Xaml/Icons.xaml" />
                 <ResourceDictionary Source="/Xaml/Themes/General.xaml" />
                 <ResourceDictionary Source="/Xaml/Templates/CustomStyles.xaml" />
                 <ResourceDictionary Source="/Xaml/Templates/DataTemplates.xaml" />
