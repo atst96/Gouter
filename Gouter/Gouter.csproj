@@ -89,6 +89,7 @@
     <Compile Include="Controls\BusyIndicator.xaml.cs">
       <DependentUpon>BusyIndicator.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\GeometryIcon.cs" />
     <Compile Include="Extensions\ExceptionExtension.cs" />
     <Compile Include="Settings\ApplicationSetting.cs" />
     <Compile Include="Utilities\FileContentUtility.cs" />
