@@ -10,7 +10,7 @@
     Title="設定" Height="450" Width="620"
     FontFamily="Meiryo"
     ResizeMode="NoResize"
-    SnapsToDevicePixels="True"
+    UseLayoutRounding="True"
     TextOptions.TextFormattingMode="Display"
     DataContext="{app:ViewModelConnector vm:SettingWindowViewModel}"
     d:DataContext="{d:DesignInstance vm:SettingWindowViewModel, IsDesignTimeCreatable=True}">

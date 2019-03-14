@@ -8,5 +8,7 @@ Windows向けの音楽再生アプリです。
   - CSCore - .NET Audio Library
   - Material design icons
   - MessagePack for C#
+  - System.Data.SQLite.Core
   - System.Threading.Tasks.Extensions
+  - XamlBehaviors for WPF
   - Windows-API-Code-Pack-1.1

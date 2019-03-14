@@ -1,5 +1,38 @@
 ﻿<ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:app="clr-namespace:Gouter">
+
+    <DataTemplate DataType="{x:Type app:AlbumInfo}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <Image
+                Margin="0,0,8,0"
+                Width="48" Height="48"
+                Stretch="Uniform"
+                Source="{Binding Artwork, Mode=OneWay}"
+                RenderOptions.BitmapScalingMode="HighQuality" />
+
+            <StackPanel
+                Grid.Column="1"
+                Orientation="Vertical"
+                VerticalAlignment="Center">
+                <TextBlock
+                    FontWeight="Bold"
+                    TextWrapping="NoWrap"
+                    TextTrimming="CharacterEllipsis"
+                    Text="{Binding Name, Mode=OneWay}" />
+                
+                <TextBlock
+                    TextWrapping="NoWrap"
+                    TextTrimming="CharacterEllipsis"
+                    Text="{Binding Artist, Mode=OneWay}" />
+            </StackPanel>
+        </Grid>
+    </DataTemplate>
     
 </ResourceDictionary>

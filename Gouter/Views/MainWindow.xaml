@@ -6,12 +6,24 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:Gouter.ViewModels"
     xmlns:app="clr-namespace:Gouter"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:rg="clr-namespace:SourceChord.ResponsiveGrid;assembly=ResponsiveGrid.Wpf"
     mc:Ignorable="d"
     Title="Gouter" Height="450" Width="800"
-    SnapsToDevicePixels="True"
+    UseLayoutRounding="True"
     FontFamily="Meiryo"
     DataContext="{app:ViewModelConnector vm:MainWindowViewModel}"
     d:DataContext="{d:DesignInstance vm:MainWindowViewModel, IsDesignTimeCreatable=True}">
+    <Window.Resources>
+        <ItemsPanelTemplate x:Key="ItemsPanelTemplate">
+            <VirtualizingStackPanel Orientation="Vertical" />
+        </ItemsPanelTemplate>
+    </Window.Resources>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="ContentRendered">
+            <i:InvokeCommandAction Command="{Binding InitializeCommand, Mode=OneTime}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
     <DockPanel LastChildFill="True">
         <Border
             Height="55"
@@ -25,7 +37,8 @@
                     DockPanel.Dock="Left"
                     Orientation="Horizontal">
                     <Button
-                        Padding="10"
+                        Margin="3" Padding="6"
+                        VerticalAlignment="Center"
                         Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
                         <app:GeometryIcon
                             Width="20" Height="20"
@@ -33,6 +46,7 @@
                     </Button>
                     <Button
                         Padding="12"
+                        VerticalAlignment="Center"
                         Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
                         <app:GeometryIcon
                             Width="24" Height="24"
@@ -40,13 +54,15 @@
                     </Button>
                     <!--<Button
                         Padding="12"
+                        VerticalAlignment="Center"
                         Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
                         <app:GeometryIcon
                             Width="24" Height="24"
                             Data="{StaticResource MaterialIcons.Pause}" />
                     </Button>-->
                     <Button
-                        Padding="10"
+                        Margin="3" Padding="6"
+                        VerticalAlignment="Center"
                         Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
                         <app:GeometryIcon
                             Width="20" Height="20"
@@ -91,7 +107,7 @@
                         DockPanel.Dock="Right"
                         VerticalAlignment="Center"
                         Text="0:00 / 0:00" />
-                    
+
                     <TextBlock
                         Margin="6"
                         Text="Title"
@@ -104,11 +120,22 @@
         </Border>
 
         <StatusBar
-            Padding="4"
+            Padding="4,2"
             DockPanel.Dock="Bottom"
             BorderThickness="0,1,0,0"
+            FontFamily="Meiryo"
             BorderBrush="{StaticResource ToolBar.Static.BorderBrush}"
             Background="{StaticResource ToolBar.Static.Background}">
+            <StatusBarItem>
+                <ProgressBar
+                    Width="120"
+                    Height="16"
+                    Value="{Binding LoadProgress.CurrentCount, Mode=OneWay}"
+                    Maximum="{Binding LoadProgress.MaxCount, Mode=OneWay}"/>
+            </StatusBarItem>
+            <Separator
+                Margin="8,2"
+                Background="{StaticResource ToolBar.Static.BorderBrush}" />
             <StatusBarItem>
                 <TextBlock Text="ステータス" />
             </StatusBarItem>
@@ -121,23 +148,111 @@
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
-            <ListBox
-                DockPanel.Dock="Left"
-                Grid.Column="0"
-                BorderThickness="0">
-
-            </ListBox>
+            <TabControl>
+                <TabItem Header="アルバム">
+                    <ListBox
+                        DockPanel.Dock="Left"
+                        Grid.Column="0"
+                        BorderThickness="0"
+                        SelectionMode="Single"
+                        ItemsPanel="{StaticResource ItemsPanelTemplate}"
+                        VirtualizingPanel.ScrollUnit="Item"
+                        VirtualizingPanel.IsVirtualizing="True"
+                        VirtualizingPanel.VirtualizationMode="Recycling"
+                        ItemsSource="{Binding Albums, Mode=OneTime}"
+                        SelectedItem="{Binding SelectedAlbum, Mode=TwoWay}">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                <Setter Property="Padding" Value="8" />
+                                <Setter Property="Height" Value="64" />
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                    </ListBox>
+                </TabItem>
+            </TabControl>
 
             <GridSplitter
                 Grid.Column="1"
-                Width="1"
+                Width="3"
                 VerticalAlignment="Stretch"
                 HorizontalAlignment="Center"
                 Background="{StaticResource ToolBar.Static.BorderBrush}" />
 
             <Grid
                 Grid.Column="2">
-                
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <Image
+                    Margin="10"
+                    Width="84" Height="84"
+                    Source="{Binding CurrentPlaylist.Album.Artwork, Mode=OneWay}" />
+
+                <StackPanel
+                    Margin="6,10,10,10"
+                    Grid.Column="1"
+                    VerticalAlignment="Top">
+                    <TextBlock
+                        FontWeight="Bold"
+                        FontSize="20"
+                        TextWrapping="NoWrap"
+                        TextTrimming="CharacterEllipsis"
+                        Text="{Binding CurrentPlaylist.Album.Name, Mode=OneWay}" />
+
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        Text="{Binding CurrentPlaylist.Album.Artist, Mode=OneWay}" />
+
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        Text="{Binding CurrentPlaylist.Tracks.Count, Mode=OneWay, StringFormat='{}{0}件'}" />
+                </StackPanel>
+
+                <ListBox
+                    Grid.Row="1"
+                    Grid.ColumnSpan="2"
+                    BorderThickness="0,1,0,0"
+                    BorderBrush="{StaticResource ToolBar.Static.BorderBrush}"
+                    ItemsSource="{Binding CurrentPlaylist.Tracks, Mode=OneWay}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <rg:ResponsiveGrid
+                                Width="{Binding ViewportWidth, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type ScrollViewer}}}" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type app:TrackInfo}">
+                            <TextBlock>
+                                 Disc:<Run Text="{Binding DiskNumber, Mode=OneTime}" /> / <Run Text="{Binding TrackNumber, Mode=OneWay}" /> / <Run Text="{Binding Title, Mode=OneWay}" />
+                            </TextBlock>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                    <ItemsControl.ItemContainerStyle>
+                        <Style TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                            <Setter Property="rg:ResponsiveGrid.SM" Value="6" />
+                            <Setter Property="rg:ResponsiveGrid.LG" Value="4" />
+                        </Style>
+                    </ItemsControl.ItemContainerStyle>
+                </ListBox>
+
+                <!--<ListBox
+                    Grid.Row="1"
+                    Grid.ColumnSpan="2"
+                    BorderThickness="0,1,0,0"
+                    BorderBrush="{StaticResource ToolBar.Static.BorderBrush}"
+                    ItemsSource="{Binding CurrentPlaylist.Tracks, Mode=OneWay}">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                            <Setter Property="Width" Value="Auto" />
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                </ListBox>-->
             </Grid>
         </Grid>
     </DockPanel>
