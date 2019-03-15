@@ -41,7 +41,7 @@ namespace Gouter.Commands.MainWindow
                     progress.Reset(newTracks.Count);
                     int count = 0;
 
-                    using (var transaction = App.SqlConnection.BeginTransaction())
+                    using (var transaction = Database.BeginTransaction())
                     {
                         foreach (var track in newTracks)
                         {

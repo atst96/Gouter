@@ -109,10 +109,13 @@
     </Compile>
     <Compile Include="Controls\GeometryIcon.cs" />
     <Compile Include="CountProgressInfo.cs" />
+    <Compile Include="Database.cs" />
     <Compile Include="Extensions\ExceptionExtension.cs" />
+    <Compile Include="Extensions\SQLiteExtensions.cs" />
     <Compile Include="IPlaylist.cs" />
     <Compile Include="Library.cs" />
     <Compile Include="MusicTrackManager.cs" />
+    <Compile Include="Components\Query.cs" />
     <Compile Include="Settings\ApplicationSetting.cs" />
     <Compile Include="StandardProgressReceiver.cs" />
     <Compile Include="TrackInfo.cs" />

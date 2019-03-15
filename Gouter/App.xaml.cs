@@ -23,7 +23,6 @@ namespace Gouter
 
         internal static AlbumManager AlbumManager { get; } = new AlbumManager();
         internal static MusicTrackManager TrackManager { get; } = new MusicTrackManager();
-        internal static SQLiteConnection SqlConnection { get; private set; }
 
         private readonly Assembly _assembly = Assembly.GetExecutingAssembly();
 
@@ -59,17 +58,7 @@ namespace Gouter
 
             this.ShutdownMode = ShutdownMode.OnMainWindowClose;
 
-            var sqlConfig = new SQLiteConnectionStringBuilder
-            {
-                Version = 3,
-                //DataSource = ":memory:"
-                DataSource = GetLocalFilePath(Config.LibraryFileName),
-            };
-
-            SqlConnection = new SQLiteConnection(sqlConfig.ToString());
-            SqlConnection.Open();
-
-            sqlConfig = null;
+            Database.Connect();
 
             this.InitializeDatabase();
             this.LoadCachedTracks();
@@ -77,7 +66,7 @@ namespace Gouter
 
         protected override void OnExit(ExitEventArgs e)
         {
-            SqlConnection?.Dispose();
+            Database.Disconnect();
 
             if (this.IsRequireSaveSettings)
             {
@@ -118,91 +107,55 @@ namespace Gouter
 
         private void InitializeDatabase()
         {
-            if (!HasDataTable("albums"))
+            var tables = Database.EnumerateTableNames();
+
+            if (!tables.Contains(Database.TableNames.Albums))
             {
-                using (var cmd = SqlConnection.CreateCommand())
-                {
-                    cmd.CommandText = "CREATE TABLE albums (id INT PRIMARY KEY NOT NULL, key TEXT, name TEXT, artist TEXT, is_compilation BOOL, artwork BLOB)";
-                    cmd.ExecuteNonQuery();
-                }
+                Database.ExecuteNonQuery(Database.Queries.CreateAlbumsTable);
             }
 
-            if (!HasDataTable("tracks"))
+            if (!tables.Contains(Database.TableNames.Tracks))
             {
-                using (var cmd = SqlConnection.CreateCommand())
-                {
-                    cmd.CommandText = "CREATE TABLE tracks (id INT PRIMARY KEY NOT NULL, album_id INT NOT NULL, path TEXT, duration INT, disk INT, track INT, year INT, album_artist TEXT, title TEXT, artist TEXT, genre TEXT)";
-                    cmd.ExecuteNonQuery();
-                }
-            }
-        }
-
-        private bool HasDataTable(string tableName)
-        {
-            using (var command = SqlConnection.CreateCommand())
-            {
-                command.CommandText = "SELECT name FROM sqlite_master WHERE type='table' AND name=?";
-
-                command.Parameters.Add(new SQLiteParameter
-                {
-                    DbType = System.Data.DbType.String,
-                    Value = tableName,
-                });
-                command.Prepare();
-
-                Console.WriteLine(command.CommandText);
-
-                using (var reader = command.ExecuteReader())
-                {
-                    return reader.Read() && reader.GetString(0) == tableName;
-                }
+                Database.ExecuteNonQuery(Database.Queries.CreateTracksTable);
             }
         }
 
         private void LoadCachedTracks()
         {
-            using (var cmd = SqlConnection.CreateCommand())
+            using (var row = Database.Select(Database.TableNames.Albums))
             {
-                cmd.CommandText = "SELECT * FROM albums";
-
-                using (var reader = cmd.ExecuteReader())
+                while (row.Read())
                 {
-                    while (reader.Read())
-                    {
-                        int id = reader.GetInt32(0);
-                        var key = reader.GetString(1);
-                        var name = reader.GetString(2);
-                        var artist = reader.GetString(3);
-                        bool isCompilation = reader.GetBoolean(4);
-                        var artwork = reader[5] as byte[];
+                    int id = row.Get<int>(0);
+                    var key = row.Get<string>(1);
+                    var name = row.Get<string>(2);
+                    var artist = row.Get<string>(3);
+                    bool isCompilation = row.Get<bool>(4);
+                    byte[] artwork = row.GetOrDefault<byte[]>(5);
 
-                        AlbumManager.Add(new AlbumInfo(id, key, name, artist, isCompilation, artwork));
-                    }
+                    var albumInfo = new AlbumInfo(id, key, name, artist, isCompilation, artwork);
+                    AlbumManager.Add(albumInfo);
                 }
             }
 
-            using (var cmd = SqlConnection.CreateCommand())
+            using (var row = Database.Select(Database.TableNames.Tracks))
             {
-                cmd.CommandText = "SELECT * FROM tracks";
-
-                using (var reader = cmd.ExecuteReader())
+                while (row.Read())
                 {
-                    while (reader.Read())
-                    {
-                        int id = reader.GetInt32(0);
-                        int albumId = reader.GetInt32(1);
-                        var path = reader.GetString(2);
-                        int duration = reader.GetInt32(3);
-                        int disk = reader.GetInt32(4);
-                        int track = reader.GetInt32(5);
-                        int year = reader.GetInt32(6);
-                        var albumArtist = reader.GetString(7);
-                        var title = reader.GetString(8);
-                        var artist = reader.GetString(9);
-                        var genre = reader.GetString(10);
+                    int id = row.Get<int>(0);
+                    int albumId = row.Get<int>(1);
+                    var path = row.Get<string>(2);
+                    int duration = row.Get<int>(3);
+                    int disk = row.Get<int>(4);
+                    int track = row.Get<int>(5);
+                    int year = row.Get<int>(6);
+                    var albumArtist = row.Get<string>(7);
+                    var title = row.Get<string>(8);
+                    var artist = row.Get<string>(9);
+                    var genre = row.Get<string>(10);
 
-                        App.TrackManager.Tracks.Add(new TrackInfo(id, albumId, path, duration, disk, track, year, albumArtist, title, artist, genre));
-                    }
+                    var trackInfo = new TrackInfo(id, albumId, path, duration, disk, track, year, albumArtist, title, artist, genre);
+                    App.TrackManager.Tracks.Add(trackInfo);
                 }
             }
 

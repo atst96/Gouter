@@ -88,24 +88,20 @@ namespace Gouter
         public void Register(AlbumInfo albumInfo)
         {
             this.Add(albumInfo);
-            
 
-            using (var cmd = App.SqlConnection.CreateCommand())
+            using (var cmd = Database.CreateCommand())
             {
-                cmd.CommandText = "INSERT INTO albums (id, key, name, artist, is_compilation, artwork) VALUES (@id,@key,@name,@artist,@compilation,@artwork)";
+                var values = new Query
+                {
+                    ["id"] = albumInfo.Id,
+                    ["key"] = albumInfo.Key,
+                    ["name"] = albumInfo.Name,
+                    ["artist"] = albumInfo.Artist,
+                    ["is_compilation"] = albumInfo.IsCompilation,
+                    ["artwork"] = albumInfo.ArtworkStream?.ToArray(),
+                };
 
-                var @params = cmd.Parameters;
-
-                @params.AddWithValue("id", albumInfo.Id);
-                @params.AddWithValue("key", albumInfo.Key);
-                @params.AddWithValue("name", albumInfo.Name);
-                @params.AddWithValue("artist", albumInfo.Artist);
-                @params.AddWithValue("compilation", albumInfo.IsCompilation);
-                @params.AddWithValue("artwork", albumInfo.ArtworkStream?.ToArray());
-
-                cmd.Prepare();
-
-                cmd.ExecuteNonQuery();
+                Database.Insert(Database.TableNames.Albums, values);
             }
         }
 

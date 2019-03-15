@@ -71,27 +71,22 @@ namespace Gouter
 
             this.Tracks.Add(trackInfo);
 
-            using (var cmd = App.SqlConnection.CreateCommand())
+            var values = new Query
             {
-                cmd.CommandText = "INSERT INTO tracks (id, album_id, path, duration, disk, track, year, album_artist, title, artist, genre) VALUES (@id, @album_id, @path, @duration, @disk, @track, @year, @album_artist, @title, @artist, @genre)";
+                ["id"] = trackInfo.Id,
+                ["album_id"] = trackInfo.AlbumInfo.Id,
+                ["path"] = trackInfo.Path,
+                ["duration"] = (int)trackInfo.Duration.TotalMilliseconds,
+                ["disk"] = trackInfo.DiskNumber,
+                ["track"] = trackInfo.TrackNumber,
+                ["year"] = trackInfo.Year,
+                ["album_artist"] = trackInfo.AlbumArtist,
+                ["title"] = trackInfo.Title,
+                ["artist"] = trackInfo.Artist,
+                ["genre"] = trackInfo.Genre,
+            };
 
-                var @params = cmd.Parameters;
-                @params.AddWithValue("id", trackInfo.Id);
-                @params.AddWithValue("album_id", trackInfo.AlbumInfo.Id);
-                @params.AddWithValue("path", trackInfo.Path);
-                @params.AddWithValue("duration", (int)trackInfo.Duration.TotalMilliseconds);
-                @params.AddWithValue("disk", trackInfo.DiskNumber);
-                @params.AddWithValue("track", trackInfo.TrackNumber);
-                @params.AddWithValue("year", trackInfo.Year);
-                @params.AddWithValue("album_artist", trackInfo.AlbumArtist);
-                @params.AddWithValue("title", trackInfo.Title);
-                @params.AddWithValue("artist", trackInfo.Artist);
-                @params.AddWithValue("genre", trackInfo.Genre);
-
-                cmd.Prepare();
-
-                cmd.ExecuteNonQuery();
-            }
+            Database.Insert(Database.TableNames.Tracks, values);
 
             return trackInfo;
         }
