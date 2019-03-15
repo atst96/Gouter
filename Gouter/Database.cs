@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Data.SQLite;
 using System.Linq;
 using System.Text;
@@ -75,13 +76,15 @@ namespace Gouter
             }
         }
 
-        public static SQLiteDataReader Select(string tableName)
+        public static IEnumerable<SQLiteDataReader> Select(string tableName)
         {
-            using (var command = CreateCommand())
+            using (var command = CreateCommand("SELECT * FROM " + tableName))
+            using (var reader = command.ExecuteReader())
             {
-                command.CommandText = "SELECT * FROM " + tableName;
-
-                return command.ExecuteReader();
+                while (reader.Read())
+                {
+                    yield return reader;
+                }
             }
         }
 
@@ -96,7 +99,7 @@ namespace Gouter
             {
                 command.CommandText = $"INSERT INTO {tableName} ({columnsText}) VALUES ({valuesText})";
 
-                foreach(var kvp in values)
+                foreach (var kvp in values)
                 {
                     command.Parameters.AddWithValue(kvp.Key, kvp.Value);
                 }

@@ -29,6 +29,9 @@ namespace Gouter.Commands.MainWindow
 
             await Task.Run(() =>
             {
+                App.AlbumManager.LoadDatabase();
+                App.TrackManager.LoadDatabase();
+
                 var progress = this._viewModel.LoadProgress;
 
                 var newFiles = MusicTrackManager.FindNewFiles(setting.MusicDirectories);

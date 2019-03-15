@@ -94,10 +94,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="AlbumComparer.cs" />
-    <Compile Include="AlbumInfo.cs" />
-    <Compile Include="AlbumManager.cs" />
-    <Compile Include="AlbumPlaylist.cs" />
+    <Compile Include="Comparer\AlbumComparer.cs" />
+    <Compile Include="Data\AlbumInfo.cs" />
+    <Compile Include="Data\AlbumManager.cs" />
+    <Compile Include="Playlists\AlbumPlaylist.cs" />
     <Compile Include="Commands\MainWindow\InitializeCommand.cs" />
     <Compile Include="Commands\SettingWindow\AddMusicDirectoryCommand.cs" />
     <Compile Include="Commands\SettingWindow\RemoveMusicDirectoryCommand.cs" />
@@ -108,18 +108,17 @@
       <DependentUpon>BusyIndicator.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\GeometryIcon.cs" />
-    <Compile Include="CountProgressInfo.cs" />
+    <Compile Include="Components\CountProgressInfo.cs" />
     <Compile Include="Database.cs" />
     <Compile Include="Extensions\ExceptionExtension.cs" />
     <Compile Include="Extensions\SQLiteExtensions.cs" />
-    <Compile Include="IPlaylist.cs" />
-    <Compile Include="Library.cs" />
-    <Compile Include="MusicTrackManager.cs" />
+    <Compile Include="Playlists\IPlaylist.cs" />
+    <Compile Include="Data\MusicTrackManager.cs" />
     <Compile Include="Components\Query.cs" />
     <Compile Include="Settings\ApplicationSetting.cs" />
-    <Compile Include="StandardProgressReceiver.cs" />
-    <Compile Include="TrackInfo.cs" />
-    <Compile Include="TrackNormalComparer.cs" />
+    <Compile Include="Components\StandardProgressReceiver.cs" />
+    <Compile Include="Data\TrackInfo.cs" />
+    <Compile Include="Comparer\TrackNormalComparer.cs" />
     <Compile Include="Utilities\FileContentUtility.cs" />
     <Compile Include="Utilities\ImageUtility.cs" />
     <Compile Include="Utilities\MessagePackUtility.cs" />

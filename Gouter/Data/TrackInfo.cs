@@ -1,5 +1,4 @@
 ﻿using ATL;
-using MessagePack;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,12 +7,14 @@ using System.Threading.Tasks;
 
 namespace Gouter
 {
-    [MessagePackObject]
     internal class TrackInfo : NotificationObject
     {
+        private readonly static MusicTrackManager TrackManager = App.TrackManager;
+        private readonly static AlbumManager AlbumManager = App.AlbumManager;
+
         public TrackInfo(Track track)
         {
-            this.Id = MusicTrackManager.GenerateId();
+            this.Id = TrackManager.GenerateId();
             this.Path = track.Path;
             this.Duration = TimeSpan.FromMilliseconds(track.DurationMs);
             this.DiskNumber = track.DiscNumber;
@@ -23,7 +24,7 @@ namespace Gouter
             this.Title = track.Title;
             this.Artist = track.Artist;
             this.Genre = track.Genre;
-            this.AlbumInfo = App.AlbumManager.GetOrAddAlbum(track);
+            this.AlbumInfo = AlbumManager.GetOrAddAlbum(track);
             this.AlbumInfo.Tracks.Add(this);
         }
 
@@ -40,7 +41,7 @@ namespace Gouter
             this.Artist = artist;
             this.Genre = genre;
 
-            this.AlbumInfo = App.AlbumManager.FromId(albumId);
+            this.AlbumInfo = AlbumManager.FromId(albumId);
             this.AlbumInfo.Tracks.Add(this);
         }
 

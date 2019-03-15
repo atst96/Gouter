@@ -61,7 +61,6 @@ namespace Gouter
             Database.Connect();
 
             this.InitializeDatabase();
-            this.LoadCachedTracks();
         }
 
         protected override void OnExit(ExitEventArgs e)
@@ -117,56 +116,6 @@ namespace Gouter
             if (!tables.Contains(Database.TableNames.Tracks))
             {
                 Database.ExecuteNonQuery(Database.Queries.CreateTracksTable);
-            }
-        }
-
-        private void LoadCachedTracks()
-        {
-            using (var row = Database.Select(Database.TableNames.Albums))
-            {
-                while (row.Read())
-                {
-                    int id = row.Get<int>(0);
-                    var key = row.Get<string>(1);
-                    var name = row.Get<string>(2);
-                    var artist = row.Get<string>(3);
-                    bool isCompilation = row.Get<bool>(4);
-                    byte[] artwork = row.GetOrDefault<byte[]>(5);
-
-                    var albumInfo = new AlbumInfo(id, key, name, artist, isCompilation, artwork);
-                    AlbumManager.Add(albumInfo);
-                }
-            }
-
-            using (var row = Database.Select(Database.TableNames.Tracks))
-            {
-                while (row.Read())
-                {
-                    int id = row.Get<int>(0);
-                    int albumId = row.Get<int>(1);
-                    var path = row.Get<string>(2);
-                    int duration = row.Get<int>(3);
-                    int disk = row.Get<int>(4);
-                    int track = row.Get<int>(5);
-                    int year = row.Get<int>(6);
-                    var albumArtist = row.Get<string>(7);
-                    var title = row.Get<string>(8);
-                    var artist = row.Get<string>(9);
-                    var genre = row.Get<string>(10);
-
-                    var trackInfo = new TrackInfo(id, albumId, path, duration, disk, track, year, albumArtist, title, artist, genre);
-                    App.TrackManager.Tracks.Add(trackInfo);
-                }
-            }
-
-            if (AlbumManager.Albums.Count > 0)
-            {
-                AlbumManager.SetAlbumIndex(AlbumManager.Albums.Max(a => a.Id));
-            }
-
-            if (TrackManager.Tracks.Count > 0)
-            {
-                MusicTrackManager.SetTrackIndex(TrackManager.Tracks.Max(t => t.Id));
             }
         }
 

@@ -2,30 +2,31 @@
 using Gouter.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
 namespace Gouter
 {
     internal class AlbumInfo : NotificationObject
     {
+        private readonly static AlbumManager AlbumManager = App.AlbumManager;
+
         private const int MaxImageSize = 128;
 
-        public AlbumInfo(string key, Track track)
+        private AlbumInfo(string key)
         {
             this.Tracks = new ConcurrentNotifiableCollection<TrackInfo>();
 
-            this.Id = AlbumManager.GenerateId();
             this.Key = key;
+        }
+
+        public AlbumInfo(string key, Track track)
+            : this(key)
+        {
+            this.Id = AlbumManager.GenerateId();
             this.Name = track.Album;
             this.Artist = AlbumManager.GetAlbumArtist(track);
 
@@ -38,56 +39,52 @@ namespace Gouter
         }
 
         public AlbumInfo(int id, string key, string name, string artist, bool isCompilation, byte[] artwork)
+            : this(key)
         {
-            this.Tracks = new ConcurrentNotifiableCollection<TrackInfo>();
-
             this.Id = id;
-            this.Key = key;
             this.Name = name;
             this.Artist = artist;
             this.IsCompilation = isCompilation;
+
             if (artwork?.Length > 0)
             {
                 this.ArtworkStream = new MemoryStream(artwork);
             }
         }
 
-        public int Id { get; private set; }
+        public int Id { get; }
 
-        public string Key { get; private set; }
+        public string Key { get; }
 
         public string Name { get; private set; }
 
         public string Artist { get; private set; }
 
-        public MemoryStream ArtworkStream { get; private set; }
-
-        private bool _isArtworkLoaded = false;
+        private MemoryStream _artworkStream;
+        public MemoryStream ArtworkStream
+        {
+            get => this._artworkStream;
+            set
+            {
+                if (this.SetProperty(ref this._artworkStream, value))
+                {
+                    if (value == null || value.Length == 0)
+                    {
+                        this.Artwork = null;
+                    }
+                    else
+                    {
+                        this.Artwork = ImageUtility.BitmapImageFromStream(value);
+                    }
+                }
+            }
+        }
 
         private ImageSource _artwork;
-
         public ImageSource Artwork
         {
-            get
-            {
-                if (this._isArtworkLoaded)
-                {
-                    return this._artwork;
-                }
-
-                this._isArtworkLoaded = true;
-
-                if (this.ArtworkStream == null)
-                {
-                    return null;
-                }
-
-                this.ArtworkStream.Position = 0;
-
-                this._artwork = ImageUtility.BitmapImageFromStream(this.ArtworkStream);
-
-                return this._artwork;
-            }
+            get => this._artwork;
+            private set => this.SetProperty(ref this._artwork, value);
         }
 
         public bool IsCompilation { get; private set; }
