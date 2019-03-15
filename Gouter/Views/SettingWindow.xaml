@@ -54,7 +54,7 @@
                         Margin="{StaticResource TopAdjacentMargin}"/>
 
                     <ListBox
-                        Height="80"
+                        Height="70"
                         BorderThickness="1"
                         Margin="{StaticResource TopAdjacentMargin}"
                         ItemsSource="{Binding MusicDirectories, Mode=OneTime}"
@@ -75,6 +75,36 @@
                             Style="{StaticResource Button.Danger}"
                             Command="{Binding RemoveMusicDirectoryCommand, Mode=OneTime}"
                             CommandParameter="{Binding SelectedMusicDirectory, Mode=OneWay}" />
+                    </StackPanel>
+
+                    <Separator Margin="0,12,0,8"/>
+
+                    <TextBlock
+                        Text="以下のディレクトリを検索から除外します"
+                        Margin="{StaticResource TopAdjacentMargin}"/>
+
+                    <ListBox
+                        Height="70"
+                        BorderThickness="1"
+                        Margin="{StaticResource TopAdjacentMargin}"
+                        ItemsSource="{Binding ExcludeDirectories, Mode=OneTime}"
+                        SelectedValue="{Binding SelectedExcludeDirectory, Mode=TwoWay}" />
+
+                    <StackPanel
+                        Margin="{StaticResource TopAdjacentMargin}"
+                        Orientation="Horizontal">
+                        <Button
+                            Padding="24 3"
+                            Content="フォルダの追加"
+                            Command="{Binding AddExcludeDirectoryCommand, Mode=OneTime}"/>
+
+                        <Button
+                            Padding="24 3"
+                            Content="削除"
+                            Margin="{StaticResource LeftAdjacentMargin}"
+                            Style="{StaticResource Button.Danger}"
+                            Command="{Binding RemoveExcludeDirectoryCommand, Mode=OneTime}"
+                            CommandParameter="{Binding SelectedExcludeDirectory, Mode=OneWay}" />
                     </StackPanel>
                 </StackPanel>
             </TabItem>

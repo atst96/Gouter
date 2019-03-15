@@ -34,7 +34,7 @@ namespace Gouter.Commands.MainWindow
 
                 var progress = this._viewModel.LoadProgress;
 
-                var newFiles = MusicTrackManager.FindNewFiles(setting.MusicDirectories);
+                var newFiles = MusicTrackManager.FindNewFiles(setting.MusicDirectories, setting.ExcludeDirectories);
 
                 if (newFiles.Count > 0)
                 {

@@ -12,7 +12,9 @@ namespace Gouter.ViewModels
         public SettingWindowViewModel()
         {
             this.Setting = App.Instance.Setting;
+
             this.MusicDirectories = this.Setting.MusicDirectories;
+            this.ExcludeDirectories = this.Setting.ExcludeDirectories;
 
             if (this.MusicDirectories.Count == 0)
             {
@@ -43,5 +45,29 @@ namespace Gouter.ViewModels
 
         private Command<string> _removeMusicDirectoryCommand;
         public Command<string> RemoveMusicDirectoryCommand => this._removeMusicDirectoryCommand ?? (this._removeMusicDirectoryCommand = new RemoveMusicDirectoryCommand(this));
+
+        public NotifiableCollection<string> ExcludeDirectories { get; }
+
+        private string _selectedExcludeDirectory;
+        public string SelectedExcludeDirectory
+        {
+            get => this._selectedExcludeDirectory;
+            set
+            {
+                if(this.SetProperty(ref this._selectedExcludeDirectory, value))
+                {
+                    this._removeExcludeDirectoryCommand?.RaiseCanExecuteChanged();
+                }
+            }
+        }
+
+        private Command _addExcludeDirectoryCommand;
+        public Command AddExcludeDirectoryCommand => this._addExcludeDirectoryCommand ?? (this._addExcludeDirectoryCommand = new AddExcludeDirectoryCommand(this));
+
+
+        private Command<string> _removeExcludeDirectoryCommand;
+        public Command<string> RemoveExcludeDirectoryCommand => this._removeExcludeDirectoryCommand ?? (this._removeExcludeDirectoryCommand = new RemoveExcludeDirectoryCommand(this));
+
+
     }
 }

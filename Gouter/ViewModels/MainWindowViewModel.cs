@@ -20,7 +20,7 @@ namespace Gouter.ViewModels
         }
 
         private Command _initializeCommand;
-        public Command InitializeCommand => this._initializeCommand ?? (this._initializeCommand = (new InitializeCommand(this)));
+        public Command InitializeCommand => this._initializeCommand ?? (this._initializeCommand = new InitializeCommand(this));
 
         private IPlaylist _currentPlaylist;
         public IPlaylist CurrentPlaylist

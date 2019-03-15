@@ -88,16 +88,39 @@ namespace Gouter
             return trackInfo;
         }
 
-        public static IList<string> FindNewFiles(IEnumerable<string> findDirectories)
+        private static bool IsContainsDirectory(string path, IEnumerable<string> directories)
         {
+            return directories.Any(dir => path.StartsWith(dir));
+        }
+
+        public static IList<string> FindNewFiles(IEnumerable<string> findDirectories, IEnumerable<string> excludeDirectories)
+        {
+            var separator = Path.DirectorySeparatorChar.ToString();
+
+            var excludes = excludeDirectories.ToArray();
+            for (int i = 0; i < excludes.Length; ++i)
+            {
+                if (!excludes[i].EndsWith(separator))
+                {
+                    excludes[i] += separator;
+                }
+            }
+
             var registeredFiles = new HashSet<string>(App.TrackManager.Tracks.Select(t => t.Path));
 
-            return findDirectories
-                .SelectMany(dir => GetFiles(dir))
+            var directories = findDirectories.Select(path => GetFiles(path));
+
+            var filesList = new List<string>(directories.Sum(f => f.Length));
+
+            var files = directories
+                .SelectMany(file => file)
                 .AsParallel()
                 .Distinct(StringComparer.Ordinal)
-                .Where(path => IsSupportedExtension(path) && !registeredFiles.Contains(path))
-                .ToList();
+                .Where(path => IsSupportedExtension(path) && !registeredFiles.Contains(path) && !IsContainsDirectory(path, excludes));
+
+            filesList.AddRange(files);
+
+            return filesList;
         }
 
         public static IList<Track> GetTracks(IList<string> files, IProgress<int> progress = null)

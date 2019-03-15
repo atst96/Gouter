@@ -94,6 +94,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Commands\SettingWindow\AddExcludeDirectoryCommand.cs" />
+    <Compile Include="Commands\SettingWindow\RemoveExcludeDirectoryCommand.cs" />
     <Compile Include="Comparer\AlbumComparer.cs" />
     <Compile Include="Data\AlbumInfo.cs" />
     <Compile Include="Data\AlbumManager.cs" />

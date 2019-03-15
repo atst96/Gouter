@@ -18,5 +18,14 @@ namespace Gouter
         {
             get => this._musicDirectories ?? (this._musicDirectories = new NotifiableCollection<string>());
         }
+
+        [Key("directory.excludes")]
+        private NotifiableCollection<string> _excludeDirectories;
+
+        [IgnoreMember]
+        public NotifiableCollection<string> ExcludeDirectories
+        {
+            get => this._excludeDirectories ?? (this._excludeDirectories = new NotifiableCollection<string>());
+        }
     }
 }
