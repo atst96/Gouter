@@ -82,5 +82,29 @@ namespace Gouter.Utilities
 
             return image;
         }
+
+        private static BitmapImage _missingAlbumImage;
+        public static BitmapImage GetMissingAlbumImage()
+        {
+            return _missingAlbumImage ?? (_missingAlbumImage = GetImage("pack://application:,,,/Resources/missing_album.png"));
+        }
+
+        private static BitmapImage _missingMusicImage;
+        public static BitmapImage GetMissingMusicImage()
+        {
+            return _missingMusicImage ?? (_missingMusicImage = GetImage("pack://application:,,,/Resources/missing_music.png"));
+        }
+
+        private static BitmapImage GetImage(string uri)
+        {
+            var image = new BitmapImage();
+            image.BeginInit();
+            image.CacheOption = BitmapCacheOption.None;
+            image.UriSource = new Uri(uri);
+            image.EndInit();
+            image.Freeze();
+
+            return image;
+        }
     }
 }

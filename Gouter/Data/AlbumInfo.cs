@@ -36,6 +36,10 @@ namespace Gouter
             {
                 this.ArtworkStream = ImageUtility.ShrinkImageData(artwork.PictureData, MaxImageSize);
             }
+            else
+            {
+                this.Artwork = ImageUtility.GetMissingAlbumImage();
+            }
         }
 
         public AlbumInfo(int id, string key, string name, string artist, bool isCompilation, byte[] artwork)
@@ -49,6 +53,10 @@ namespace Gouter
             if (artwork?.Length > 0)
             {
                 this.ArtworkStream = new MemoryStream(artwork);
+            }
+            else
+            {
+                this.Artwork = ImageUtility.GetMissingAlbumImage();
             }
         }
 
@@ -70,7 +78,7 @@ namespace Gouter
                 {
                     if (value == null || value.Length == 0)
                     {
-                        this.Artwork = null;
+                        this.Artwork = ImageUtility.GetMissingAlbumImage();
                     }
                     else
                     {
