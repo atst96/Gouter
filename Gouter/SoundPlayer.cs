@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Timers;
+using System.Windows.Threading;
 using CSCore;
 using CSCore.Codecs;
 using CSCore.CoreAudioAPI;
@@ -13,7 +13,7 @@ namespace Gouter
 {
     internal class SoundPlayer : NotificationObject, IDisposable
     {
-        private readonly Timer _timer;
+        private readonly DispatcherTimer _timer;
         private IWaveSource _soundSource;
         private ISoundOut _soundOut;
 
@@ -69,11 +69,14 @@ namespace Gouter
 
         public SoundPlayer()
         {
-            this._timer = new Timer(100);
-            this._timer.Elapsed += this.OnTimerTicked;
+            this._timer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(200d),
+            };
+            this._timer.Tick += this.OnTimerTicked;
         }
 
-        private void OnTimerTicked(object sender, ElapsedEventArgs e)
+        private void OnTimerTicked(object sender, EventArgs e)
         {
             this.CurrentTime = this._soundSource.GetTime(this._soundSource.Position).TotalMilliseconds;
         }
@@ -146,7 +149,7 @@ namespace Gouter
 
         private void OnSoundOutStopped(object sender, PlaybackStoppedEventArgs e)
         {
-            this._timer.Stop();
+            this._timer.Start();
         }
 
         public void Pause()
