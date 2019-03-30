@@ -36,6 +36,9 @@
         <i:EventTrigger EventName="ContentRendered">
             <i:InvokeCommandAction Command="{Binding InitializeCommand, Mode=OneTime}" />
         </i:EventTrigger>
+        <i:EventTrigger EventName="Closed">
+            <i:InvokeCommandAction Command="{Binding OnCloseCommand, Mode=OneTime}" />
+        </i:EventTrigger>
     </i:Interaction.Triggers>
     <DockPanel LastChildFill="True">
         <Border
@@ -113,8 +116,8 @@
                     <Image
                         DockPanel.Dock="Left"
                         Height="54" Width="54"
-                        b:TrackBehavior.AlbumArt="{Binding Player.CurrentTrack, Mode=OneWay}" />
-
+                        b:TrackBehavior.AlbumArt="{Binding Player.CurrentTrack, Mode=OneWay}"
+                        RenderOptions.BitmapScalingMode="HighQuality" />
 
                     <Slider
                         Margin="6,0,6,6"
@@ -133,7 +136,7 @@
                     </TextBlock>
 
                     <TextBlock
-                        Margin="6"
+                        Margin="12,6,6,6"
                         Text="{Binding Player.CurrentTrack.Title}"
                         FontWeight="Bold"
                         VerticalAlignment="Center"
@@ -222,7 +225,8 @@
                 <Image
                     Margin="10"
                     Width="84" Height="84"
-                    Source="{Binding CurrentPlaylist.Album.Artwork, Mode=OneWay}" />
+                    Source="{Binding CurrentPlaylist.Album.Artwork, Mode=OneWay}"
+                    RenderOptions.BitmapScalingMode="HighQuality" />
 
                 <StackPanel
                     Margin="6,10,10,10"
@@ -275,10 +279,31 @@
                                 </GridViewColumn.HeaderContainerStyle>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate DataType="{x:Type app:TrackInfo}">
-                                        <TextBlock
-                                            HorizontalAlignment="Right"
-                                            TextWrapping="NoWrap"
-                                            Text="{Binding TrackNumber, Mode=OneWay}"/>
+                                        <Grid>
+                                            <app:GeometryIcon
+                                                x:Name="PART_PlayingIcon"
+                                                HorizontalAlignment="Right"
+                                                VerticalAlignment="Stretch"
+                                                Data="{StaticResource MaterialIcons.VolumeUp}" />
+
+                                            <TextBlock
+                                                x:Name="PART_TrackNumber"
+                                                HorizontalAlignment="Right"
+                                                TextWrapping="NoWrap"
+                                                Text="{Binding TrackNumber, Mode=OneWay}" />
+                                        </Grid>
+
+                                        <DataTemplate.Triggers>
+                                            <DataTrigger Binding="{Binding IsPlaying, Mode=OneWay}" Value="True">
+                                                <Setter TargetName="PART_PlayingIcon" Property="Visibility" Value="Visible" />
+                                                <Setter TargetName="PART_TrackNumber" Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+
+                                            <DataTrigger Binding="{Binding IsPlaying, Mode=OneWay}" Value="False">
+                                                <Setter TargetName="PART_PlayingIcon" Property="Visibility" Value="Collapsed" />
+                                                <Setter TargetName="PART_TrackNumber" Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </DataTemplate.Triggers>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
