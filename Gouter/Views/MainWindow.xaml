@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:view="clr-namespace:Gouter.Views"
     xmlns:vm="clr-namespace:Gouter.ViewModels"
     xmlns:app="clr-namespace:Gouter"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
@@ -21,6 +22,7 @@
         </ItemsPanelTemplate>
 
         <conv:DurationConverter x:Key="DurationConverter" />
+        <conv:MillisecondsToTimeStringConverter x:Key="MillisecondsToTimeStringConverter" />
 
         <CollectionViewSource
             x:Key="TracksCollectionViewSource"
@@ -58,19 +60,23 @@
                     <Button
                         Padding="12"
                         VerticalAlignment="Center"
-                        Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+                        Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
+                        Command="{Binding PlayCommand, Mode=OneTime}"
+                        b:ElementBehavior.IsCollapse="{Binding Player.IsPlaying, Mode=OneWay}">
                         <app:GeometryIcon
                             Width="24" Height="24"
                             Data="{StaticResource MaterialIcons.PlayArrow}" />
                     </Button>
-                    <!--<Button
+                    <Button
                         Padding="12"
                         VerticalAlignment="Center"
-                        Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+                        Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
+                        Command="{Binding PauseCommand, Mode=OneTime}"
+                        b:ElementBehavior.Visible="{Binding Player.IsPlaying, Mode=OneWay}">
                         <app:GeometryIcon
                             Width="24" Height="24"
                             Data="{StaticResource MaterialIcons.Pause}" />
-                    </Button>-->
+                    </Button>
                     <Button
                         Margin="3" Padding="6"
                         VerticalAlignment="Center"
@@ -97,31 +103,38 @@
                     <Slider
                         Width="80"
                         Minimum="0.0" Maximum="1.0"
-                        Value="1.0"
+                        Value="{Binding Player.Volumne, Mode=TwoWay}"
                         VerticalAlignment="Center" />
                 </StackPanel>
 
                 <DockPanel
-                    Margin="12,0"
+                    Margin="18,0,12,0"
                     DockPanel.Dock="Left">
                     <Image
                         DockPanel.Dock="Left"
-                        Height="54" Width="54">
-                    </Image>
+                        Height="54" Width="54"
+                        b:TrackBehavior.AlbumArt="{Binding Player.CurrentTrack, Mode=OneWay}" />
+
 
                     <Slider
                         Margin="6,0,6,6"
+                        Minimum="0"
+                        Value="{Binding Player.CurrentTime, Mode=OneWay}"
+                        Maximum="{Binding Player.Duration, Mode=OneWay}"
                         DockPanel.Dock="Bottom" />
 
                     <TextBlock
                         Margin="6"
                         DockPanel.Dock="Right"
-                        VerticalAlignment="Center"
-                        Text="0:00 / 0:00" />
+                        VerticalAlignment="Center">
+                        <Run Text="{Binding Player.CurrentTime, Mode=OneWay, Converter={StaticResource MillisecondsToTimeStringConverter}}" /><!--
+                     --><Run Text=" / " /><!--
+                     --><Run Text="{Binding Player.Duration, Mode=OneWay, Converter={StaticResource MillisecondsToTimeStringConverter}}" />
+                    </TextBlock>
 
                     <TextBlock
                         Margin="6"
-                        Text="Title"
+                        Text="{Binding Player.CurrentTrack.Title}"
                         FontWeight="Bold"
                         VerticalAlignment="Center"
                         TextWrapping="NoWrap"
@@ -173,6 +186,11 @@
                         VirtualizingPanel.VirtualizationMode="Recycling"
                         ItemsSource="{Binding Albums, Mode=OneTime}"
                         SelectedItem="{Binding SelectedAlbum, Mode=TwoWay}">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseDoubleClick">
+                                <i:InvokeCommandAction Command="{Binding DataContext.AlbumPlaylistSelectedCommand, Mode=OneTime, RelativeSource={RelativeSource AncestorType=view:MainWindow}}"  />
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
                         <ListBox.ItemContainerStyle>
                             <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
                                 <Setter Property="Padding" Value="8" />
@@ -237,10 +255,16 @@
                     BorderThickness="0,1,0,0"
                     ItemsPanel="{StaticResource ItemsPanelTemplate}"
                     BorderBrush="{StaticResource ToolBar.Static.BorderBrush}"
-                    ItemsSource="{Binding Source={StaticResource TracksCollectionViewSource}}">
+                    ItemsSource="{Binding Source={StaticResource TracksCollectionViewSource}}"
+                    SelectedItem="{Binding SelectedTrack, Mode=TwoWay}">
                     <i:Interaction.Behaviors>
                         <b:ListViewFillColumnBehavior FillColumnIndex="1" />
                     </i:Interaction.Behaviors>
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="MouseDoubleClick">
+                            <i:InvokeCommandAction Command="{Binding DataContext.TrackListDoubleClickCommand, Mode=OneTime, RelativeSource={RelativeSource AncestorType=view:MainWindow}}"  />
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Header="#" Width="40">

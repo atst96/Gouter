@@ -27,5 +27,8 @@ namespace Gouter
         {
             get => this._excludeDirectories ?? (this._excludeDirectories = new NotifiableCollection<string>());
         }
+
+        [Key("player.volume")]
+        public float SoundVolumne { get; set; } = 1.0f;
     }
 }

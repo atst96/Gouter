@@ -91,11 +91,17 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Behaviors\ElementBehavior.cs" />
     <Compile Include="Behaviors\ListViewFillColumnBehavior.cs" />
+    <Compile Include="Behaviors\TrackBehavior.cs" />
+    <Compile Include="Commands\MainWindow\PauseCommand.cs" />
+    <Compile Include="Commands\MainWindow\PlayCommand.cs" />
+    <Compile Include="Commands\MainWindow\TrackListDoubleClickCommand.cs" />
     <Compile Include="Commands\SettingWindow\AddExcludeDirectoryCommand.cs" />
     <Compile Include="Commands\SettingWindow\RemoveExcludeDirectoryCommand.cs" />
     <Compile Include="Comparer\AlbumComparer.cs" />
     <Compile Include="Converters\DurationConverter.cs" />
+    <Compile Include="Converters\MillisecondsToTimeStringConverter.cs" />
     <Compile Include="Data\AlbumInfo.cs" />
     <Compile Include="Data\AlbumManager.cs" />
     <Compile Include="Extensions\WpfExtensions.cs" />
@@ -117,10 +123,12 @@
     <Compile Include="Playlists\IPlaylist.cs" />
     <Compile Include="Data\MusicTrackManager.cs" />
     <Compile Include="Components\Query.cs" />
+    <Compile Include="PlayState.cs" />
     <Compile Include="Settings\ApplicationSetting.cs" />
     <Compile Include="Components\StandardProgressReceiver.cs" />
     <Compile Include="Data\TrackInfo.cs" />
     <Compile Include="Comparer\TrackNormalComparer.cs" />
+    <Compile Include="SoundPlayer.cs" />
     <Compile Include="Utilities\FileContentUtility.cs" />
     <Compile Include="Utilities\ImageUtility.cs" />
     <Compile Include="Utilities\MessagePackUtility.cs" />

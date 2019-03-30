@@ -14,7 +14,7 @@ namespace Gouter.Commands.MainWindow
         private readonly MainWindowViewModel _viewModel;
         private bool _isCalled = false;
 
-        public InitializeCommand(MainWindowViewModel viewModel)
+        public InitializeCommand(MainWindowViewModel viewModel) : base()
         {
             this._viewModel = viewModel;
         }

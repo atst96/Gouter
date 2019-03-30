@@ -54,7 +54,7 @@ namespace Gouter.ViewModels
             get => this._selectedExcludeDirectory;
             set
             {
-                if(this.SetProperty(ref this._selectedExcludeDirectory, value))
+                if (this.SetProperty(ref this._selectedExcludeDirectory, value))
                 {
                     this._removeExcludeDirectoryCommand?.RaiseCanExecuteChanged();
                 }
@@ -67,7 +67,5 @@ namespace Gouter.ViewModels
 
         private Command<string> _removeExcludeDirectoryCommand;
         public Command<string> RemoveExcludeDirectoryCommand => this._removeExcludeDirectoryCommand ?? (this._removeExcludeDirectoryCommand = new RemoveExcludeDirectoryCommand(this));
-
-
     }
 }

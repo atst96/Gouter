@@ -12,9 +12,12 @@ namespace Gouter.ViewModels
     {
         public SortedNotifiableCollectionWrapper<AlbumInfo> Albums { get; }
 
+        public SoundPlayer Player { get; }
+
         public MainWindowViewModel() : base()
         {
             this.Albums = new SortedNotifiableCollectionWrapper<AlbumInfo>(App.AlbumManager.Albums, AlbumComparer.Instance);
+            this.Player = new SoundPlayer();
 
             BindingOperations.EnableCollectionSynchronization(this.Albums, new object());
         }
@@ -50,5 +53,28 @@ namespace Gouter.ViewModels
             get => this._status;
             set => this.SetProperty(ref this._status, value);
         }
+
+        private double _volume = 1.0;
+        public double Volume
+        {
+            get => this._volume;
+            set => this.SetProperty(ref this._volume, value);
+        }
+
+        private Command _trackListDoubleClickCommand;
+        public Command TrackListDoubleClickCommand => this._trackListDoubleClickCommand ?? (this._trackListDoubleClickCommand = new TrackListDoubleClickCommand(this));
+
+        private TrackInfo _selectedTrack;
+        public TrackInfo SelectedTrack
+        {
+            get => this._selectedTrack;
+            set => this.SetProperty(ref this._selectedTrack, value);
+        }
+
+        private Command _playCommand;
+        public Command PlayCommand => this._playCommand ?? (this._playCommand = new PlayCommand(this));
+
+        private Command _pauseCommand;
+        public Command PauseCommand => this._pauseCommand ?? (this._pauseCommand = new PauseCommand(this));
     }
 }
