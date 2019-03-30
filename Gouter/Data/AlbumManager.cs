@@ -14,7 +14,7 @@ namespace Gouter
 {
     internal class AlbumManager
     {
-        public readonly static StringComparer AlbumNameComparer = StringComparer.CurrentCultureIgnoreCase;
+        public static readonly StringComparer AlbumNameComparer = StringComparer.CurrentCultureIgnoreCase;
 
         private volatile int _albumLatestIdx = -1;
 
@@ -32,7 +32,7 @@ namespace Gouter
 
         public int GenerateId()
         {
-            return ++_albumLatestIdx;
+            return ++this._albumLatestIdx;
         }
 
         public static string GetAlbumKey(Track track)
@@ -85,29 +85,24 @@ namespace Gouter
         {
             this.AddImpl(albumInfo);
 
-            using (var cmd = Database.CreateCommand())
+            var values = new Query
             {
-                var values = new Query
-                {
-                    ["id"] = albumInfo.Id,
-                    ["key"] = albumInfo.Key,
-                    ["name"] = albumInfo.Name,
-                    ["artist"] = albumInfo.Artist,
-                    ["is_compilation"] = albumInfo.IsCompilation,
-                    ["artwork"] = albumInfo.ArtworkStream?.ToArray(),
-                };
+                ["id"] = albumInfo.Id,
+                ["key"] = albumInfo.Key,
+                ["name"] = albumInfo.Name,
+                ["artist"] = albumInfo.Artist,
+                ["is_compilation"] = albumInfo.IsCompilation,
+                ["artwork"] = albumInfo.ArtworkStream?.ToArray(),
+            };
 
-                Database.Insert(Database.TableNames.Albums, values);
-            }
+            Database.Insert(Database.TableNames.Albums, values);
         }
 
         public AlbumInfo GetOrAddAlbum(Track track)
         {
-            AlbumInfo albumInfo;
-
             var albumKey = GetAlbumKey(track);
 
-            if (this._albumKeyMap.TryGetValue(albumKey, out albumInfo))
+            if (this._albumKeyMap.TryGetValue(albumKey, out var albumInfo))
             {
                 return albumInfo;
             }

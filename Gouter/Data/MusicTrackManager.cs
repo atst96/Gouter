@@ -18,7 +18,7 @@ namespace Gouter
     {
         private volatile int _latestTrackIdx = -1;
 
-        private IDictionary<int, TrackInfo> _trackIdMap;
+        private readonly IDictionary<int, TrackInfo> _trackIdMap;
         public ConcurrentNotifiableCollection<TrackInfo> Tracks { get; }
 
         public MusicTrackManager()
@@ -29,17 +29,17 @@ namespace Gouter
             BindingOperations.EnableCollectionSynchronization(this.Tracks, new object());
         }
 
-        private static string[] GetFiles(string directory)
+        private static IEnumerable<string> GetFiles(string directory)
         {
-            return Directory.GetFiles(directory, "*.*", SearchOption.AllDirectories);
+            return Directory.EnumerateFiles(directory, "*.*", SearchOption.AllDirectories);
         }
 
         public int GenerateId()
         {
-            return ++_latestTrackIdx;
+            return ++this._latestTrackIdx;
         }
 
-        public readonly static HashSet<string> SupportedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        public static readonly HashSet<string> SupportedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
             ".wav", ".mp3", ".acc", ".m4a", ".flac", ".ogg"
         };
@@ -88,39 +88,61 @@ namespace Gouter
             return trackInfo;
         }
 
+        public void RegisterAll(IEnumerable<Track> tracks, IProgress<int> progress = null)
+        {
+            int count = 0;
+
+            using (var transaction = Database.BeginTransaction())
+            {
+                foreach (var track in tracks)
+                {
+                    var trackInfo = App.TrackManager.Register(track);
+                    progress?.Report(++count);
+                }
+
+                transaction.Commit();
+            }
+        }
+
         private static bool IsContainsDirectory(string path, IEnumerable<string> directories)
         {
-            return directories.Any(dir => path.StartsWith(dir));
+            return directories.Any(dir => !path.Equals(dir) && path.StartsWith(dir));
+        }
+
+        private static readonly string DirectorySeparator = Path.DirectorySeparatorChar.ToString();
+
+        private static IList<string> NormalizeDirectories(IEnumerable<string> paths)
+        {
+            var directories = paths
+                .Select(path => path.EndsWith(DirectorySeparator) ? path : (path + DirectorySeparator))
+                .ToList();
+
+            for (int i = directories.Count - 1; i >= 0; --i)
+            {
+                if (IsContainsDirectory(directories[i], directories))
+                {
+                    directories.RemoveAt(i);
+                }
+            }
+
+            return directories;
         }
 
         public static IList<string> FindNewFiles(IEnumerable<string> findDirectories, IEnumerable<string> excludeDirectories)
         {
-            var separator = Path.DirectorySeparatorChar.ToString();
-
-            var excludes = excludeDirectories.ToArray();
-            for (int i = 0; i < excludes.Length; ++i)
-            {
-                if (!excludes[i].EndsWith(separator))
-                {
-                    excludes[i] += separator;
-                }
-            }
+            var finds = NormalizeDirectories(findDirectories);
+            var excludes = NormalizeDirectories(excludeDirectories);
 
             var registeredFiles = new HashSet<string>(App.TrackManager.Tracks.Select(t => t.Path));
 
-            var directories = findDirectories.Select(path => GetFiles(path));
-
-            var filesList = new List<string>(directories.Sum(f => f.Length));
-
-            var files = directories
-                .SelectMany(file => file)
+            var files = finds
+                .SelectMany(path => GetFiles(path))
                 .AsParallel()
-                .Distinct(StringComparer.Ordinal)
                 .Where(path => IsSupportedExtension(path) && !registeredFiles.Contains(path) && !IsContainsDirectory(path, excludes));
 
-            filesList.AddRange(files);
+            var list = files.ToList();
 
-            return filesList;
+            return list;
         }
 
         public static IList<Track> GetTracks(IList<string> files, IProgress<int> progress = null)

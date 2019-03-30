@@ -34,29 +34,26 @@ namespace Gouter.Commands.MainWindow
 
                 var progress = this._viewModel.LoadProgress;
 
+                this._viewModel.Status = "楽曲ディレクトリを検索しています...";
+
                 var newFiles = MusicTrackManager.FindNewFiles(setting.MusicDirectories, setting.ExcludeDirectories);
 
                 if (newFiles.Count > 0)
                 {
+                    this._viewModel.Status = newFiles.Count + "件の新規ファイルを検出しました。楽曲情報を読み込んでいます...";
                     progress.Reset(newFiles.Count);
                     var newTracks = MusicTrackManager.GetTracks(newFiles, progress);
 
+                    this._viewModel.Status = newTracks.Count + "件の楽曲情報をライブラリに登録しています...";
+
                     progress.Reset(newTracks.Count);
-                    int count = 0;
 
-                    using (var transaction = Database.BeginTransaction())
-                    {
-                        foreach (var track in newTracks)
-                        {
-                            var trackInfo = App.TrackManager.Register(track);
+                    App.TrackManager.RegisterAll(newTracks, progress);
 
-                            progress.Report(++count);
-                        }
-
-                        transaction.Commit();
-                    }
                 }
             });
+
+            this._viewModel.Status = null;
         }
     }
 }

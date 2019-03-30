@@ -148,7 +148,7 @@
                 Margin="8,2"
                 Background="{StaticResource ToolBar.Static.BorderBrush}" />
             <StatusBarItem>
-                <TextBlock Text="ステータス" />
+                <TextBlock Text="{Binding Status, Mode=OneWay}" />
             </StatusBarItem>
         </StatusBar>
 

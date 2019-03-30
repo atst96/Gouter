@@ -41,7 +41,14 @@ namespace Gouter.ViewModels
                 }
             }
         }
-        
+
         public StandardProgressReceiver LoadProgress { get; } = new StandardProgressReceiver();
+
+        private string _status;
+        public string Status
+        {
+            get => this._status;
+            set => this.SetProperty(ref this._status, value);
+        }
     }
 }
