@@ -14,9 +14,9 @@ namespace Gouter.Converters
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is double longValue)
+            if (value is double doubleValue)
             {
-                return this._converter.Convert(TimeSpan.FromMilliseconds(longValue), targetType, parameter, culture);
+                return this._converter.Convert(TimeSpan.FromMilliseconds(doubleValue), targetType, parameter, culture);
             }
 
             throw new NotSupportedException();

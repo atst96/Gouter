@@ -16,10 +16,10 @@ namespace Gouter.Converters
             {
                 if (timeSpan.Hours > 0)
                 {
-                    return $"{timeSpan.TotalHours:0}:{timeSpan.Minutes:00}:{timeSpan.Seconds:00}";
+                    return $"{Math.Floor(timeSpan.TotalHours):0}:{timeSpan.Minutes:00}:{timeSpan.Seconds:00}";
                 }
 
-                return $"{timeSpan.TotalMinutes:0}:{timeSpan.Seconds:00}";
+                return $"{Math.Floor(timeSpan.TotalMinutes):0}:{timeSpan.Seconds:00}";
             }
 
             throw new NotSupportedException();
