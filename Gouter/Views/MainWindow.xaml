@@ -7,7 +7,8 @@
     xmlns:vm="clr-namespace:Gouter.ViewModels"
     xmlns:app="clr-namespace:Gouter"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-    xmlns:rg="clr-namespace:SourceChord.ResponsiveGrid;assembly=ResponsiveGrid.Wpf"
+    xmlns:b="clr-namespace:Gouter.Behaviors"
+    xmlns:conv="clr-namespace:Gouter.Converters"
     mc:Ignorable="d"
     Title="Gouter" Height="450" Width="800"
     UseLayoutRounding="True"
@@ -18,6 +19,16 @@
         <ItemsPanelTemplate x:Key="ItemsPanelTemplate">
             <VirtualizingStackPanel Orientation="Vertical" />
         </ItemsPanelTemplate>
+
+        <conv:DurationConverter x:Key="DurationConverter" />
+
+        <CollectionViewSource
+            x:Key="TracksCollectionViewSource"
+            Source="{Binding CurrentPlaylist.Tracks, Mode=OneWay}">
+            <CollectionViewSource.GroupDescriptions>
+                <PropertyGroupDescription PropertyName="DiskNumber" />
+            </CollectionViewSource.GroupDescriptions>
+        </CollectionViewSource>
     </Window.Resources>
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="ContentRendered">
@@ -155,6 +166,7 @@
                         Grid.Column="0"
                         BorderThickness="0"
                         SelectionMode="Single"
+                        AlternationCount="2"
                         ItemsPanel="{StaticResource ItemsPanelTemplate}"
                         VirtualizingPanel.ScrollUnit="Item"
                         VirtualizingPanel.IsVirtualizing="True"
@@ -214,45 +226,138 @@
                         Text="{Binding CurrentPlaylist.Tracks.Count, Mode=OneWay, StringFormat='{}{0}件'}" />
                 </StackPanel>
 
-                <ListBox
+                <ListView
                     Grid.Row="1"
                     Grid.ColumnSpan="2"
+                    VirtualizingPanel.IsVirtualizing="True"
+                    VirtualizingPanel.ScrollUnit="Pixel"
+                    VirtualizingPanel.IsVirtualizingWhenGrouping="True"
+                    VirtualizingPanel.VirtualizationMode="Recycling"
+                    AlternationCount="2"
                     BorderThickness="0,1,0,0"
+                    ItemsPanel="{StaticResource ItemsPanelTemplate}"
                     BorderBrush="{StaticResource ToolBar.Static.BorderBrush}"
-                    ItemsSource="{Binding CurrentPlaylist.Tracks, Mode=OneWay}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <rg:ResponsiveGrid
-                                Width="{Binding ViewportWidth, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type ScrollViewer}}}" />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="{x:Type app:TrackInfo}">
-                            <TextBlock>
-                                 Disc:<Run Text="{Binding DiskNumber, Mode=OneTime}" /> / <Run Text="{Binding TrackNumber, Mode=OneWay}" /> / <Run Text="{Binding Title, Mode=OneWay}" />
-                            </TextBlock>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                    <ItemsControl.ItemContainerStyle>
-                        <Style TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource {x:Type ListBoxItem}}">
-                            <Setter Property="rg:ResponsiveGrid.SM" Value="6" />
-                            <Setter Property="rg:ResponsiveGrid.LG" Value="4" />
-                        </Style>
-                    </ItemsControl.ItemContainerStyle>
-                </ListBox>
+                    ItemsSource="{Binding Source={StaticResource TracksCollectionViewSource}}">
+                    <i:Interaction.Behaviors>
+                        <b:ListViewFillColumnBehavior FillColumnIndex="1" />
+                    </i:Interaction.Behaviors>
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="#" Width="40">
+                                <GridViewColumn.HeaderContainerStyle>
+                                    <Style TargetType="{x:Type GridViewColumnHeader}">
+                                        <Setter Property="HorizontalContentAlignment" Value="Right" />
+                                    </Style>
+                                </GridViewColumn.HeaderContainerStyle>
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate DataType="{x:Type app:TrackInfo}">
+                                        <TextBlock
+                                            HorizontalAlignment="Right"
+                                            TextWrapping="NoWrap"
+                                            Text="{Binding TrackNumber, Mode=OneWay}"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
 
-                <!--<ListBox
-                    Grid.Row="1"
-                    Grid.ColumnSpan="2"
-                    BorderThickness="0,1,0,0"
-                    BorderBrush="{StaticResource ToolBar.Static.BorderBrush}"
-                    ItemsSource="{Binding CurrentPlaylist.Tracks, Mode=OneWay}">
-                    <ListBox.ItemContainerStyle>
-                        <Style TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource {x:Type ListBoxItem}}">
-                            <Setter Property="Width" Value="Auto" />
+                            <GridViewColumn Header="タイトル">
+                                <GridViewColumn.HeaderContainerStyle>
+                                    <Style TargetType="{x:Type GridViewColumnHeader}">
+                                        <Setter Property="HorizontalContentAlignment" Value="Left" />
+                                    </Style>
+                                </GridViewColumn.HeaderContainerStyle>
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate DataType="{x:Type app:TrackInfo}">
+                                        <TextBlock
+                                            HorizontalAlignment="Left"
+                                            TextWrapping="NoWrap"
+                                            TextTrimming="CharacterEllipsis"
+                                            Text="{Binding Title, Mode=OneWay}"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
+                            <GridViewColumn
+                                Header="時間"
+                                Width="60">
+                                <GridViewColumn.HeaderContainerStyle>
+                                    <Style TargetType="{x:Type GridViewColumnHeader}">
+                                        <Setter Property="HorizontalContentAlignment" Value="Right" />
+                                    </Style>
+                                </GridViewColumn.HeaderContainerStyle>
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate DataType="{x:Type app:TrackInfo}">
+                                        <TextBlock
+                                            HorizontalAlignment="Right"
+                                            TextWrapping="NoWrap"
+                                            TextTrimming="CharacterEllipsis"
+                                            TextAlignment="Right"
+                                            Text="{Binding Duration, Mode=OneWay, Converter={StaticResource DurationConverter}}"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
+                            <GridViewColumn
+                                Header="アーティスト"
+                                Width="120">
+                                <GridViewColumn.HeaderContainerStyle>
+                                    <Style TargetType="{x:Type GridViewColumnHeader}">
+                                        <Setter Property="HorizontalContentAlignment" Value="Left" />
+                                    </Style>
+                                </GridViewColumn.HeaderContainerStyle>
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate DataType="{x:Type app:TrackInfo}">
+                                        <TextBlock
+                                            HorizontalAlignment="Left"
+                                            TextWrapping="NoWrap"
+                                            TextTrimming="CharacterEllipsis"
+                                            Text="{Binding Artist, Mode=OneWay}"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                    <ListView.GroupStyle>
+                        <GroupStyle>
+                            <GroupStyle.ContainerStyle>
+                                <Style TargetType="{x:Type GroupItem}">
+                                    <Setter Property="Padding" Value="8,4" />
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="{x:Type GroupItem}">
+                                                <Grid
+                                                    Width="{Binding ViewportWidth, Mode=OneWay, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto" />
+                                                        <RowDefinition Height="Auto" />
+                                                    </Grid.RowDefinitions>
+
+                                                    <Border
+                                                        Grid.Row="0"
+                                                        Padding="{TemplateBinding Padding}"
+                                                        Background="{StaticResource ToolBar.Static.Background}"
+                                                        TextBlock.FontWeight="Bold"
+                                                        TextBlock.Foreground="{StaticResource ToolBar.Static.Foreground}">
+                                                        <ContentPresenter
+                                                            ContentStringFormat="{}ディスク #{0}" />
+                                                    </Border>
+
+                                                    <ItemsPresenter
+                                                        Grid.Row="1"/>
+                                                </Grid>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </GroupStyle.ContainerStyle>
+                        </GroupStyle>
+                    </ListView.GroupStyle>
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="{x:Type ListViewItem}" BasedOn="{StaticResource {x:Type ListViewItem}}">
+                            <Setter Property="Width" Value="{Binding ViewportWidth, Mode=OneWay, RelativeSource={RelativeSource AncestorType=ScrollViewer}}" />
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                         </Style>
-                    </ListBox.ItemContainerStyle>
-                </ListBox>-->
+                    </ListView.ItemContainerStyle>
+                </ListView>
             </Grid>
         </Grid>
     </DockPanel>

@@ -60,9 +60,6 @@
       <HintPath>..\packages\Microsoft.Xaml.Behaviors.Wpf.1.0.1\lib\net45\Microsoft.Xaml.Behaviors.dll</HintPath>
     </Reference>
     <Reference Include="PresentationFramework.Aero2" />
-    <Reference Include="ResponsiveGrid.Wpf, Version=0.3.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ResponsiveGrid.0.3.3\lib\net45\ResponsiveGrid.Wpf.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.SQLite, Version=1.0.110.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
@@ -94,11 +91,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Behaviors\ListViewFillColumnBehavior.cs" />
     <Compile Include="Commands\SettingWindow\AddExcludeDirectoryCommand.cs" />
     <Compile Include="Commands\SettingWindow\RemoveExcludeDirectoryCommand.cs" />
     <Compile Include="Comparer\AlbumComparer.cs" />
+    <Compile Include="Converters\DurationConverter.cs" />
     <Compile Include="Data\AlbumInfo.cs" />
     <Compile Include="Data\AlbumManager.cs" />
+    <Compile Include="Extensions\WpfExtensions.cs" />
     <Compile Include="Playlists\AlbumPlaylist.cs" />
     <Compile Include="Commands\MainWindow\InitializeCommand.cs" />
     <Compile Include="Commands\SettingWindow\AddMusicDirectoryCommand.cs" />
