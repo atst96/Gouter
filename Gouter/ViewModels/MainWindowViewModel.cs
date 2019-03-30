@@ -76,5 +76,8 @@ namespace Gouter.ViewModels
 
         private Command _pauseCommand;
         public Command PauseCommand => this._pauseCommand ?? (this._pauseCommand = new PauseCommand(this));
+
+        private Command _onCloseCommand;
+        public Command OnCloseCommand => this._onCloseCommand ?? (this._onCloseCommand = new OnCloseCommand(this));
     }
 }

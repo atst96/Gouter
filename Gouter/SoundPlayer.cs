@@ -102,6 +102,32 @@ namespace Gouter
             this.Playlist = playlist;
         }
 
+        private void SetCurrentTrack(TrackInfo trackInfo)
+        {
+            if (object.ReferenceEquals(this.CurrentTrack, trackInfo))
+            {
+                return;
+            }
+
+            if (this.CurrentTrack != null)
+            {
+                this.CurrentTrack.IsPlaying = false;
+            }
+
+            this.CurrentTrack = trackInfo;
+
+            this._soundSource = CodecFactory.Instance.GetCodec(trackInfo.Path);
+            this.CurrentTime = this._soundSource.GetTime(this._soundSource.Position).TotalMilliseconds;
+            this.Duration = this._soundSource.GetTime(this._soundSource.Length).TotalMilliseconds;
+
+            if (this._soundOut.PlaybackState != PlaybackState.Stopped)
+            {
+                this._soundOut.Stop();
+            }
+
+            this._soundOut.Initialize(this._soundSource);
+        }
+
         public void Play(TrackInfo trackInfo)
         {
             this.PlayItem(trackInfo);
@@ -124,6 +150,7 @@ namespace Gouter
                 Device = MMDeviceEnumerator.DefaultAudioEndpoint(DataFlow.Render, Role.Multimedia),
                 Latency = 100,
             };
+
             this._soundOut.Stopped += this.OnSoundOutStopped;
         }
 
@@ -131,20 +158,14 @@ namespace Gouter
         {
             this.InitializeSoundDevice();
 
-            this.CurrentTrack = trackInfo;
+            this.SetCurrentTrack(trackInfo);
 
-            this._soundSource = CodecFactory.Instance.GetCodec(trackInfo.Path);
-            this.CurrentTime = this._soundSource.GetTime(this._soundSource.Position).TotalMilliseconds;
-            this.Duration = this._soundSource.GetTime(this._soundSource.Length).TotalMilliseconds;
-            if (this._soundOut.PlaybackState != PlaybackState.Stopped)
-            {
-                this._soundOut.Stop();
-            }
-            this._soundOut.Initialize(this._soundSource);
             this._soundOut.Volume = this.Volumne;
             this._soundOut.Play();
             this._timer.Start();
             this.State = PlayState.Play;
+
+            trackInfo.IsPlaying = true;
         }
 
         private void OnSoundOutStopped(object sender, PlaybackStoppedEventArgs e)
@@ -154,6 +175,11 @@ namespace Gouter
 
         public void Pause()
         {
+            if (this.CurrentTrack != null)
+            {
+                this.CurrentTrack.IsPlaying = false;
+            }
+
             this.State = PlayState.Pause;
             this._timer.Stop();
             this._soundOut?.Pause();
@@ -161,9 +187,15 @@ namespace Gouter
 
         public void Stop()
         {
+            if (this.CurrentTrack != null)
+            {
+                this.CurrentTrack.IsPlaying = false;
+            }
+
             this.State = PlayState.Stop;
             this._soundOut?.Stop();
             this._timer.Stop();
+
             if (this._soundSource != null)
             {
                 this._soundSource.Position = 0;
@@ -172,6 +204,7 @@ namespace Gouter
 
         public void Dispose()
         {
+            this.Stop();
             this._soundSource?.Dispose();
             this._soundOut?.Dispose();
         }

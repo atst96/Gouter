@@ -66,5 +66,12 @@ namespace Gouter
         public string Artist { get; private set; }
 
         public string Genre { get; private set; }
+
+        private bool _isPlaying;
+        public bool IsPlaying
+        {
+            get => this._isPlaying;
+            set => this.SetProperty(ref this._isPlaying, value);
+        }
     }
 }
