@@ -1,4 +1,5 @@
 ﻿using Gouter.Commands.MainWindow;
+using Gouter.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +20,21 @@ namespace Gouter.ViewModels
             this.Albums = new SortedNotifiableCollectionWrapper<AlbumInfo>(App.AlbumManager.Albums, AlbumComparer.Instance);
             this.Player = new SoundPlayer();
 
+            this.Player.TrackPlayingEnded += this.OnPlayTrackEnded;
+
             BindingOperations.EnableCollectionSynchronization(this.Albums, new object());
+        }
+
+        private void OnPlayTrackEnded(object sender, EventArgs e)
+        {
+            if (this.IsPlayRequired)
+            {
+                if (this.IsLoop)
+                {
+                    this.SelectNextTrack();
+                    this.Player.Play();
+                }
+            }
         }
 
         private Command _initializeCommand;
@@ -85,6 +100,45 @@ namespace Gouter.ViewModels
         {
             get => this._playingPlaylist;
             set => this.SetProperty(ref this._playingPlaylist, value);
+        }
+
+        private bool _isLoop = true;
+        public bool IsLoop
+        {
+            get => this._isLoop;
+            set => this.SetProperty(ref this._isLoop, value);
+        }
+
+        private bool _isShuffle;
+        public bool IsShuffle
+        {
+            get => this._isShuffle;
+            set => this.SetProperty(ref this._isShuffle, value);
+        }
+
+        public bool IsPlayRequired { get; set; }
+
+        public void SelectNextTrack()
+        {
+            if (this.PlayingPlaylist == null)
+            {
+                return;
+            }
+
+            var playlist = this.PlayingPlaylist;
+            var tracks = playlist.Tracks;
+
+            var currentTrack = this.Player.CurrentTrack;
+            var currentTrackIdx = tracks.IndexOf(currentTrack);
+
+            if (currentTrackIdx >= 0)
+            {
+                int nextIdx = tracks.Count <= currentTrackIdx - 1
+                    ? 0
+                    : currentTrackIdx + 1;
+
+                this.Player.Play(tracks[nextIdx]);
+            }
         }
     }
 }

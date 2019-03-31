@@ -20,5 +20,7 @@ namespace Gouter
         public AlbumInfo Album { get; }
 
         public SortedNotifiableCollectionWrapper<TrackInfo> Tracks { get; }
+
+        IReadOnlyList<TrackInfo> IPlaylist.Tracks => this.Tracks;
     }
 }

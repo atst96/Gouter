@@ -110,6 +110,20 @@
                         VerticalAlignment="Center" />
                 </StackPanel>
 
+                <StackPanel
+                    Margin="12,0"
+                    DockPanel.Dock="Right"
+                    Orientation="Vertical"
+                    VerticalAlignment="Center">
+                    <CheckBox
+                        Content="ループ再生"
+                        IsChecked="{Binding IsLoop, Mode=TwoWay}" />
+
+                    <CheckBox
+                        Content="シャッフル再生" 
+                        IsChecked="{Binding IsShuffle, Mode=TwoWay}" />
+                </StackPanel>
+                
                 <DockPanel
                     Margin="18,0,12,0"
                     DockPanel.Dock="Left">

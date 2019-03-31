@@ -17,6 +17,8 @@ namespace Gouter
         private IWaveSource _soundSource;
         private ISoundOut _soundOut;
 
+        public event EventHandler<EventArgs> TrackPlayingEnded;
+
         private bool _isPlaying;
         public bool IsPlaying
         {
@@ -190,6 +192,8 @@ namespace Gouter
                 return;
             }
 
+            bool isEndOfTrack = this.State == PlayState.Play;
+
             this.StopTimer();
 
             this.State = PlayState.Stop;
@@ -200,6 +204,11 @@ namespace Gouter
             }
 
             this._isPlayerStopped = true;
+
+            if (isEndOfTrack)
+            {
+                this.TrackPlayingEnded?.Invoke(this, EventArgs.Empty);
+            }
         }
 
         public void Pause()

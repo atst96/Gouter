@@ -8,6 +8,7 @@ using System.Windows.Data;
 
 namespace Gouter.Converters
 {
+    [ValueConversion(typeof(TimeSpan), typeof(string))]
     internal class DurationConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

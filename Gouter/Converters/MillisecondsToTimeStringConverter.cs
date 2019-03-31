@@ -8,6 +8,7 @@ using System.Windows.Data;
 
 namespace Gouter.Converters
 {
+    [ValueConversion(typeof(double), typeof(string))]
     internal class MillisecondsToTimeStringConverter : IValueConverter
     {
         private readonly DurationConverter _converter = new DurationConverter();
@@ -24,7 +25,9 @@ namespace Gouter.Converters
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return this._converter.ConvertBack(value, targetType, parameter, culture);
+            var timeSpan = (TimeSpan)this._converter.ConvertBack(value, targetType, parameter, culture);
+
+            return timeSpan.TotalMilliseconds;
         }
     }
 }

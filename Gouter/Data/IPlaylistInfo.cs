@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace Gouter
 {
-    internal interface IPlaylist
+    internal interface IPlaylistInfo
     {
-        IReadOnlyList<TrackInfo> Tracks { get; }
+        
     }
 }

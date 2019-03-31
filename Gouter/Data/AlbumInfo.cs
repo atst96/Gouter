@@ -10,7 +10,7 @@ using System.Windows.Media;
 
 namespace Gouter
 {
-    internal class AlbumInfo : NotificationObject
+    internal class AlbumInfo : NotificationObject, IPlaylistInfo
     {
         private readonly static AlbumManager AlbumManager = App.AlbumManager;
 
