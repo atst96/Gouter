@@ -105,6 +105,7 @@
 
                     <Slider
                         Width="80"
+                        IsMoveToPointEnabled="True"
                         Minimum="0.0" Maximum="1.0"
                         Value="{Binding Player.Volumne, Mode=TwoWay}"
                         VerticalAlignment="Center" />
@@ -136,6 +137,7 @@
                     <Slider
                         Margin="6,0,6,6"
                         Minimum="0"
+                        IsMoveToPointEnabled="True"
                         Value="{Binding Player.CurrentTime, Mode=TwoWay}"
                         Maximum="{Binding Player.Duration, Mode=OneWay}"
                         ToolTip="{Binding Player.CurrentTime, Mode=OneWay, Converter={StaticResource MillisecondsToTimeStringConverter}}"
