@@ -11,6 +11,8 @@ namespace Gouter.ViewModels
 {
     internal class MainWindowViewModel : ViewModelBase
     {
+        private readonly Random _rand = new Random();
+
         public SortedNotifiableCollectionWrapper<AlbumInfo> Albums { get; }
 
         public SoundPlayer Player { get; }
@@ -33,6 +35,14 @@ namespace Gouter.ViewModels
                 {
                     this.SelectNextTrack();
                     this.Player.Play();
+                }
+                else
+                {
+                    this.IsPlayRequired = false;
+                    if (this.PauseCommand.CanExecute(null))
+                    {
+                        this.PauseCommand.Execute(null);
+                    }
                 }
             }
         }
@@ -128,16 +138,25 @@ namespace Gouter.ViewModels
             var playlist = this.PlayingPlaylist;
             var tracks = playlist.Tracks;
 
-            var currentTrack = this.Player.CurrentTrack;
-            var currentTrackIdx = tracks.IndexOf(currentTrack);
-
-            if (currentTrackIdx >= 0)
+            if (this.IsShuffle)
             {
-                int nextIdx = tracks.Count <= currentTrackIdx - 1
-                    ? 0
-                    : currentTrackIdx + 1;
+                int nextTrackIdx = this._rand.Next(0, tracks.Count - 1);
 
-                this.Player.Play(tracks[nextIdx]);
+                this.Player.Play(tracks[nextTrackIdx]);
+            }
+            else
+            {
+                var currentTrack = this.Player.CurrentTrack;
+                var currentTrackIdx = tracks.IndexOf(currentTrack);
+
+                if (currentTrackIdx >= 0)
+                {
+                    int nextTrackIdx = tracks.Count <= currentTrackIdx - 1
+                        ? 0
+                        : currentTrackIdx + 1;
+
+                    this.Player.Play(tracks[nextTrackIdx]);
+                }
             }
         }
     }
