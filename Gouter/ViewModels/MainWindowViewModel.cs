@@ -79,5 +79,12 @@ namespace Gouter.ViewModels
 
         private Command _onCloseCommand;
         public Command OnCloseCommand => this._onCloseCommand ?? (this._onCloseCommand = new OnCloseCommand(this));
+
+        private IPlaylist _playingPlaylist;
+        public IPlaylist PlayingPlaylist
+        {
+            get => this._playingPlaylist;
+            set => this.SetProperty(ref this._playingPlaylist, value);
+        }
     }
 }

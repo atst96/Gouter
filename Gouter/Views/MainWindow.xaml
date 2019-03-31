@@ -122,8 +122,9 @@
                     <Slider
                         Margin="6,0,6,6"
                         Minimum="0"
-                        Value="{Binding Player.CurrentTime, Mode=OneWay}"
+                        Value="{Binding Player.CurrentTime, Mode=TwoWay}"
                         Maximum="{Binding Player.Duration, Mode=OneWay}"
+                        ToolTip="{Binding Player.CurrentTime, Mode=OneWay, Converter={StaticResource MillisecondsToTimeStringConverter}}"
                         DockPanel.Dock="Bottom" />
 
                     <TextBlock
