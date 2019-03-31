@@ -67,11 +67,18 @@ namespace Gouter
 
         public string Genre { get; private set; }
 
-        private bool _isPlaying;
-        public bool IsPlaying
+        public bool IsPlaying { get; private set; }
+
+        public void SetPlayState(bool isPlaying)
         {
-            get => this._isPlaying;
-            set => this.SetProperty(ref this._isPlaying, value);
+            if (this.IsPlaying!=isPlaying)
+            {
+                this.IsPlaying = isPlaying;
+                this.RaisePropertyChanged(nameof(this.IsPlaying));
+
+                Console.Write(this.Title);
+                Console.WriteLine("Status changed: " + isPlaying);
+            }
         }
     }
 }

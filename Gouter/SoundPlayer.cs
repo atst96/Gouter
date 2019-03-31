@@ -26,7 +26,7 @@ namespace Gouter
             private set => this.SetProperty(ref this._isPlaying, value);
         }
 
-        private PlayState _state;
+        private PlayState _state = PlayState.Stop;
         public PlayState State
         {
             get => this._state;
@@ -81,6 +81,7 @@ namespace Gouter
             {
                 Interval = TimeSpan.FromMilliseconds(100),
             };
+
             this._timer.Tick += this.OnTimerTicked;
         }
 
@@ -106,23 +107,30 @@ namespace Gouter
             private set => this.SetProperty(ref this._currentTrack, value);
         }
 
-        private void SetCurrentTrack(TrackInfo trackInfo)
+        public void SetTrack(TrackInfo trackInfo)
         {
-            if (object.ReferenceEquals(this.CurrentTrack, trackInfo))
-            {
-                return;
-            }
+            this.Stop();
 
-            if (this.CurrentTrack != null)
+            var previousTrack = this.CurrentTrack;
+
+            //if (object.ReferenceEquals(previousTrack, trackInfo))
+            //{
+            //    this._soundOut?.Resume();
+            //    this._soundSource?.SetPosition(TimeSpan.Zero);
+
+            //    return;
+            //}
+
+            if (previousTrack != null)
             {
-                this.CurrentTrack.IsPlaying = false;
+                previousTrack.SetPlayState(false);
             }
 
             this.CurrentTrack = trackInfo;
 
             this._soundSource = CodecFactory.Instance.GetCodec(trackInfo.Path);
-            this.CurrentTime = this._soundSource.GetTime(this._soundSource.Position).TotalMilliseconds;
-            this.Duration = this._soundSource.GetTime(this._soundSource.Length).TotalMilliseconds;
+            this.CurrentTime = this._soundSource.GetPosition().TotalMilliseconds;
+            this.Duration = this._soundSource.GetLength().TotalMilliseconds;
 
             if (this._soundOut.PlaybackState != PlaybackState.Stopped)
             {
@@ -130,8 +138,6 @@ namespace Gouter
             }
 
             this._soundOut.Initialize(this._soundSource);
-
-            this.Stop();
         }
 
         private void InitializeSoundDevice()
@@ -150,19 +156,14 @@ namespace Gouter
             this._soundOut.Stopped += this.OnPlayerStopped;
         }
 
-        public void Play()
+        public async void Play()
         {
-            if (this.CurrentTrack != null)
+            if (this.CurrentTrack == null || this.State == PlayState.Play)
             {
-                this.Play(this.CurrentTrack);
+                return;
             }
-        }
 
-        public async void Play(TrackInfo trackInfo)
-        {
             this.InitializeSoundDevice();
-
-            this.SetCurrentTrack(trackInfo);
 
             await this.WaitPlayerStop();
 
@@ -172,7 +173,16 @@ namespace Gouter
             this._isPlayerStopped = false;
             this._soundOut.Play();
 
-            trackInfo.IsPlaying = true;
+            this.CurrentTrack.SetPlayState(true);
+        }
+
+        public void Play(TrackInfo trackInfo)
+        {
+            this.InitializeSoundDevice();
+
+            this.SetTrack(trackInfo);
+
+            this.Play();
         }
 
         public async Task WaitPlayerStop()
@@ -198,10 +208,7 @@ namespace Gouter
 
             this.State = PlayState.Stop;
 
-            if (this.CurrentTrack != null)
-            {
-                this.CurrentTrack.IsPlaying = false;
-            }
+            this.CurrentTrack?.SetPlayState(false);
 
             this._isPlayerStopped = true;
 
@@ -213,11 +220,6 @@ namespace Gouter
 
         public void Pause()
         {
-            if (this.CurrentTrack != null)
-            {
-                this.CurrentTrack.IsPlaying = false;
-            }
-
             this._isPlayerStopped = true;
             this.State = PlayState.Pause;
             this.StopTimer();
@@ -226,10 +228,12 @@ namespace Gouter
 
         public void Stop()
         {
-            if (this.CurrentTrack != null)
+            if (this.State == PlayState.Stop)
             {
-                this.CurrentTrack.IsPlaying = false;
+                return;
             }
+
+            this.CurrentTrack?.SetPlayState(false);
 
             if (this._soundOut != null)
             {
@@ -259,7 +263,7 @@ namespace Gouter
                 return;
             }
 
-            double timeMs = this._soundSource.GetTime(this._soundSource.Position).TotalMilliseconds;
+            double timeMs = this._soundSource.GetPosition().TotalMilliseconds;
 
             this.SetProperty(ref this._currentTime, timeMs, nameof(SoundPlayer.CurrentTime));
         }

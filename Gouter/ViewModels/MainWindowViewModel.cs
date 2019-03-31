@@ -142,7 +142,7 @@ namespace Gouter.ViewModels
             {
                 int nextTrackIdx = this._rand.Next(0, tracks.Count - 1);
 
-                this.Player.Play(tracks[nextTrackIdx]);
+                this.Player.SetTrack(tracks[nextTrackIdx]);
             }
             else
             {
@@ -151,11 +151,11 @@ namespace Gouter.ViewModels
 
                 if (currentTrackIdx >= 0)
                 {
-                    int nextTrackIdx = tracks.Count <= currentTrackIdx - 1
+                    int nextTrackIdx = tracks.Count - 1 <= currentTrackIdx
                         ? 0
                         : currentTrackIdx + 1;
 
-                    this.Player.Play(tracks[nextTrackIdx]);
+                    this.Player.SetTrack(tracks[nextTrackIdx]);
                 }
             }
         }
