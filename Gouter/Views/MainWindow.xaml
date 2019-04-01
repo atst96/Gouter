@@ -55,7 +55,8 @@
                     <Button
                         Margin="3" Padding="6"
                         VerticalAlignment="Center"
-                        Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+                        Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
+                        Command="{Binding PreviousTrackCommand, Mode=OneTime}">
                         <app:GeometryIcon
                             Width="20" Height="20"
                             Data="{StaticResource MaterialIcons.FastRewind}" />
@@ -83,7 +84,8 @@
                     <Button
                         Margin="3" Padding="6"
                         VerticalAlignment="Center"
-                        Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
+                        Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
+                        Command="{Binding NextTrackCommand, Mode=OneTime}">
                         <app:GeometryIcon
                             Width="20" Height="20"
                             Data="{StaticResource MaterialIcons.FastForward}" />

@@ -75,9 +75,6 @@ namespace Gouter
             {
                 this.IsPlaying = isPlaying;
                 this.RaisePropertyChanged(nameof(this.IsPlaying));
-
-                Console.Write(this.Title);
-                Console.WriteLine("Status changed: " + isPlaying);
             }
         }
     }

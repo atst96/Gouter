@@ -111,6 +111,8 @@ namespace Gouter
         {
             this.Stop();
 
+            this.InitializeSoundDevice();
+
             var previousTrack = this.CurrentTrack;
 
             //if (object.ReferenceEquals(previousTrack, trackInfo))
@@ -178,8 +180,6 @@ namespace Gouter
 
         public void Play(TrackInfo trackInfo)
         {
-            this.InitializeSoundDevice();
-
             this.SetTrack(trackInfo);
 
             this.Play();

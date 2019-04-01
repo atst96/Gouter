@@ -102,6 +102,12 @@ namespace Gouter.ViewModels
         private Command _pauseCommand;
         public Command PauseCommand => this._pauseCommand ?? (this._pauseCommand = new PauseCommand(this));
 
+        private Command _previousTrackCommand;
+        public Command PreviousTrackCommand => this._previousTrackCommand ?? (this._previousTrackCommand = new PreviousTrackCommand(this));
+
+        private Command _nextTrackCommand;
+        public Command NextTrackCommand => this._nextTrackCommand ?? (this._nextTrackCommand = new NextTrackCommand(this));
+
         private Command _onCloseCommand;
         public Command OnCloseCommand => this._onCloseCommand ?? (this._onCloseCommand = new OnCloseCommand(this));
 
@@ -126,7 +132,61 @@ namespace Gouter.ViewModels
             set => this.SetProperty(ref this._isShuffle, value);
         }
 
+        private readonly LinkedList<TrackInfo> _trackHistory = new LinkedList<TrackInfo>();
+
+        public const int MaxHistoryCount = 50;
+
+        public void AddHistory(TrackInfo nextTrack)
+        {
+            var history = this._trackHistory;
+
+            var currentTrack = this.Player.CurrentTrack;
+
+            if (history.Count == 0 || !object.ReferenceEquals(history.Last.Value, currentTrack))
+            {
+                history.AddLast(nextTrack);
+            }
+
+            if (history.Count > MaxHistoryCount)
+            {
+                history.RemoveFirst();
+            }
+        }
+
         public bool IsPlayRequired { get; set; }
+
+        public void Play()
+        {
+            this.IsPlayRequired = true;
+            this.Player.Play();
+        }
+
+        public void Play(TrackInfo track)
+        {
+            this.IsPlayRequired = true;
+            this.Player.Play(track);
+            this.AddHistory(track);
+        }
+
+        public void SelectPreviousTrack()
+        {
+            if (this.PlayingPlaylist == null)
+            {
+                return;
+            }
+
+            var playlist = this.PlayingPlaylist;
+            var tracks = playlist.Tracks;
+
+            var history = this._trackHistory;
+
+            if (history.Count > 1)
+            {
+                history.RemoveLast();
+                var previousTrack = history.Last.Value;
+                this.Player.SetTrack(previousTrack);
+            }
+        }
 
         public void SelectNextTrack()
         {
@@ -138,11 +198,12 @@ namespace Gouter.ViewModels
             var playlist = this.PlayingPlaylist;
             var tracks = playlist.Tracks;
 
+            TrackInfo nextTrack = default;
+
             if (this.IsShuffle)
             {
                 int nextTrackIdx = this._rand.Next(0, tracks.Count - 1);
-
-                this.Player.SetTrack(tracks[nextTrackIdx]);
+                nextTrack = tracks[nextTrackIdx];
             }
             else
             {
@@ -155,8 +216,14 @@ namespace Gouter.ViewModels
                         ? 0
                         : currentTrackIdx + 1;
 
-                    this.Player.SetTrack(tracks[nextTrackIdx]);
+                    nextTrack = tracks[nextTrackIdx];
                 }
+            }
+
+            if (nextTrack != default)
+            {
+                this.Player.SetTrack(nextTrack);
+                this.AddHistory(nextTrack);
             }
         }
     }

@@ -23,8 +23,7 @@ namespace Gouter.Commands.MainWindow
 
         public override void Execute(object parameter)
         {
-            this._viewModel.IsPlayRequired = true;
-            this._viewModel.Player.Play();
+            this._viewModel.Play();
         }
     }
 }
