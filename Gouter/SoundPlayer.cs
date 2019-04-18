@@ -169,7 +169,10 @@ namespace Gouter
 
             this.InitializeSoundDevice();
 
-            await this.WaitPlayerStop();
+            if (this.State != PlayState.Pause)
+            {
+                await this.WaitPlayerStop();
+            }
 
             this._soundOut.Volume = this.Volumne;
             this.StartTimer();
