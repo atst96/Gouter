@@ -10,6 +10,7 @@
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:b="clr-namespace:Gouter.Behaviors"
     xmlns:conv="clr-namespace:Gouter.Converters"
+    xmlns:cnm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
     mc:Ignorable="d"
     Title="Gouter" Height="450" Width="800"
     UseLayoutRounding="True"
@@ -30,6 +31,11 @@
             <CollectionViewSource.GroupDescriptions>
                 <PropertyGroupDescription PropertyName="DiskNumber" />
             </CollectionViewSource.GroupDescriptions>
+            <CollectionViewSource.SortDescriptions>
+                <cnm:SortDescription PropertyName="DiskNumber" />
+                <cnm:SortDescription PropertyName="TrackNumber" />
+                <cnm:SortDescription PropertyName="Name" />
+            </CollectionViewSource.SortDescriptions>
         </CollectionViewSource>
     </Window.Resources>
     <i:Interaction.Triggers>
