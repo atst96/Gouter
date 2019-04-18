@@ -13,13 +13,13 @@ namespace Gouter.ViewModels
     {
         private readonly Random _rand = new Random();
 
-        public SortedNotifiableCollectionWrapper<AlbumInfo> Albums { get; }
+        public SortedNotifiableCollectionWrapper<AlbumPlaylist> Albums { get; }
 
         public SoundPlayer Player { get; }
 
         public MainWindowViewModel() : base()
         {
-            this.Albums = new SortedNotifiableCollectionWrapper<AlbumInfo>(App.AlbumManager.Albums, AlbumComparer.Instance);
+            this.Albums = new SortedNotifiableCollectionWrapper<AlbumPlaylist>(App.PlaylistManager.Albums, AlbumComparer.Instance);
             this.Player = new SoundPlayer();
 
             this.Player.TrackPlayingEnded += this.OnPlayTrackEnded;
@@ -33,7 +33,7 @@ namespace Gouter.ViewModels
             {
                 if (this.IsLoop)
                 {
-                    this.SelectNextTrack();
+                    this.SkipToNextTrack();
                     this.Player.Play();
                 }
                 else
@@ -57,15 +57,15 @@ namespace Gouter.ViewModels
             set => this.SetProperty(ref this._currentPlaylist, value);
         }
 
-        private AlbumInfo _selectedAlbum;
-        public AlbumInfo SelectedAlbum
+        private IPlaylist _selectedAlbum;
+        public IPlaylist SelectedAlbum
         {
             get => this._selectedAlbum;
             set
             {
-                if (this.SetProperty(ref this._selectedAlbum, value))
+                if (this.SetProperty(ref this._selectedAlbum, value) && value != null)
                 {
-                    this.CurrentPlaylist = new AlbumPlaylist(value);
+                    this.CurrentPlaylist = value;
                 }
             }
         }
@@ -132,26 +132,9 @@ namespace Gouter.ViewModels
             set => this.SetProperty(ref this._isShuffle, value);
         }
 
-        private readonly LinkedList<TrackInfo> _trackHistory = new LinkedList<TrackInfo>();
+        private readonly LinkedList<TrackInfo> _playHistory = new LinkedList<TrackInfo>();
 
         public const int MaxHistoryCount = 50;
-
-        public void AddHistory(TrackInfo nextTrack)
-        {
-            var history = this._trackHistory;
-
-            var currentTrack = this.Player.CurrentTrack;
-
-            if (history.Count == 0 || !object.ReferenceEquals(history.Last.Value, currentTrack))
-            {
-                history.AddLast(nextTrack);
-            }
-
-            if (history.Count > MaxHistoryCount)
-            {
-                history.RemoveFirst();
-            }
-        }
 
         public bool IsPlayRequired { get; set; }
 
@@ -168,30 +151,43 @@ namespace Gouter.ViewModels
             this.AddHistory(track);
         }
 
-        public void SelectPreviousTrack()
+        private LinkedListNode<TrackInfo> _currentNode;
+
+        public void SkipToPreviousTrack()
         {
             if (this.PlayingPlaylist == null)
             {
                 return;
             }
 
-            var playlist = this.PlayingPlaylist;
-            var tracks = playlist.Tracks;
+            var player = this.Player;
+            var previousNode = this._currentNode?.Previous;
 
-            var history = this._trackHistory;
-
-            if (history.Count > 1)
+            if (player.CurrentTime > 3000.0 || previousNode == null)
             {
-                history.RemoveLast();
-                var previousTrack = history.Last.Value;
-                this.Player.SetTrack(previousTrack);
+                player.CurrentTime = 0;
+                return;
             }
+
+            player.SetTrack(previousNode.Value);
+            this._currentNode = previousNode;
         }
 
-        public void SelectNextTrack()
+        public void SkipToNextTrack()
         {
             if (this.PlayingPlaylist == null)
             {
+                return;
+            }
+
+            var player = this.Player;
+
+            var nextNode = this._currentNode?.Next;
+            if (nextNode != null)
+            {
+                player.SetTrack(nextNode.Value);
+                this._currentNode = nextNode;
+
                 return;
             }
 
@@ -203,11 +199,12 @@ namespace Gouter.ViewModels
             if (this.IsShuffle)
             {
                 int nextTrackIdx = this._rand.Next(0, tracks.Count - 1);
+
                 nextTrack = tracks[nextTrackIdx];
             }
             else
             {
-                var currentTrack = this.Player.CurrentTrack;
+                var currentTrack = player.CurrentTrack;
                 var currentTrackIdx = tracks.IndexOf(currentTrack);
 
                 if (currentTrackIdx >= 0)
@@ -222,9 +219,34 @@ namespace Gouter.ViewModels
 
             if (nextTrack != default)
             {
-                this.Player.SetTrack(nextTrack);
+                player.SetTrack(nextTrack);
                 this.AddHistory(nextTrack);
             }
+        }
+
+        public void AddHistory(TrackInfo nextTrack)
+        {
+            var history = this._playHistory;
+            var currentNode = this._currentNode;
+
+            if (currentNode == null)
+            {
+                this._currentNode = history.AddLast(nextTrack);
+            }
+            else if (!object.ReferenceEquals(this._currentNode.Value, nextTrack))
+            {
+                this._currentNode = history.AddAfter(currentNode, nextTrack);
+            }
+
+            //if (history.Count == 0 || !object.ReferenceEquals(history.Last.Value, currentTrack))
+            //{
+            //    history.AddLast(nextTrack);
+            //}
+
+            //if (history.Count > MaxHistoryCount)
+            //{
+            //    history.RemoveFirst();
+            //}
         }
     }
 }

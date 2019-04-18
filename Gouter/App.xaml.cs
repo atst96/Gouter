@@ -21,6 +21,7 @@ namespace Gouter
         internal const string Name = "Gouter";
         internal const string Version = "0.0.0.0";
 
+        internal static PlaylistManager PlaylistManager { get; } = new PlaylistManager();
         internal static AlbumManager AlbumManager { get; } = new AlbumManager();
         internal static MusicTrackManager TrackManager { get; } = new MusicTrackManager();
 

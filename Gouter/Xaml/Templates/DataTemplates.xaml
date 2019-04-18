@@ -3,7 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:app="clr-namespace:Gouter">
 
-    <DataTemplate DataType="{x:Type app:AlbumInfo}">
+    <DataTemplate DataType="{x:Type app:AlbumPlaylist}">
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
@@ -14,7 +14,7 @@
                 Margin="0,0,8,0"
                 Width="48" Height="48"
                 Stretch="Uniform"
-                Source="{Binding Artwork, Mode=OneWay}"
+                Source="{Binding Album.Artwork, Mode=OneWay}"
                 RenderOptions.BitmapScalingMode="HighQuality" />
 
             <StackPanel
@@ -30,7 +30,7 @@
                 <TextBlock
                     TextWrapping="NoWrap"
                     TextTrimming="CharacterEllipsis"
-                    Text="{Binding Artist, Mode=OneWay}" />
+                    Text="{Binding Album.Artist, Mode=OneWay}" />
             </StackPanel>
         </Grid>
     </DataTemplate>

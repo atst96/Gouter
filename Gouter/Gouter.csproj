@@ -103,11 +103,14 @@
     <Compile Include="Commands\SettingWindow\AddExcludeDirectoryCommand.cs" />
     <Compile Include="Commands\SettingWindow\RemoveExcludeDirectoryCommand.cs" />
     <Compile Include="Comparer\AlbumComparer.cs" />
+    <Compile Include="Controls\ListBoxEx.cs" />
+    <Compile Include="Controls\ListViewEx.cs" />
     <Compile Include="Converters\DurationConverter.cs" />
     <Compile Include="Converters\MillisecondsToTimeStringConverter.cs" />
     <Compile Include="Data\AlbumInfo.cs" />
     <Compile Include="Data\AlbumManager.cs" />
     <Compile Include="Data\IPlaylistInfo.cs" />
+    <Compile Include="Data\PlaylistManager.cs" />
     <Compile Include="Extensions\Extension.cs" />
     <Compile Include="Extensions\WpfExtensions.cs" />
     <Compile Include="Playlists\AlbumPlaylist.cs" />

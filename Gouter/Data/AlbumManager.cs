@@ -79,6 +79,7 @@ namespace Gouter
             this._albumKeyMap.Add(albumInfo.Key, albumInfo);
 
             this.Albums.Add(albumInfo);
+            App.PlaylistManager.Albums.Add(albumInfo.Playlist);
         }
 
         public void Register(AlbumInfo albumInfo)

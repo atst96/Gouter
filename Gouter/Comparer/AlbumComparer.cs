@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Gouter
 {
-    internal class AlbumComparer : IComparer<AlbumInfo>
+    internal class AlbumComparer : IComparer<AlbumInfo>, IComparer<AlbumPlaylist>
     {
         public static readonly AlbumComparer Instance = new AlbumComparer();
 
@@ -15,6 +15,11 @@ namespace Gouter
         public int Compare(AlbumInfo x, AlbumInfo y)
         {
             return _albumNameComparer.Compare(x.Key, y.Key);
+        }
+
+        public int Compare(AlbumPlaylist x, AlbumPlaylist y)
+        {
+            return _albumNameComparer.Compare(x.Album.Key, y.Album.Key);
         }
     }
 }

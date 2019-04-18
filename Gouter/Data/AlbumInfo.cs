@@ -18,8 +18,6 @@ namespace Gouter
 
         private AlbumInfo(string key)
         {
-            this.Tracks = new ConcurrentNotifiableCollection<TrackInfo>();
-
             this.Key = key;
         }
 
@@ -40,6 +38,8 @@ namespace Gouter
             {
                 this.Artwork = ImageUtility.GetMissingAlbumImage();
             }
+
+            this.Playlist = new AlbumPlaylist(this);
         }
 
         public AlbumInfo(int id, string key, string name, string artist, bool isCompilation, byte[] artwork)
@@ -58,6 +58,8 @@ namespace Gouter
             {
                 this.Artwork = ImageUtility.GetMissingAlbumImage();
             }
+
+            this.Playlist = new AlbumPlaylist(this);
         }
 
         public int Id { get; }
@@ -97,6 +99,6 @@ namespace Gouter
 
         public bool IsCompilation { get; private set; }
 
-        public ConcurrentNotifiableCollection<TrackInfo> Tracks { get; }
+        public AlbumPlaylist Playlist { get; }
     }
 }

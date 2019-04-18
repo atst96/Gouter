@@ -267,7 +267,7 @@
                         Text="{Binding CurrentPlaylist.Tracks.Count, Mode=OneWay, StringFormat='{}{0}件'}" />
                 </StackPanel>
 
-                <ListView
+                <app:ListViewEx
                     Grid.Row="1"
                     Grid.ColumnSpan="2"
                     VirtualizingPanel.IsVirtualizing="True"
@@ -279,16 +279,12 @@
                     ItemsPanel="{StaticResource ItemsPanelTemplate}"
                     BorderBrush="{StaticResource ToolBar.Static.BorderBrush}"
                     ItemsSource="{Binding Source={StaticResource TracksCollectionViewSource}}"
-                    SelectedItem="{Binding SelectedTrack, Mode=TwoWay}">
+                    SelectedItem="{Binding SelectedTrack, Mode=TwoWay}"
+                    ItemDoubleClickCommand="{Binding TrackListDoubleClickCommand, Mode=OneTime}">
                     <i:Interaction.Behaviors>
                         <b:ListViewFillColumnBehavior FillColumnIndex="1" />
                     </i:Interaction.Behaviors>
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="MouseDoubleClick">
-                            <i:InvokeCommandAction Command="{Binding DataContext.TrackListDoubleClickCommand, Mode=OneTime, RelativeSource={RelativeSource AncestorType=view:MainWindow}}"  />
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
-                    <ListView.View>
+                    <app:ListViewEx.View>
                         <GridView>
                             <GridViewColumn Header="#" Width="40">
                                 <GridViewColumn.HeaderContainerStyle>
@@ -383,8 +379,8 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
                         </GridView>
-                    </ListView.View>
-                    <ListView.GroupStyle>
+                    </app:ListViewEx.View>
+                    <app:ListViewEx.GroupStyle>
                         <GroupStyle>
                             <GroupStyle.ContainerStyle>
                                 <Style TargetType="{x:Type GroupItem}">
@@ -418,14 +414,14 @@
                                 </Style>
                             </GroupStyle.ContainerStyle>
                         </GroupStyle>
-                    </ListView.GroupStyle>
-                    <ListView.ItemContainerStyle>
+                    </app:ListViewEx.GroupStyle>
+                    <app:ListViewEx.ItemContainerStyle>
                         <Style TargetType="{x:Type ListViewItem}" BasedOn="{StaticResource {x:Type ListViewItem}}">
                             <Setter Property="Width" Value="{Binding ViewportWidth, Mode=OneWay, RelativeSource={RelativeSource AncestorType=ScrollViewer}}" />
                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                         </Style>
-                    </ListView.ItemContainerStyle>
-                </ListView>
+                    </app:ListViewEx.ItemContainerStyle>
+                </app:ListViewEx>
             </Grid>
         </Grid>
     </DockPanel>

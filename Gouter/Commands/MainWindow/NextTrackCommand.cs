@@ -23,7 +23,7 @@ namespace Gouter.Commands.MainWindow
 
         public override void Execute(object parameter)
         {
-            this._viewModel.SelectNextTrack();
+            this._viewModel.SkipToNextTrack();
 
             if (this._viewModel.IsPlayRequired)
             {

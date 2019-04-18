@@ -25,7 +25,7 @@ namespace Gouter
             this.Artist = track.Artist;
             this.Genre = track.Genre;
             this.AlbumInfo = AlbumManager.GetOrAddAlbum(track);
-            this.AlbumInfo.Tracks.Add(this);
+            this.AlbumInfo.Playlist.Tracks.Add(this);
         }
 
         public TrackInfo(int id, int albumId, string path, int duration, int disk, int track, int year, string albumArtist, string title, string artist, string genre)
@@ -42,7 +42,7 @@ namespace Gouter
             this.Genre = genre;
 
             this.AlbumInfo = AlbumManager.FromId(albumId);
-            this.AlbumInfo.Tracks.Add(this);
+            this.AlbumInfo.Playlist.Tracks.Add(this);
         }
 
         public AlbumInfo AlbumInfo { get; private set; }
