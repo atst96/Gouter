@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 using CSCore;
@@ -13,9 +14,10 @@ namespace Gouter
 {
     internal class SoundPlayer : NotificationObject, IDisposable
     {
-        private readonly DispatcherTimer _timer;
+        private readonly DispatcherTimer _updateStausTimer;
         private IWaveSource _soundSource;
         private ISoundOut _soundOut;
+        private bool _isInternalPlayerStopped = true;
 
         public event EventHandler<EventArgs> TrackPlayingEnded;
 
@@ -77,12 +79,12 @@ namespace Gouter
 
         public SoundPlayer()
         {
-            this._timer = new DispatcherTimer
+            this._updateStausTimer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromMilliseconds(100),
             };
 
-            this._timer.Tick += this.OnTimerTicked;
+            this._updateStausTimer.Tick += this.OnTimerTicked;
         }
 
         private void OnTimerTicked(object sender, EventArgs e)
@@ -172,7 +174,7 @@ namespace Gouter
             this._soundOut.Volume = this.Volumne;
             this.StartTimer();
             this.State = PlayState.Play;
-            this._isPlayerStopped = false;
+            this._isInternalPlayerStopped = false;
             this._soundOut.Play();
 
             this.CurrentTrack.SetPlayState(true);
@@ -187,17 +189,15 @@ namespace Gouter
 
         public async Task WaitPlayerStop()
         {
-            while (!this._isPlayerStopped)
+            if (this._soundOut != null)
             {
-                await Task.Delay(20).ConfigureAwait(false);
+                await Task.Run(() => this._soundOut.WaitForStopped());
             }
         }
 
-        private bool _isPlayerStopped = true;
-
         private void OnPlayerStopped(object sender, PlaybackStoppedEventArgs e)
         {
-            if (this._isPlayerStopped)
+            if (this._isInternalPlayerStopped)
             {
                 return;
             }
@@ -210,7 +210,7 @@ namespace Gouter
 
             this.CurrentTrack?.SetPlayState(false);
 
-            this._isPlayerStopped = true;
+            this._isInternalPlayerStopped = true;
 
             if (isEndOfTrack)
             {
@@ -220,13 +220,13 @@ namespace Gouter
 
         public void Pause()
         {
-            this._isPlayerStopped = true;
+            this._isInternalPlayerStopped = true;
             this.State = PlayState.Pause;
             this.StopTimer();
             this._soundOut?.Pause();
         }
 
-        public void Stop()
+        public async void Stop()
         {
             if (this.State == PlayState.Stop)
             {
@@ -238,15 +238,12 @@ namespace Gouter
             if (this._soundOut != null)
             {
                 this._soundOut.Stop();
+                this._soundSource.Position = 0;
             }
 
             this.State = PlayState.Stop;
             this.StopTimer();
-
-            if (this._soundSource != null)
-            {
-                this._soundSource.Position = 0;
-            }
+            await this.WaitPlayerStop();
         }
 
         public void Dispose()
@@ -270,12 +267,12 @@ namespace Gouter
 
         private void StartTimer()
         {
-            this._timer.Start();
+            this._updateStausTimer.Start();
         }
 
         private void StopTimer()
         {
-            this._timer.Stop();
+            this._updateStausTimer.Stop();
         }
     }
 }
