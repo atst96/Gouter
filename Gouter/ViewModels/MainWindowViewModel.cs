@@ -236,6 +236,8 @@ namespace Gouter.ViewModels
             else if (!object.ReferenceEquals(this._currentNode.Value, nextTrack))
             {
                 this._currentNode = history.AddAfter(currentNode, nextTrack);
+
+                history.RemoveAfter(this._currentNode.Next);
             }
 
             //if (history.Count == 0 || !object.ReferenceEquals(history.Last.Value, currentTrack))

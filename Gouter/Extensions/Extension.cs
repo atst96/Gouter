@@ -29,5 +29,16 @@ namespace Gouter.Extensions
 
             return -1;
         }
+
+        public static void RemoveAfter<T>(this LinkedList<T> linkedList, LinkedListNode<T> linkedListNode)
+        {
+            var node = linkedListNode;
+
+            while (node != null)
+            {
+                linkedList.Remove(node);
+                node = node.Next;
+            }
+        }
     }
 }
