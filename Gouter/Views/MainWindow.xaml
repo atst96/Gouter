@@ -280,6 +280,8 @@
                     VirtualizingPanel.ScrollUnit="Pixel"
                     VirtualizingPanel.IsVirtualizingWhenGrouping="True"
                     VirtualizingPanel.VirtualizationMode="Recycling"
+                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                    ScrollViewer.HorizontalScrollBarVisibility="Auto"
                     AlternationCount="2"
                     BorderThickness="0,1,0,0"
                     ItemsPanel="{StaticResource ItemsPanelTemplate}"
@@ -287,9 +289,9 @@
                     ItemsSource="{Binding Source={StaticResource TracksCollectionViewSource}}"
                     SelectedItem="{Binding SelectedTrack, Mode=TwoWay}"
                     ItemDoubleClickCommand="{Binding TrackListDoubleClickCommand, Mode=OneTime}">
-                    <i:Interaction.Behaviors>
+                    <!--<i:Interaction.Behaviors>
                         <b:ListViewFillColumnBehavior FillColumnIndex="1" />
-                    </i:Interaction.Behaviors>
+                    </i:Interaction.Behaviors>-->
                     <app:ListViewEx.View>
                         <GridView>
                             <GridViewColumn Header="#" Width="40">
@@ -329,7 +331,8 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn Header="タイトル">
+                            <GridViewColumn
+                                Header="タイトル" Width="310">
                                 <GridViewColumn.HeaderContainerStyle>
                                     <Style TargetType="{x:Type GridViewColumnHeader}">
                                         <Setter Property="HorizontalContentAlignment" Value="Left" />
@@ -368,7 +371,7 @@
 
                             <GridViewColumn
                                 Header="アーティスト"
-                                Width="120">
+                                Width="100">
                                 <GridViewColumn.HeaderContainerStyle>
                                     <Style TargetType="{x:Type GridViewColumnHeader}">
                                         <Setter Property="HorizontalContentAlignment" Value="Left" />
@@ -394,8 +397,7 @@
                                     <Setter Property="Template">
                                         <Setter.Value>
                                             <ControlTemplate TargetType="{x:Type GroupItem}">
-                                                <Grid
-                                                    Width="{Binding ViewportWidth, Mode=OneWay, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
+                                                <Grid>
                                                     <Grid.RowDefinitions>
                                                         <RowDefinition Height="Auto" />
                                                         <RowDefinition Height="Auto" />
@@ -423,7 +425,8 @@
                     </app:ListViewEx.GroupStyle>
                     <app:ListViewEx.ItemContainerStyle>
                         <Style TargetType="{x:Type ListViewItem}" BasedOn="{StaticResource {x:Type ListViewItem}}">
-                            <Setter Property="Width" Value="{Binding ViewportWidth, Mode=OneWay, RelativeSource={RelativeSource AncestorType=ScrollViewer}}" />
+                            <Setter Property="Width" Value="NaN" />
+                            <!--<Setter Property="Width" Value="{Binding ViewportWidth, Mode=OneWay, RelativeSource={RelativeSource AncestorType=ScrollViewer}}" />-->
                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                         </Style>
                     </app:ListViewEx.ItemContainerStyle>
