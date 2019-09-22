@@ -86,8 +86,8 @@ namespace Gouter.ViewModels
             set => this.SetProperty(ref this._volume, value);
         }
 
-        private Command _trackListDoubleClickCommand;
-        public Command TrackListDoubleClickCommand => this._trackListDoubleClickCommand ?? (this._trackListDoubleClickCommand = new TrackListDoubleClickCommand(this));
+        private Command<TrackInfo> _trackListDoubleClickCommand;
+        public Command<TrackInfo> TrackListDoubleClickCommand => this._trackListDoubleClickCommand ??= new TrackListDoubleClickCommand(this);
 
         private TrackInfo _selectedTrack;
         public TrackInfo SelectedTrack
@@ -97,19 +97,19 @@ namespace Gouter.ViewModels
         }
 
         private Command _playCommand;
-        public Command PlayCommand => this._playCommand ?? (this._playCommand = new PlayCommand(this));
+        public Command PlayCommand => this._playCommand ??= new PlayCommand(this);
 
         private Command _pauseCommand;
-        public Command PauseCommand => this._pauseCommand ?? (this._pauseCommand = new PauseCommand(this));
+        public Command PauseCommand => this._pauseCommand ??= new PauseCommand(this);
 
         private Command _previousTrackCommand;
-        public Command PreviousTrackCommand => this._previousTrackCommand ?? (this._previousTrackCommand = new PreviousTrackCommand(this));
+        public Command PreviousTrackCommand => this._previousTrackCommand ??= new PreviousTrackCommand(this);
 
         private Command _nextTrackCommand;
-        public Command NextTrackCommand => this._nextTrackCommand ?? (this._nextTrackCommand = new NextTrackCommand(this));
+        public Command NextTrackCommand => this._nextTrackCommand ??= new NextTrackCommand(this);
 
         private Command _onCloseCommand;
-        public Command OnCloseCommand => this._onCloseCommand ?? (this._onCloseCommand = new OnCloseCommand(this));
+        public Command OnCloseCommand => this._onCloseCommand ??= new OnCloseCommand(this);
 
         private IPlaylist _playingPlaylist;
         public IPlaylist PlayingPlaylist
@@ -249,6 +249,12 @@ namespace Gouter.ViewModels
             //{
             //    history.RemoveFirst();
             //}
+        }
+
+        public void SwitchPlaylist(IPlaylist album, TrackInfo track)
+        {
+            this.PlayingPlaylist = album;
+            this.AddHistory(track);
         }
     }
 }

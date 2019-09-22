@@ -288,6 +288,7 @@
                     BorderBrush="{StaticResource ToolBar.Static.BorderBrush}"
                     ItemsSource="{Binding Source={StaticResource TracksCollectionViewSource}}"
                     SelectedItem="{Binding SelectedTrack, Mode=TwoWay}"
+                    SetSelectingItemToCommandParameter="True"
                     ItemDoubleClickCommand="{Binding TrackListDoubleClickCommand, Mode=OneTime}">
                     <!--<i:Interaction.Behaviors>
                         <b:ListViewFillColumnBehavior FillColumnIndex="1" />

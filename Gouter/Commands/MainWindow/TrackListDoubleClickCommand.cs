@@ -7,7 +7,7 @@ using Gouter.ViewModels;
 
 namespace Gouter.Commands.MainWindow
 {
-    internal class TrackListDoubleClickCommand : Command
+    internal class TrackListDoubleClickCommand : Command<TrackInfo>
     {
         private readonly MainWindowViewModel _viewModel;
 
@@ -16,16 +16,15 @@ namespace Gouter.Commands.MainWindow
             this._viewModel = viewModel;
         }
 
-        public override bool CanExecute(object parameter)
+        public override bool CanExecute(TrackInfo parameter)
         {
-            return this._viewModel.SelectedTrack != null;
+            return parameter != null;
         }
 
-        public override void Execute(object parameter)
+        public override void Execute(TrackInfo parameter)
         {
-            this._viewModel.PlayingPlaylist = this._viewModel.SelectedAlbum;
-            this._viewModel.AddHistory(this._viewModel.SelectedTrack);
-            this._viewModel.Play(this._viewModel.SelectedTrack);
+            this._viewModel.SwitchPlaylist(this._viewModel.SelectedAlbum, parameter);
+            this._viewModel.Play(parameter);
         }
     }
 }
