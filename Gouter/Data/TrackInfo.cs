@@ -1,4 +1,5 @@
 ﻿using ATL;
+using Gouter.DataModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,20 +29,20 @@ namespace Gouter
             this.AlbumInfo.Playlist.Tracks.Add(this);
         }
 
-        public TrackInfo(int id, int albumId, string path, int duration, int disk, int track, int year, string albumArtist, string title, string artist, string genre)
+        public TrackInfo(TrackDataModel dbItem)
         {
-            this.Id = id;
-            this.Path = path;
-            this.Duration = TimeSpan.FromMilliseconds(duration);
-            this.DiskNumber = disk;
-            this.TrackNumber = track;
-            this.Year = year;
-            this.AlbumArtist = albumArtist;
-            this.Title = title;
-            this.Artist = artist;
-            this.Genre = genre;
+            this.Id = dbItem.Id;
+            this.Path = dbItem.Path;
+            this.Duration = TimeSpan.FromMilliseconds(dbItem.Duration);
+            this.DiskNumber = dbItem.Disk ?? -1;
+            this.TrackNumber = dbItem.Track ?? -1;
+            this.Year = dbItem.Year ?? -1;
+            this.AlbumArtist = dbItem.AlbumArtist;
+            this.Title = dbItem.Title;
+            this.Artist = dbItem.Artist;
+            this.Genre = dbItem.Genre;
 
-            this.AlbumInfo = AlbumManager.FromId(albumId);
+            this.AlbumInfo = AlbumManager.FromId(dbItem.AlbumId);
             this.AlbumInfo.Playlist.Tracks.Add(this);
         }
 
@@ -71,7 +72,7 @@ namespace Gouter
 
         public void SetPlayState(bool isPlaying)
         {
-            if (this.IsPlaying!=isPlaying)
+            if (this.IsPlaying != isPlaying)
             {
                 this.IsPlaying = isPlaying;
                 this.RaisePropertyChanged(nameof(this.IsPlaying));

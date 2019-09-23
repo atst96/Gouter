@@ -107,7 +107,7 @@ namespace Gouter
 
         private void InitializeDatabase()
         {
-            var tables = Database.EnumerateTableNames();
+            var tables = new HashSet<string>(Database.EnumerateTableNames());
 
             if (!tables.Contains(Database.TableNames.Albums))
             {

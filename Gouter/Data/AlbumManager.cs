@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using ATL;
+using Gouter.DataModels;
 using Gouter.Extensions;
 
 namespace Gouter
@@ -86,17 +87,16 @@ namespace Gouter
         {
             this.AddImpl(albumInfo);
 
-            var values = new Query
+            var dataModel = new AlbumDataModel
             {
-                ["id"] = albumInfo.Id,
-                ["key"] = albumInfo.Key,
-                ["name"] = albumInfo.Name,
-                ["artist"] = albumInfo.Artist,
-                ["is_compilation"] = albumInfo.IsCompilation,
-                ["artwork"] = albumInfo.ArtworkStream?.ToArray(),
+                Id = albumInfo.Id,
+                Key = albumInfo.Key,
+                Name = albumInfo.Name,
+                Artist = albumInfo.Artist,
+                IsCompilation = albumInfo.IsCompilation,
+                Artwork = albumInfo.ArtworkStream?.ToArray(),
             };
-
-            Database.Insert(Database.TableNames.Albums, values);
+            dataModel.Insert();
         }
 
         public AlbumInfo GetOrAddAlbum(Track track)
@@ -127,16 +127,11 @@ namespace Gouter
                 throw new InvalidOperationException();
             }
 
-            foreach (var row in Database.Select(Database.TableNames.Albums))
-            {
-                int id = row.Get<int>(0);
-                var key = row.Get<string>(1);
-                var name = row.Get<string>(2);
-                var artist = row.Get<string>(3);
-                bool isCompilation = row.Get<bool>(4);
-                byte[] artwork = row.GetOrDefault<byte[]>(5);
+            var results = AlbumDataModel.GetAll();
 
-                var albumInfo = new AlbumInfo(id, key, name, artist, isCompilation, artwork);
+            foreach(var result in results)
+            {
+                var albumInfo = new AlbumInfo(result);
                 this.AddImpl(albumInfo);
             }
 

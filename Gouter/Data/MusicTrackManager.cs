@@ -1,4 +1,5 @@
 ﻿using ATL;
+using Gouter.DataModels;
 using Gouter.Extensions;
 using System;
 using System.Collections.Concurrent;
@@ -68,22 +69,21 @@ namespace Gouter
 
             this.AddImpl(trackInfo);
 
-            var values = new Query
+            var dataModel = new TrackDataModel
             {
-                ["id"] = trackInfo.Id,
-                ["album_id"] = trackInfo.AlbumInfo.Id,
-                ["path"] = trackInfo.Path,
-                ["duration"] = (int)trackInfo.Duration.TotalMilliseconds,
-                ["disk"] = trackInfo.DiskNumber,
-                ["track"] = trackInfo.TrackNumber,
-                ["year"] = trackInfo.Year,
-                ["album_artist"] = trackInfo.AlbumArtist,
-                ["title"] = trackInfo.Title,
-                ["artist"] = trackInfo.Artist,
-                ["genre"] = trackInfo.Genre,
+                Id = trackInfo.Id,
+                AlbumId = trackInfo.AlbumInfo.Id,
+                Path = trackInfo.Path,
+                Duration = (int)trackInfo.Duration.TotalMilliseconds,
+                Disk = trackInfo.DiskNumber,
+                Track = trackInfo.TrackNumber,
+                Year = trackInfo.Year,
+                AlbumArtist = trackInfo.AlbumArtist,
+                Title = trackInfo.Title,
+                Artist = trackInfo.Artist,
+                Genre = trackInfo.Genre,
             };
-
-            Database.Insert(Database.TableNames.Tracks, values);
+            dataModel.Insert();
 
             return trackInfo;
         }
@@ -172,21 +172,11 @@ namespace Gouter
                 throw new InvalidOperationException();
             }
 
-            foreach (var row in Database.Select(Database.TableNames.Tracks))
-            {
-                int id = row.Get<int>(0);
-                int albumId = row.Get<int>(1);
-                var path = row.Get<string>(2);
-                int duration = row.Get<int>(3);
-                int disk = row.Get<int>(4);
-                int track = row.Get<int>(5);
-                int year = row.Get<int>(6);
-                var albumArtist = row.Get<string>(7);
-                var title = row.Get<string>(8);
-                var artist = row.Get<string>(9);
-                var genre = row.Get<string>(10);
+            var results = TrackDataModel.GetAll();
 
-                var trackInfo = new TrackInfo(id, albumId, path, duration, disk, track, year, albumArtist, title, artist, genre);
+            foreach (var result in results)
+            {
+                var trackInfo = new TrackInfo(result);
                 this.AddImpl(trackInfo);
             }
 

@@ -1,4 +1,5 @@
 ﻿using ATL;
+using Gouter.DataModels;
 using Gouter.Utilities;
 using System;
 using System.Collections.Generic;
@@ -42,13 +43,15 @@ namespace Gouter
             this.Playlist = new AlbumPlaylist(this);
         }
 
-        public AlbumInfo(int id, string key, string name, string artist, bool isCompilation, byte[] artwork)
-            : this(key)
+        public AlbumInfo(AlbumDataModel dataModel)
+            : this(dataModel.Key)
         {
-            this.Id = id;
-            this.Name = name;
-            this.Artist = artist;
-            this.IsCompilation = isCompilation;
+            this.Id = dataModel.Id;
+            this.Name = dataModel.Name;
+            this.Artist = dataModel.Artist;
+            this.IsCompilation = dataModel.IsCompilation ?? false;
+
+            var artwork = dataModel.Artwork;
 
             if (artwork?.Length > 0)
             {
