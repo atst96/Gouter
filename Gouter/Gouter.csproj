@@ -114,7 +114,8 @@
     <Compile Include="Commands\SettingWindow\AddExcludeDirectoryCommand.cs" />
     <Compile Include="Commands\SettingWindow\RemoveExcludeDirectoryCommand.cs" />
     <Compile Include="Comparer\AlbumComparer.cs" />
-    <Compile Include="Components\TypeMappers\MemoryStreamTypeHandler.cs" />
+    <Compile Include="Components\TypeHandlers\DateTimeOffsetTypeHandler.cs" />
+    <Compile Include="Components\TypeHandlers\MemoryStreamTypeHandler.cs" />
     <Compile Include="Controls\ListBoxEx.cs" />
     <Compile Include="Controls\ListViewEx.cs" />
     <Compile Include="Converters\DurationConverter.cs" />

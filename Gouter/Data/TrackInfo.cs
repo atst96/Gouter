@@ -27,6 +27,8 @@ namespace Gouter
             this.Genre = track.Genre;
             this.AlbumInfo = AlbumManager.GetOrAddAlbum(track);
             this.AlbumInfo.Playlist.Tracks.Add(this);
+            this.RegisteredAt = DateTimeOffset.Now;
+            this.UpdatedAt = this.RegisteredAt;
         }
 
         public TrackInfo(TrackDataModel dbItem)
@@ -44,29 +46,24 @@ namespace Gouter
 
             this.AlbumInfo = AlbumManager.FromId(dbItem.AlbumId);
             this.AlbumInfo.Playlist.Tracks.Add(this);
+
+            this.RegisteredAt = dbItem.CreatedAt;
+            this.UpdatedAt = dbItem.UpdatedAt;
         }
 
         public AlbumInfo AlbumInfo { get; private set; }
-
         public int Id { get; private set; }
-
         public string Path { get; private set; }
-
         public TimeSpan Duration { get; private set; }
-
         public int DiskNumber { get; private set; }
-
         public int TrackNumber { get; private set; }
-
         public int Year { get; private set; }
-
         public string AlbumArtist { get; private set; }
-
         public string Title { get; private set; }
-
         public string Artist { get; private set; }
-
         public string Genre { get; private set; }
+        public DateTimeOffset RegisteredAt { get; }
+        public DateTimeOffset UpdatedAt { get; private set; }
 
         public bool IsPlaying { get; private set; }
 

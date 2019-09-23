@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Dapper;
 
-namespace Gouter.Components.TypeMappers
+namespace Gouter.Components.TypeHandlers
 {
     internal class MemoryStreamTypeHandler : SqlMapper.TypeHandler<MemoryStream>
     {

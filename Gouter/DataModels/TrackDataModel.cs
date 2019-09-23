@@ -23,6 +23,8 @@ namespace Gouter.DataModels
         public string Title { get; set; }
         public string Artist { get; set; }
         public string Genre { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
+        public DateTimeOffset UpdatedAt { get; set; }
 
         private static SqlKata.Query GetQueryBuilder()
         {
@@ -49,6 +51,8 @@ namespace Gouter.DataModels
                 ["title"] = this.Title,
                 ["artist"] = this.Artist,
                 ["genre"] = this.Genre,
+                ["created_at"] = this.CreatedAt,
+                ["updated_at"] = this.UpdatedAt,
             });
         }
 

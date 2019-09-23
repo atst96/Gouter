@@ -18,6 +18,8 @@ namespace Gouter.DataModels
         public string Name { get; set; }
         public bool? IsCompilation { get; set; }
         public byte[] Artwork { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
+        public DateTimeOffset UpdatedAt { get; set; }
 
         public static SqlKata.Query GetQueryBuilder()
         {
@@ -26,7 +28,11 @@ namespace Gouter.DataModels
 
         public static IEnumerable<AlbumDataModel> GetAll()
         {
-            return GetQueryBuilder().Get<AlbumDataModel>();
+            var awTableName = Database.TableNames.AlbumArtworks;
+
+            return GetQueryBuilder()
+                .LeftJoin(awTableName, $"{TableName}.id", $"{awTableName}.album_id")
+                .Get<AlbumDataModel>();
         }
 
         public void Insert()
@@ -42,10 +48,26 @@ namespace Gouter.DataModels
                 ["artist"] = this.Artist,
                 ["name"] = this.Name,
                 ["is_compilation"] = this.IsCompilation,
+                ["created_at"] = this.CreatedAt,
+                ["updated_at"] = this.UpdatedAt,
+            };
+
+            var artworkData = new Dictionary<string, object>
+            {
+                ["album_id"] = this.Id,
                 ["artwork"] = artworkStream,
+                ["created_at"] = this.CreatedAt,
+                ["updated_at"] = this.UpdatedAt,
             };
 
             GetQueryBuilder().Insert(data);
+
+            if (artworkStream != null)
+            {
+                GetQueryBuilder(Database.TableNames.AlbumArtworks).Insert(artworkData);
+            }
+
+            artworkStream?.Dispose();
         }
 
         public void Delete()

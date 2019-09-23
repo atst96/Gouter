@@ -28,6 +28,8 @@ namespace Gouter
             this.Id = AlbumManager.GenerateId();
             this.Name = track.Album;
             this.Artist = AlbumManager.GetAlbumArtist(track);
+            this.RegisteredAt = DateTimeOffset.Now;
+            this.UpdatedAt = this.RegisteredAt;
 
             var artwork = track.EmbeddedPictures.FirstOrDefault();
 
@@ -50,6 +52,8 @@ namespace Gouter
             this.Name = dataModel.Name;
             this.Artist = dataModel.Artist;
             this.IsCompilation = dataModel.IsCompilation ?? false;
+            this.RegisteredAt = dataModel.CreatedAt;
+            this.UpdatedAt = dataModel.UpdatedAt;
 
             var artwork = dataModel.Artwork;
 
@@ -66,12 +70,11 @@ namespace Gouter
         }
 
         public int Id { get; }
-
         public string Key { get; }
-
         public string Name { get; private set; }
-
         public string Artist { get; private set; }
+        public DateTimeOffset RegisteredAt { get; }
+        public DateTimeOffset UpdatedAt { get; private set; }
 
         private MemoryStream _artworkStream;
         public MemoryStream ArtworkStream

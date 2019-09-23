@@ -95,6 +95,8 @@ namespace Gouter
                 Artist = albumInfo.Artist,
                 IsCompilation = albumInfo.IsCompilation,
                 Artwork = albumInfo.ArtworkStream?.ToArray(),
+                CreatedAt = albumInfo.RegisteredAt,
+                UpdatedAt = albumInfo.UpdatedAt,
             };
             dataModel.Insert();
         }

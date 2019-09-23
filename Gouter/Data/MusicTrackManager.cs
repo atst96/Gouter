@@ -82,6 +82,8 @@ namespace Gouter
                 Title = trackInfo.Title,
                 Artist = trackInfo.Artist,
                 Genre = trackInfo.Genre,
+                CreatedAt = trackInfo.RegisteredAt,
+                UpdatedAt = trackInfo.UpdatedAt,
             };
             dataModel.Insert();
 
@@ -151,7 +153,7 @@ namespace Gouter
 
             int count = 0;
 
-            foreach (var path in files.AsParallel())
+            foreach (var path in files)
             {
                 try
                 {

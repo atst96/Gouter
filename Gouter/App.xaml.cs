@@ -118,6 +118,11 @@ namespace Gouter
             {
                 Database.ExecuteNonQuery(Database.Queries.CreateTracksTable);
             }
+
+            if (!tables.Contains(Database.TableNames.AlbumArtworks))
+            {
+                Database.ExecuteNonQuery(Database.Queries.CreateAlbumArtworksTable);
+            }
         }
 
         public void ForceShutdown()

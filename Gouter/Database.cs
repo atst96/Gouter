@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Dapper;
-using Gouter.Components.TypeMappers;
+using Gouter.Components.TypeHandlers;
 using SqlKata.Compilers;
 using SqlKata.Execution;
 
@@ -50,6 +50,7 @@ namespace Gouter
         {
             DefaultTypeMap.MatchNamesWithUnderscores = true;
             SqlMapper.AddTypeHandler(new MemoryStreamTypeHandler());
+            SqlMapper.AddTypeHandler(new DateTimeOffsetTypeHandler());
         }
 
         private static void InitializeSQLite()
@@ -107,6 +108,7 @@ namespace Gouter
         {
             public const string Albums = "albums";
             public const string Tracks = "tracks";
+            public const string AlbumArtworks = "album_artworks";
         }
 
         public static class Queries
@@ -118,7 +120,8 @@ CREATE TABLE {TableNames.Albums} (
     name TEXT,
     artist TEXT,
     is_compilation BOOL,
-    artwork BLOB
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
 )";
             public static readonly string CreateTracksTable = $@"
 CREATE TABLE {TableNames.Tracks} (
@@ -133,6 +136,17 @@ CREATE TABLE {TableNames.Tracks} (
     title TEXT,
     artist TEXT,
     genre TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    foreign key (album_id) references {TableNames.Albums}(id)
+)";
+
+            public static readonly string CreateAlbumArtworksTable = $@"
+CREATE TABLE {TableNames.AlbumArtworks} (
+    album_id PRIMARY KEY NOT NULL,
+    artwork BLOB,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
     foreign key (album_id) references {TableNames.Albums}(id)
 )";
         }
