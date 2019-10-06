@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Data;
 
 namespace Gouter.ViewModels
@@ -16,6 +17,13 @@ namespace Gouter.ViewModels
         public SortedNotifiableCollectionWrapper<AlbumPlaylist> Albums { get; }
 
         public SoundPlayer Player { get; }
+
+        private AlbumPlaylist _selectedAlbumPlaylist;
+        public AlbumPlaylist SelectedAlbumPlaylist
+        {
+            get => this._selectedAlbumPlaylist;
+            set => this.SetProperty(ref this._selectedAlbumPlaylist, value);
+        }
 
         public MainWindowViewModel() : base()
         {
@@ -110,6 +118,12 @@ namespace Gouter.ViewModels
 
         private Command _onCloseCommand;
         public Command OnCloseCommand => this._onCloseCommand ??= new OnCloseCommand(this);
+
+        private Command<AlbumPlaylist> _selectAlbumPlaylistCommand;
+        public Command<AlbumPlaylist> SelectAlbumPlaylistCommand => this._selectAlbumPlaylistCommand ??= new SelectAlbumPlaylistCommand(this);
+
+        private Command _closeAlbumPlaylistTrackListCommand;
+        public Command CloseAlbumPlaylistTrackListCommand => this._closeAlbumPlaylistTrackListCommand ??= new CloseAlbumPlaylistTrackListCommand(this);
 
         private IPlaylist _playingPlaylist;
         public IPlaylist PlayingPlaylist
@@ -222,6 +236,13 @@ namespace Gouter.ViewModels
                 player.SetTrack(nextTrack);
                 this.AddHistory(nextTrack);
             }
+        }
+
+        private bool _isOpenAlbumPlaylistTrackList = false;
+        public bool IsOpenAlbumPlaylistTrackList
+        {
+            get => this._isOpenAlbumPlaylistTrackList;
+            set => this.SetProperty(ref this._isOpenAlbumPlaylistTrackList, value);
         }
 
         public void AddHistory(TrackInfo nextTrack)

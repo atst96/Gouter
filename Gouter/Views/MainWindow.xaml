@@ -27,7 +27,7 @@
 
         <CollectionViewSource
             x:Key="TracksCollectionViewSource"
-            Source="{Binding CurrentPlaylist.Tracks, Mode=OneWay}">
+            Source="{Binding SelectedAlbumPlaylist.Tracks, Mode=OneWay}">
             <CollectionViewSource.GroupDescriptions>
                 <PropertyGroupDescription PropertyName="DiskNumber" />
             </CollectionViewSource.GroupDescriptions>
@@ -37,6 +37,9 @@
                 <cnm:SortDescription PropertyName="Name" />
             </CollectionViewSource.SortDescriptions>
         </CollectionViewSource>
+
+        <Duration x:Key="AnimateDuration">0:0:0.5</Duration>
+        <KeyTime x:Key="AnimationEndKeyTime">0:0:0.5</KeyTime>
     </Window.Resources>
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="ContentRendered">
@@ -132,7 +135,7 @@
                         Content="シャッフル再生" 
                         IsChecked="{Binding IsShuffle, Mode=TwoWay}" />
                 </StackPanel>
-                
+
                 <DockPanel
                     Margin="18,0,12,0"
                     DockPanel.Dock="Left">
@@ -236,7 +239,324 @@
                 HorizontalAlignment="Center"
                 Background="{StaticResource ToolBar.Static.BorderBrush}" />
 
-            <Grid
+            <Grid Grid.Column="2">
+                <Grid.Resources>
+                    <Storyboard
+                        x:Key="OpenTrackListPanel"
+                        Storyboard.Target="{Binding ElementName=albumTracKListContainer}">
+                        <ObjectAnimationUsingKeyFrames
+                            Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{x:Static Visibility.Visible}" />
+                        </ObjectAnimationUsingKeyFrames>
+                        <BooleanAnimationUsingKeyFrames
+                            Storyboard.TargetProperty="IsHitTestVisible"
+                            Duration="{StaticResource AnimateDuration}">
+                            <DiscreteBooleanKeyFrame KeyTime="0:0:0" Value="True" />
+                        </BooleanAnimationUsingKeyFrames>
+                        <DoubleAnimation
+                            Storyboard.TargetProperty="RenderTransform.(TranslateTransform.Y)"
+                            Duration="{StaticResource AnimateDuration}"
+                            To="0.0">
+                            <DoubleAnimation.EasingFunction>
+                                <CubicEase EasingMode="EaseOut" />
+                            </DoubleAnimation.EasingFunction>
+                        </DoubleAnimation>
+                        <DoubleAnimation
+                            Storyboard.TargetProperty="Opacity"
+                            Duration="{StaticResource AnimateDuration}"
+                            To="1.0">
+                            <DoubleAnimation.EasingFunction>
+                                <CubicEase EasingMode="EaseOut" />
+                            </DoubleAnimation.EasingFunction>
+                        </DoubleAnimation>
+                    </Storyboard>
+
+                    <Storyboard
+                        x:Key="CloseTrackListPanel"
+                        Storyboard.Target="{Binding ElementName=albumTracKListContainer}">
+                        <ObjectAnimationUsingKeyFrames
+                            Storyboard.TargetProperty="Visibility"
+                            Duration="{StaticResource AnimateDuration}">
+                            <DiscreteObjectKeyFrame KeyTime="{StaticResource AnimationEndKeyTime}" Value="{x:Static Visibility.Collapsed}" />
+                        </ObjectAnimationUsingKeyFrames>
+                        <BooleanAnimationUsingKeyFrames
+                            Storyboard.TargetProperty="IsHitTestVisible"
+                            Duration="{StaticResource AnimateDuration}">
+                            <DiscreteBooleanKeyFrame KeyTime="0:0:0" Value="False" />
+                        </BooleanAnimationUsingKeyFrames>
+                        <DoubleAnimation
+                            Storyboard.TargetProperty="RenderTransform.(TranslateTransform.Y)"
+                            Duration="{StaticResource AnimateDuration}"
+                            To="50.0">
+                            <DoubleAnimation.EasingFunction>
+                                <CubicEase EasingMode="EaseOut" />
+                            </DoubleAnimation.EasingFunction>
+                        </DoubleAnimation>
+                        <DoubleAnimation
+                            Storyboard.TargetProperty="Opacity"
+                            Duration="{StaticResource AnimateDuration}"
+                            To="0.0">
+                            <DoubleAnimation.EasingFunction>
+                                <CubicEase EasingMode="EaseOut" />
+                            </DoubleAnimation.EasingFunction>
+                        </DoubleAnimation>
+                    </Storyboard>
+                </Grid.Resources>
+
+                <ScrollViewer
+                    HorizontalScrollBarVisibility="Auto"
+                    VerticalScrollBarVisibility="Auto">
+                    <ItemsControl
+                        ItemsSource="{Binding Albums, Mode=OneTime}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel
+                                    Width="{Binding ViewportWidth, RelativeSource={RelativeSource AncestorType={x:Type ScrollViewer}}}" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type app:AlbumInfo}">
+                                <Button
+                                    Background="White"
+                                    Command="{Binding DataContext.SelectAlbumPlaylistCommand, RelativeSource={RelativeSource AncestorType={x:Type view:MainWindow}}, Mode=OneTime}"
+                                    CommandParameter="{Binding Mode=OneWay}">
+                                    <Button.Style>
+                                        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                            <Setter Property="Margin" Value="20" />
+                                            <Setter Property="Cursor" Value="Hand" />
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="{x:Type Button}">
+                                                        <Border
+                                                            x:Name="border"
+                                                            Padding="{TemplateBinding Padding}"
+                                                            Background="{TemplateBinding Background}">
+                                                            <Border.Effect>
+                                                                <DropShadowEffect
+                                                                    BlurRadius="30"
+                                                                    ShadowDepth="0"
+                                                                    Opacity="0.0"
+                                                                    Color="#CCCCCC"/>
+                                                            </Border.Effect>
+                                                            <ContentPresenter
+                                                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" />
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </Button.Style>
+                                    <Grid Width="160">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+
+                                        <Image
+                                            Width="160" Height="160"
+                                            Source="{Binding Album.Artwork, Mode=OneWay}"
+                                            RenderOptions.BitmapScalingMode="HighQuality" />
+
+                                        <TextBlock
+                                            Grid.Row="1"
+                                            TextAlignment="Center"
+                                            Text="{Binding Album.Name, Mode=OneWay}"
+                                            TextTrimming="CharacterEllipsis" />
+                                    </Grid>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <Grid
+                    x:Name="albumTracKListContainer"
+                    Background="White"
+                    Visibility="Visible"
+                    IsHitTestVisible="False"
+                    Opacity="0.0"
+                    RenderTransformOrigin="0.5,0.5">
+                    <Grid.RenderTransform>
+                        <TranslateTransform Y="50.0" />
+                    </Grid.RenderTransform>
+
+                    <i:Interaction.Triggers>
+                        <i:DataTrigger Binding="{Binding IsOpenAlbumPlaylistTrackList, Mode=OneWay}" Value="True">
+                            <i:ControlStoryboardAction
+                                Storyboard="{StaticResource OpenTrackListPanel}"
+                                ControlStoryboardOption="Play" />
+                        </i:DataTrigger>
+
+                        <i:DataTrigger Binding="{Binding IsOpenAlbumPlaylistTrackList, Mode=OneWay}" Value="False">
+                            <i:ControlStoryboardAction
+                                Storyboard="{StaticResource CloseTrackListPanel}"
+                                ControlStoryboardOption="Play" />
+                        </i:DataTrigger>
+                    </i:Interaction.Triggers>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock
+                            Grid.Row="0" Grid.Column="0"
+                            Grid.ColumnSpan="2"
+                            Margin="6,6,0,0">
+                            <Hyperlink
+                                Command="{Binding CloseAlbumPlaylistTrackListCommand, Mode=OneTime}">
+                                <Run Text="« アルバム一覧に戻る" />
+                            </Hyperlink>
+                        </TextBlock>
+
+                        <Image
+                            Grid.Column="0" Grid.Row="1"
+                            Grid.RowSpan="2"
+                            Margin="14"
+                            Width="160" Height="160"
+                            VerticalAlignment="Top"
+                            Source="{Binding SelectedAlbumPlaylist.Album.Artwork, Mode=OneWay}"
+                            RenderOptions.BitmapScalingMode="HighQuality" />
+
+                        <StackPanel
+                            Grid.Column="1" Grid.Row="1"
+                            Margin="0,12,12,12">
+                            <TextBlock
+                                FontSize="18pt"
+                                Text="{Binding SelectedAlbumPlaylist.Name, Mode=OneWay}"
+                                TextTrimming="CharacterEllipsis"
+                                ToolTip="{Binding SelectedAlbumPlaylist.Name, Mode=OneWay}"/>
+                            <TextBlock
+                                Foreground="#0077CC"
+                                Text="{Binding SelectedAlbumPlaylist.Album.Artist, Mode=OneWay}"
+                                TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+
+                        <app:ListViewEx
+                            Grid.Column="1" Grid.Row="2"
+                            VirtualizingPanel.IsVirtualizing="True"
+                            VirtualizingPanel.ScrollUnit="Pixel"
+                            VirtualizingPanel.IsVirtualizingWhenGrouping="True"
+                            VirtualizingPanel.VirtualizationMode="Recycling"
+                            ScrollViewer.VerticalScrollBarVisibility="Auto"
+                            ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                            AlternationCount="2"
+                            BorderThickness="0,1,0,0"
+                            ItemsPanel="{StaticResource ItemsPanelTemplate}"
+                            BorderBrush="{StaticResource ToolBar.Static.BorderBrush}"
+                            ItemsSource="{Binding Source={StaticResource TracksCollectionViewSource}}"
+                            SelectedItem="{Binding SelectedTrack, Mode=TwoWay}"
+                            SetSelectingItemToCommandParameter="True"
+                            ItemDoubleClickCommand="{Binding TrackListDoubleClickCommand, Mode=OneTime}">
+                            <app:ListViewEx.ItemTemplate>
+                                <DataTemplate DataType="{x:Type app:TrackInfo}">
+                                    <Grid Grid.IsSharedSizeScope="True">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="40" />
+                                            <ColumnDefinition />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <app:GeometryIcon
+                                            Margin="0,0,4,0"
+                                            x:Name="PART_PlayingIcon"
+                                            Grid.Column="0"
+                                            HorizontalAlignment="Right"
+                                            VerticalAlignment="Stretch"
+                                            Data="{StaticResource MaterialIcons.VolumeUp}" />
+
+                                        <TextBlock
+                                            Margin="0,0,4,0"
+                                            x:Name="PART_TrackNumber"
+                                            Grid.Column="0"
+                                            HorizontalAlignment="Right"
+                                            TextWrapping="NoWrap"
+                                            Text="{Binding TrackNumber, Mode=OneWay}" />
+
+                                        <TextBlock
+                                            Margin="4,0"
+                                            Grid.Column="1"
+                                            HorizontalAlignment="Left"
+                                            TextWrapping="NoWrap"
+                                            TextTrimming="CharacterEllipsis"
+                                            Text="{Binding Title, Mode=OneWay}"/>
+
+                                        <TextBlock
+                                            Margin="4,0"
+                                            Grid.Column="2"
+                                            HorizontalAlignment="Right"
+                                            TextWrapping="NoWrap"
+                                            TextTrimming="CharacterEllipsis"
+                                            TextAlignment="Right"
+                                            Text="{Binding Duration, Mode=OneWay, Converter={StaticResource DurationConverter}}" />
+                                    </Grid>
+
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding IsPlaying, Mode=OneWay}" Value="True">
+                                            <Setter TargetName="PART_PlayingIcon" Property="Visibility" Value="Visible" />
+                                            <Setter TargetName="PART_TrackNumber" Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+
+                                        <DataTrigger Binding="{Binding IsPlaying, Mode=OneWay}" Value="False">
+                                            <Setter TargetName="PART_PlayingIcon" Property="Visibility" Value="Collapsed" />
+                                            <Setter TargetName="PART_TrackNumber" Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </app:ListViewEx.ItemTemplate>
+                            <app:ListViewEx.GroupStyle>
+                                <GroupStyle>
+                                    <GroupStyle.ContainerStyle>
+                                        <Style TargetType="{x:Type GroupItem}">
+                                            <Setter Property="Padding" Value="8,4" />
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="{x:Type GroupItem}">
+                                                        <Grid>
+                                                            <Grid.RowDefinitions>
+                                                                <RowDefinition Height="Auto" />
+                                                                <RowDefinition Height="Auto" />
+                                                            </Grid.RowDefinitions>
+
+                                                            <Border
+                                                                Grid.Row="0"
+                                                                Padding="{TemplateBinding Padding}"
+                                                                Background="{StaticResource ToolBar.Static.Background}"
+                                                                TextBlock.FontWeight="Bold"
+                                                                TextBlock.Foreground="{StaticResource ToolBar.Static.Foreground}">
+                                                                <ContentPresenter
+                                                                    ContentStringFormat="{}ディスク #{0}" />
+                                                            </Border>
+
+                                                            <ItemsPresenter
+                                                                Grid.Row="1" />
+                                                        </Grid>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </GroupStyle.ContainerStyle>
+                                </GroupStyle>
+                            </app:ListViewEx.GroupStyle>
+                            <app:ListViewEx.ItemContainerStyle>
+                                <Style TargetType="{x:Type ListViewItem}" BasedOn="{StaticResource {x:Type ListViewItem}}">
+                                    <Setter Property="Width" Value="{Binding ViewportWidth, Mode=OneWay, RelativeSource={RelativeSource AncestorType=ScrollViewer}}" />
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                </Style>
+                            </app:ListViewEx.ItemContainerStyle>
+                        </app:ListViewEx>
+                    </Grid>
+                </Grid>
+            </Grid>
+
+            <!--<Grid
                 Grid.Column="2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -290,9 +610,7 @@
                     SelectedItem="{Binding SelectedTrack, Mode=TwoWay}"
                     SetSelectingItemToCommandParameter="True"
                     ItemDoubleClickCommand="{Binding TrackListDoubleClickCommand, Mode=OneTime}">
-                    <!--<i:Interaction.Behaviors>
-                        <b:ListViewFillColumnBehavior FillColumnIndex="1" />
-                    </i:Interaction.Behaviors>-->
+
                     <app:ListViewEx.View>
                         <GridView>
                             <GridViewColumn Header="#" Width="40">
@@ -427,12 +745,14 @@
                     <app:ListViewEx.ItemContainerStyle>
                         <Style TargetType="{x:Type ListViewItem}" BasedOn="{StaticResource {x:Type ListViewItem}}">
                             <Setter Property="Width" Value="NaN" />
-                            <!--<Setter Property="Width" Value="{Binding ViewportWidth, Mode=OneWay, RelativeSource={RelativeSource AncestorType=ScrollViewer}}" />-->
+                            -->
+            <!--<Setter Property="Width" Value="{Binding ViewportWidth, Mode=OneWay, RelativeSource={RelativeSource AncestorType=ScrollViewer}}" />-->
+            <!--
                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                         </Style>
                     </app:ListViewEx.ItemContainerStyle>
                 </app:ListViewEx>
-            </Grid>
+            </Grid>-->
         </Grid>
     </DockPanel>
 </Window>

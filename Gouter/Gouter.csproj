@@ -105,11 +105,13 @@
     <Compile Include="Behaviors\ElementBehavior.cs" />
     <Compile Include="Behaviors\ListViewFillColumnBehavior.cs" />
     <Compile Include="Behaviors\TrackBehavior.cs" />
+    <Compile Include="Commands\MainWindow\CloseAlbumPlaylistTrackListCommand.cs" />
     <Compile Include="Commands\MainWindow\NextTrackCommand.cs" />
     <Compile Include="Commands\MainWindow\OnCloseCommand.cs" />
     <Compile Include="Commands\MainWindow\PauseCommand.cs" />
     <Compile Include="Commands\MainWindow\PlayCommand.cs" />
     <Compile Include="Commands\MainWindow\PreviousTrackCommand.cs" />
+    <Compile Include="Commands\MainWindow\SelectAlbumPlaylistCommand.cs" />
     <Compile Include="Commands\MainWindow\TrackListDoubleClickCommand.cs" />
     <Compile Include="Commands\SettingWindow\AddExcludeDirectoryCommand.cs" />
     <Compile Include="Commands\SettingWindow\RemoveExcludeDirectoryCommand.cs" />
