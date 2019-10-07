@@ -8,9 +8,9 @@ namespace Gouter.DataModels
 {
     internal class DataModelBase
     {
-        public static SqlKata.Query GetQueryBuilder(string tableName)
+        public static SqlKata.Query GetQueryBuilder(Database database, string tableName)
         {
-            return Database.GetQueryFactory().Query(tableName);
+            return database.GetQueryBuilder().Query(tableName);
         }
     }
 

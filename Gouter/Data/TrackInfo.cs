@@ -10,12 +10,9 @@ namespace Gouter
 {
     internal class TrackInfo : NotificationObject
     {
-        private readonly static MusicTrackManager TrackManager = App.TrackManager;
-        private readonly static AlbumManager AlbumManager = App.AlbumManager;
-
-        public TrackInfo(Track track)
+        public TrackInfo(int trackId, Track track, AlbumInfo albumInfo)
         {
-            this.Id = TrackManager.GenerateId();
+            this.Id = trackId;
             this.Path = track.Path;
             this.Duration = TimeSpan.FromMilliseconds(track.DurationMs);
             this.DiskNumber = track.DiscNumber;
@@ -25,13 +22,13 @@ namespace Gouter
             this.Title = track.Title;
             this.Artist = track.Artist;
             this.Genre = track.Genre;
-            this.AlbumInfo = AlbumManager.GetOrAddAlbum(track);
+            this.AlbumInfo = albumInfo;
             this.AlbumInfo.Playlist.Tracks.Add(this);
             this.RegisteredAt = DateTimeOffset.Now;
             this.UpdatedAt = this.RegisteredAt;
         }
 
-        public TrackInfo(TrackDataModel dbItem)
+        public TrackInfo(TrackDataModel dbItem, AlbumInfo albumInfo)
         {
             this.Id = dbItem.Id;
             this.Path = dbItem.Path;
@@ -44,7 +41,7 @@ namespace Gouter
             this.Artist = dbItem.Artist;
             this.Genre = dbItem.Genre;
 
-            this.AlbumInfo = AlbumManager.FromId(dbItem.AlbumId);
+            this.AlbumInfo = albumInfo;
             this.AlbumInfo.Playlist.Tracks.Add(this);
 
             this.RegisteredAt = dbItem.CreatedAt;

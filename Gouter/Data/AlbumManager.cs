@@ -15,6 +15,8 @@ namespace Gouter
 {
     internal class AlbumManager
     {
+        private readonly Database _database;
+
         public static readonly StringComparer AlbumNameComparer = StringComparer.CurrentCultureIgnoreCase;
 
         private volatile int _albumLatestIdx = -1;
@@ -24,8 +26,10 @@ namespace Gouter
 
         public ConcurrentNotifiableCollection<AlbumInfo> Albums { get; } = new ConcurrentNotifiableCollection<AlbumInfo>();
 
-        public AlbumManager()
+        public AlbumManager(Database database)
         {
+            this._database = database ?? throw new InvalidOperationException();
+
             this.Albums = new ConcurrentNotifiableCollection<AlbumInfo>();
 
             BindingOperations.EnableCollectionSynchronization(this.Albums, new object());
@@ -98,7 +102,7 @@ namespace Gouter
                 CreatedAt = albumInfo.RegisteredAt,
                 UpdatedAt = albumInfo.UpdatedAt,
             };
-            dataModel.Insert();
+            dataModel.Insert(this._database);
         }
 
         public AlbumInfo GetOrAddAlbum(Track track)
@@ -129,7 +133,7 @@ namespace Gouter
                 throw new InvalidOperationException();
             }
 
-            var results = AlbumDataModel.GetAll();
+            var results = AlbumDataModel.GetAll(this._database);
 
             foreach(var result in results)
             {

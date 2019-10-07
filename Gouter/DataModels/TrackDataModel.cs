@@ -26,19 +26,19 @@ namespace Gouter.DataModels
         public DateTimeOffset CreatedAt { get; set; }
         public DateTimeOffset UpdatedAt { get; set; }
 
-        private static SqlKata.Query GetQueryBuilder()
+        private static SqlKata.Query GetQueryBuilder(Database database)
         {
-            return GetQueryBuilder(TableName);
+            return GetQueryBuilder(database, TableName);
         }
 
-        public static IEnumerable<TrackDataModel> GetAll()
+        public static IEnumerable<TrackDataModel> GetAll(Database database)
         {
-            return GetQueryBuilder().Get<TrackDataModel>();
+            return GetQueryBuilder(database).Get<TrackDataModel>();
         }
 
-        public void Insert()
+        public void Insert(Database database)
         {
-            GetQueryBuilder().Insert(new Dictionary<string, object>
+            GetQueryBuilder(database).Insert(new Dictionary<string, object>
             {
                 ["id"] = this.Id,
                 ["album_id"] = this.AlbumId,
@@ -56,9 +56,9 @@ namespace Gouter.DataModels
             });
         }
 
-        public void Delete()
+        public void Delete(Database database)
         {
-            GetQueryBuilder().Where("id", this.Id).Delete();
+            GetQueryBuilder(database).Where("id", this.Id).Delete();
         }
     }
 }

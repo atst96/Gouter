@@ -122,6 +122,7 @@
     <Compile Include="Controls\ListViewEx.cs" />
     <Compile Include="Converters\DurationConverter.cs" />
     <Compile Include="Converters\MillisecondsToTimeStringConverter.cs" />
+    <Compile Include="Components\Database.cs" />
     <Compile Include="DataModels\AlbumDataModel.cs" />
     <Compile Include="DataModels\DataModelBase.cs" />
     <Compile Include="DataModels\TrackDataModel.cs" />
@@ -131,6 +132,8 @@
     <Compile Include="Data\PlaylistManager.cs" />
     <Compile Include="Extensions\Extension.cs" />
     <Compile Include="Extensions\WpfExtensions.cs" />
+    <Compile Include="Components\LibraryManager.cs" />
+    <Compile Include="Components\MediaPlayer.cs" />
     <Compile Include="Playlists\AlbumPlaylist.cs" />
     <Compile Include="Commands\MainWindow\InitializeCommand.cs" />
     <Compile Include="Commands\SettingWindow\AddMusicDirectoryCommand.cs" />
@@ -143,18 +146,17 @@
     </Compile>
     <Compile Include="Controls\GeometryIcon.cs" />
     <Compile Include="Components\CountProgressInfo.cs" />
-    <Compile Include="Database.cs" />
     <Compile Include="Extensions\ExceptionExtension.cs" />
     <Compile Include="Extensions\SQLiteExtensions.cs" />
     <Compile Include="Playlists\IPlaylist.cs" />
-    <Compile Include="Data\MusicTrackManager.cs" />
+    <Compile Include="Data\TrackManager.cs" />
     <Compile Include="Components\Query.cs" />
-    <Compile Include="PlayState.cs" />
+    <Compile Include="Components\PlayState.cs" />
     <Compile Include="Settings\ApplicationSetting.cs" />
     <Compile Include="Components\StandardProgressReceiver.cs" />
     <Compile Include="Data\TrackInfo.cs" />
     <Compile Include="Comparer\TrackNormalComparer.cs" />
-    <Compile Include="SoundPlayer.cs" />
+    <Compile Include="Components\SoundPlayer.cs" />
     <Compile Include="Utilities\FileContentUtility.cs" />
     <Compile Include="Utilities\ImageUtility.cs" />
     <Compile Include="Utilities\MessagePackUtility.cs" />

@@ -27,28 +27,31 @@ namespace Gouter.Commands.MainWindow
 
             var setting = App.Instance.Setting;
 
-            await Task.Run(() =>
+            var mediaPlayer = App.MediaPlayer;
+            var library = mediaPlayer.Library;
+
+            await Task.Run(async () =>
             {
-                App.AlbumManager.LoadDatabase();
-                App.TrackManager.LoadDatabase();
+                mediaPlayer.Initialize(App.Instance.GetLocalFilePath(Config.LibraryFileName));
+                await library.LoadLibrary();
 
                 var progress = this._viewModel.LoadProgress;
 
                 this._viewModel.Status = "楽曲ディレクトリを検索しています...";
 
-                var newFiles = MusicTrackManager.FindNewFiles(setting.MusicDirectories, setting.ExcludeDirectories);
+                var newFiles = TrackManager.FindNewFiles(setting.MusicDirectories, setting.ExcludeDirectories);
 
                 if (newFiles.Count > 0)
                 {
                     this._viewModel.Status = newFiles.Count + "件の新規ファイルを検出しました。楽曲情報を読み込んでいます...";
                     progress.Reset(newFiles.Count);
-                    var newTracks = MusicTrackManager.GetTracks(newFiles, progress);
+                    var newTracks = TrackManager.GetTracks(newFiles, progress);
 
                     this._viewModel.Status = newTracks.Count + "件の楽曲情報をライブラリに登録しています...";
 
                     progress.Reset(newTracks.Count);
 
-                    App.TrackManager.RegisterAll(newTracks, progress);
+                    library.RegisterTracks(newTracks, progress);
 
                 }
             });

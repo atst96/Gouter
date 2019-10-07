@@ -15,15 +15,19 @@ using System.Windows.Data;
 
 namespace Gouter
 {
-    internal class MusicTrackManager
+    internal class TrackManager
     {
+        private readonly Database _database;
+
         private volatile int _latestTrackIdx = -1;
 
         private readonly IDictionary<int, TrackInfo> _trackIdMap;
         public ConcurrentNotifiableCollection<TrackInfo> Tracks { get; }
 
-        public MusicTrackManager()
+        public TrackManager(Database database)
         {
+            this._database = database ?? throw new InvalidOperationException();
+
             this._trackIdMap = new Dictionary<int, TrackInfo>();
             this.Tracks = new ConcurrentNotifiableCollection<TrackInfo>();
 
@@ -63,10 +67,8 @@ namespace Gouter
             this.Tracks.Add(trackInfo);
         }
 
-        public TrackInfo Register(Track track)
+        public TrackInfo Register(TrackInfo trackInfo)
         {
-            var trackInfo = new TrackInfo(track);
-
             this.AddImpl(trackInfo);
 
             var dataModel = new TrackDataModel
@@ -85,25 +87,9 @@ namespace Gouter
                 CreatedAt = trackInfo.RegisteredAt,
                 UpdatedAt = trackInfo.UpdatedAt,
             };
-            dataModel.Insert();
+            dataModel.Insert(this._database);
 
             return trackInfo;
-        }
-
-        public void RegisterAll(IEnumerable<Track> tracks, IProgress<int> progress = null)
-        {
-            int count = 0;
-
-            using (var transaction = Database.BeginTransaction())
-            {
-                foreach (var track in tracks)
-                {
-                    var trackInfo = App.TrackManager.Register(track);
-                    progress?.Report(++count);
-                }
-
-                transaction.Commit();
-            }
         }
 
         private static bool IsContainsDirectory(string path, IEnumerable<string> directories)
@@ -167,18 +153,18 @@ namespace Gouter
             return tracks;
         }
 
-        public void LoadDatabase()
+        public void LoadDatabase(AlbumManager albumManager)
         {
             if (this.Tracks.Count > 0)
             {
                 throw new InvalidOperationException();
             }
 
-            var results = TrackDataModel.GetAll();
+            var results = TrackDataModel.GetAll(this._database);
 
             foreach (var result in results)
             {
-                var trackInfo = new TrackInfo(result);
+                var trackInfo = new TrackInfo(result, albumManager.FromId(result.AlbumId));
                 this.AddImpl(trackInfo);
             }
 

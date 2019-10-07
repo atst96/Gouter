@@ -1,4 +1,6 @@
-﻿using Gouter.Extensions;
+﻿using Dapper;
+using Gouter.Components.TypeHandlers;
+using Gouter.Extensions;
 using Gouter.Utilities;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
@@ -21,9 +23,16 @@ namespace Gouter
         internal const string Name = "Gouter";
         internal const string Version = "0.0.0.0";
 
-        internal static PlaylistManager PlaylistManager { get; } = new PlaylistManager();
-        internal static AlbumManager AlbumManager { get; } = new AlbumManager();
-        internal static MusicTrackManager TrackManager { get; } = new MusicTrackManager();
+        internal static MediaPlayer MediaPlayer { get; } = new MediaPlayer();
+
+        [Obsolete]
+        internal static LibraryManager LibraryManager => MediaPlayer.Library;
+        [Obsolete]
+        internal static PlaylistManager PlaylistManager => LibraryManager.Playlists;
+        [Obsolete]
+        internal static AlbumManager AlbumManager => LibraryManager.Albums;
+        [Obsolete]
+        internal static TrackManager TrackManager => LibraryManager.Tracks;
 
         private readonly Assembly _assembly = Assembly.GetExecutingAssembly();
 
@@ -59,14 +68,12 @@ namespace Gouter
 
             this.ShutdownMode = ShutdownMode.OnMainWindowClose;
 
-            Database.Connect();
-
-            this.InitializeDatabase();
+            this.InitializeDapper();
         }
 
         protected override void OnExit(ExitEventArgs e)
         {
-            Database.Disconnect();
+            MediaPlayer.Close();
 
             if (this.IsRequireSaveSettings)
             {
@@ -105,24 +112,11 @@ namespace Gouter
             return Path.Combine(this.GetAssemlyDirectory(), filename);
         }
 
-        private void InitializeDatabase()
+        private void InitializeDapper()
         {
-            var tables = new HashSet<string>(Database.EnumerateTableNames());
-
-            if (!tables.Contains(Database.TableNames.Albums))
-            {
-                Database.ExecuteNonQuery(Database.Queries.CreateAlbumsTable);
-            }
-
-            if (!tables.Contains(Database.TableNames.Tracks))
-            {
-                Database.ExecuteNonQuery(Database.Queries.CreateTracksTable);
-            }
-
-            if (!tables.Contains(Database.TableNames.AlbumArtworks))
-            {
-                Database.ExecuteNonQuery(Database.Queries.CreateAlbumArtworksTable);
-            }
+            DefaultTypeMap.MatchNamesWithUnderscores = true;
+            SqlMapper.AddTypeHandler(new MemoryStreamTypeHandler());
+            SqlMapper.AddTypeHandler(new DateTimeOffsetTypeHandler());
         }
 
         public void ForceShutdown()

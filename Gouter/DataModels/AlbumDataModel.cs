@@ -21,21 +21,21 @@ namespace Gouter.DataModels
         public DateTimeOffset CreatedAt { get; set; }
         public DateTimeOffset UpdatedAt { get; set; }
 
-        public static SqlKata.Query GetQueryBuilder()
+        public static SqlKata.Query GetQueryBuilder(Database database)
         {
-            return GetQueryBuilder(TableName);
+            return GetQueryBuilder(database, TableName);
         }
 
-        public static IEnumerable<AlbumDataModel> GetAll()
+        public static IEnumerable<AlbumDataModel> GetAll(Database database)
         {
             var awTableName = Database.TableNames.AlbumArtworks;
 
-            return GetQueryBuilder()
+            return GetQueryBuilder(database)
                 .LeftJoin(awTableName, $"{TableName}.id", $"{awTableName}.album_id")
                 .Get<AlbumDataModel>();
         }
 
-        public void Insert()
+        public void Insert(Database database)
         {
             var artworkStream = this.Artwork != null
                 ? new MemoryStream(this.Artwork)
@@ -60,19 +60,19 @@ namespace Gouter.DataModels
                 ["updated_at"] = this.UpdatedAt,
             };
 
-            GetQueryBuilder().Insert(data);
+            GetQueryBuilder(database).Insert(data);
 
             if (artworkStream != null)
             {
-                GetQueryBuilder(Database.TableNames.AlbumArtworks).Insert(artworkData);
+                GetQueryBuilder(database, Database.TableNames.AlbumArtworks).Insert(artworkData);
             }
 
             artworkStream?.Dispose();
         }
 
-        public void Delete()
+        public void Delete(Database database)
         {
-            GetQueryBuilder().Where("id", this.Id).Delete();
+            GetQueryBuilder(database).Where("id", this.Id).Delete();
         }
     }
 }
