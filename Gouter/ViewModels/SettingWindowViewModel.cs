@@ -73,11 +73,23 @@ namespace Gouter.ViewModels
         private Command<string> _removeExcludeDirectoryCommand;
         public Command<string> RemoveExcludeDirectoryCommand => this._removeExcludeDirectoryCommand ??= new RemoveExcludeDirectoryCommand(this);
 
-        public IReadOnlyDictionary<string, string> SoundOutputTypes { get; } = new Dictionary<string, string>
+        public SoundOutType SelectedSoundOutType
         {
-            ["directsound"] = "DirectSound",
-            ["wasapi_shared"] = "WASAPI (Shared)",
-            ["wasapi_exclude"] = "WASAPI (Exclusive)"
+            get => this.Setting.SoundOutType;
+            set => this.Setting.SoundOutType = value;
+        }
+
+        public string SelectedOutputDeviceId
+        {
+            get => this.Setting.SoundOutDeviceId;
+            set => this.Setting.SoundOutDeviceId = value;
+        }
+
+        public IReadOnlyDictionary<SoundOutType, string> SoundOutputTypes { get; } = new Dictionary<SoundOutType, string>
+        {
+            [SoundOutType.DirectSound] = "DirectSound",
+            [SoundOutType.Wasapi_Shraed] = "WASAPI (共有モード)",
+            [SoundOutType.Wasapi_Exclusive] = "WASAPI (専有モード)"
         };
 
         public NotifiableCollection<SoundDeviceInfo> SoundDevices { get; }

@@ -146,7 +146,8 @@
                             Grid.Column="1"
                             ItemsSource="{Binding SoundOutputTypes, Mode=OneTime}"
                             SelectedValuePath="Key"
-                            DisplayMemberPath="Value" />
+                            DisplayMemberPath="Value"
+                            SelectedValue="{Binding SelectedSoundOutType, Mode=TwoWay}"/>
 
                         <TextBlock
                             Grid.Row="1"
@@ -157,6 +158,8 @@
                             Margin="4"
                             Grid.Row="1"
                             Grid.Column="1"
+                            SelectedValue="{Binding SelectedOutputDeviceId, Mode=TwoWay}"
+                            SelectedValuePath="Id"
                             ItemsSource="{Binding SoundDevices, Mode=OneTime}">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate DataType="{x:Type app:SoundDeviceInfo}">
