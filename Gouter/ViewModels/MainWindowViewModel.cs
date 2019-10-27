@@ -30,7 +30,6 @@ namespace Gouter.ViewModels
         {
             this.Albums = new SortedNotifiableCollectionWrapper<AlbumPlaylist>(App.PlaylistManager.Albums, AlbumComparer.Instance);
             this.Player = new SoundPlayer();
-            this.Player.SetSoundDevice(new WasapiOut());
 
             this.Player.PlayerEventChanged += this.OnPlayerStateChanged;
 
@@ -283,5 +282,8 @@ namespace Gouter.ViewModels
             this.PlayingPlaylist = album;
             this.AddHistory(track);
         }
+
+        private Command _openSettingWindowCommand;
+        public Command OpenSettingWindowCommand => this._openSettingWindowCommand ??= (new OpenSettingWindowCommand(this));
     }
 }

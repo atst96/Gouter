@@ -10,6 +10,8 @@ namespace Gouter
     {
         public LibraryManager Library { get; } = new LibraryManager();
 
+        public SoundDeviceManager DeviceManager { get; } = new SoundDeviceManager();
+
         public MediaPlayer()
         {
         }
@@ -21,7 +23,8 @@ namespace Gouter
 
         public void Close()
         {
-            this.Library?.Dispose();
+            this.Library.Dispose();
+            this.DeviceManager.Dispose();
         }
 
         public void Dispose()

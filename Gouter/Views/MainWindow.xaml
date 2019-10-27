@@ -122,6 +122,15 @@
                         VerticalAlignment="Center" />
                 </StackPanel>
 
+                <Button
+                    Style="{DynamicResource {x:Static ToolBar.ButtonStyleKey}}"
+                    DockPanel.Dock="Right"
+                    Command="{Binding OpenSettingWindowCommand, Mode=OneTime}"
+                    >
+                    <app:GeometryIcon
+                        Data="{StaticResource MaterialIcons.Settings}" />
+                </Button>
+
                 <StackPanel
                     Margin="12,0"
                     DockPanel.Dock="Right"
