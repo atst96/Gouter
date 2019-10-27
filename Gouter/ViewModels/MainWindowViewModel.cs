@@ -1,4 +1,5 @@
-﻿using Gouter.Commands.MainWindow;
+﻿using CSCore.SoundOut;
+using Gouter.Commands.MainWindow;
 using Gouter.Extensions;
 using System;
 using System.Collections.Generic;
@@ -29,6 +30,7 @@ namespace Gouter.ViewModels
         {
             this.Albums = new SortedNotifiableCollectionWrapper<AlbumPlaylist>(App.PlaylistManager.Albums, AlbumComparer.Instance);
             this.Player = new SoundPlayer();
+            this.Player.SetSoundDevice(new WasapiOut());
 
             this.Player.PlayerEventChanged += this.OnPlayerStateChanged;
 
