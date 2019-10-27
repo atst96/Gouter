@@ -16,6 +16,18 @@
   <ItemGroup>
     <Resource Include="Resources\missing_album.png" />
     <Resource Include="Resources\missing_music.png" />
+    <EmbeddedResource Include="Xaml\Icons.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Xaml\Templates\CustomStyles.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Xaml\Templates\DataTemplates.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Xaml\Themes\General.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CSCore">
