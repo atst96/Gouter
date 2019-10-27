@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using Gouter.Views;
 
 namespace Gouter.Services
 {
@@ -27,6 +28,41 @@ namespace Gouter.Services
             {
                 this._view = view;
             }
+        }
+
+        private static IEnumerable<TWindow> GetOpenedWindows<TWindow>() where TWindow : Window
+        {
+            foreach (Window window in App.Instance.Windows)
+            {
+                if (window is TWindow tWindow)
+                {
+                    yield return tWindow;
+                }
+            }
+        }
+
+        private static SettingWindow GetOpenedSettingWindow()
+        {
+            return GetOpenedWindows<SettingWindow>().FirstOrDefault();
+        }
+
+        internal void OpenSettingWindow()
+        {
+            var opennedWindow = GetOpenedSettingWindow();
+            if (opennedWindow != null)
+            {
+                opennedWindow.Activate();
+            }
+            else
+            {
+                opennedWindow = new SettingWindow
+                {
+                    Owner = this._view,
+                };
+
+                opennedWindow.Show();
+            }
+
         }
     }
 }

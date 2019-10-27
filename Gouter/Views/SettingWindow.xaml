@@ -12,6 +12,7 @@
     ResizeMode="NoResize"
     UseLayoutRounding="True"
     TextOptions.TextFormattingMode="Display"
+    xmlns:sys="clr-namespace:System;assembly=System.Runtime"
     DataContext="{app:ViewModelConnector vm:SettingWindowViewModel}"
     d:DataContext="{d:DesignInstance vm:SettingWindowViewModel, IsDesignTimeCreatable=True}">
     <Window.Resources>
@@ -114,6 +115,67 @@
                     <Label
                         Content="一般設定"
                         Style="{StaticResource HeaderTitleStyle}" />
+                </StackPanel>
+            </TabItem>
+
+            <TabItem Header="サウンド出力">
+                <StackPanel
+                    Margin="{StaticResource PanelPadding}">
+                    <Label
+                        Style="{StaticResource HeaderTitleStyle}"
+                        Content="サウンド出力" />
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock
+                            Grid.Row="0"
+                            Text="出力方法:"
+                            VerticalAlignment="Center" />
+
+                        <ComboBox
+                            Margin="4"
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            ItemsSource="{Binding SoundOutputTypes, Mode=OneTime}"
+                            SelectedValuePath="Key"
+                            DisplayMemberPath="Value" />
+
+                        <TextBlock
+                            Grid.Row="1"
+                            VerticalAlignment="Center"
+                            Text="出力デバイス:" />
+
+                        <ComboBox
+                            Margin="4"
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            ItemsSource="{Binding SoundDevices, Mode=OneTime}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate DataType="{x:Type app:SoundDeviceInfo}">
+                                    <TextBlock
+                                        x:Name="PART_DeviceName"
+                                        VerticalAlignment="Center"
+                                        Text="{Binding Name, Mode=OneWay}" />
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding IsDefaultDevice, Mode=OneWay}" Value="True">
+                                            <Setter
+                                                TargetName="PART_DeviceName"
+                                                Property="Text"
+                                                Value="{Binding Name, Mode=OneWay, StringFormat='{}Primary Device [{0}]'}" />
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </Grid>
                 </StackPanel>
             </TabItem>
         </TabControl>

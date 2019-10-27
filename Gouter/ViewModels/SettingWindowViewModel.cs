@@ -1,4 +1,5 @@
-﻿using Gouter.Commands.SettingWindow;
+﻿using CSCore.CoreAudioAPI;
+using Gouter.Commands.SettingWindow;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,8 @@ namespace Gouter.ViewModels
 {
     internal class SettingWindowViewModel : ViewModelBase
     {
+        private MediaPlayer _mediaPlayer;
+
         public SettingWindowViewModel()
         {
             this.Setting = App.Instance.Setting;
@@ -21,6 +24,9 @@ namespace Gouter.ViewModels
                 var musicDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
                 this.MusicDirectories.Add(musicDirectory);
             }
+
+            this._mediaPlayer = App.MediaPlayer;
+            this.SoundDevices = this._mediaPlayer.DeviceManager.Devices;
         }
 
         public ApplicationSetting Setting { get; }
@@ -62,10 +68,18 @@ namespace Gouter.ViewModels
         }
 
         private Command _addExcludeDirectoryCommand;
-        public Command AddExcludeDirectoryCommand => this._addExcludeDirectoryCommand ?? (this._addExcludeDirectoryCommand = new AddExcludeDirectoryCommand(this));
-
+        public Command AddExcludeDirectoryCommand => this._addExcludeDirectoryCommand ??= new AddExcludeDirectoryCommand(this);
 
         private Command<string> _removeExcludeDirectoryCommand;
-        public Command<string> RemoveExcludeDirectoryCommand => this._removeExcludeDirectoryCommand ?? (this._removeExcludeDirectoryCommand = new RemoveExcludeDirectoryCommand(this));
+        public Command<string> RemoveExcludeDirectoryCommand => this._removeExcludeDirectoryCommand ??= new RemoveExcludeDirectoryCommand(this);
+
+        public IReadOnlyDictionary<string, string> SoundOutputTypes { get; } = new Dictionary<string, string>
+        {
+            ["directsound"] = "DirectSound",
+            ["wasapi_shared"] = "WASAPI (Shared)",
+            ["wasapi_exclude"] = "WASAPI (Exclusive)"
+        };
+
+        public NotifiableCollection<SoundDeviceInfo> SoundDevices { get; }
     }
 }
