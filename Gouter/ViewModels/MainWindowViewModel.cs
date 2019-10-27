@@ -30,26 +30,29 @@ namespace Gouter.ViewModels
             this.Albums = new SortedNotifiableCollectionWrapper<AlbumPlaylist>(App.PlaylistManager.Albums, AlbumComparer.Instance);
             this.Player = new SoundPlayer();
 
-            this.Player.TrackPlayingEnded += this.OnPlayTrackEnded;
+            this.Player.PlayerEventChanged += this.OnPlayerStateChanged;
 
             BindingOperations.EnableCollectionSynchronization(this.Albums, new object());
         }
 
-        private void OnPlayTrackEnded(object sender, EventArgs e)
+        private void OnPlayerStateChanged(object sender, PlayerStateEventArgs e)
         {
-            if (this.IsPlayRequired)
+            if (e.State == PlayState.Stop)
             {
-                if (this.IsLoop)
+                if (this.IsPlayRequired)
                 {
-                    this.SkipToNextTrack();
-                    this.Player.Play();
-                }
-                else
-                {
-                    this.IsPlayRequired = false;
-                    if (this.PauseCommand.CanExecute(null))
+                    if (this.IsLoop)
                     {
-                        this.PauseCommand.Execute(null);
+                        this.SkipToNextTrack();
+                        this.Player.Play();
+                    }
+                    else
+                    {
+                        this.IsPlayRequired = false;
+                        if (this.PauseCommand.CanExecute(null))
+                        {
+                            this.PauseCommand.Execute(null);
+                        }
                     }
                 }
             }
@@ -161,7 +164,8 @@ namespace Gouter.ViewModels
         public void Play(TrackInfo track)
         {
             this.IsPlayRequired = true;
-            this.Player.Play(track);
+            this.Player.SetTrack(track);
+            this.Player.Play();
             this.AddHistory(track);
         }
 
@@ -177,9 +181,9 @@ namespace Gouter.ViewModels
             var player = this.Player;
             var previousNode = this._currentNode?.Previous;
 
-            if (player.CurrentTime > 3000.0 || previousNode == null)
+            if (player.GetPosition().TotalMilliseconds > 3000.0 || previousNode == null)
             {
-                player.CurrentTime = 0;
+                player.SetPosition(TimeSpan.Zero);
                 return;
             }
 
@@ -218,7 +222,7 @@ namespace Gouter.ViewModels
             }
             else
             {
-                var currentTrack = player.CurrentTrack;
+                var currentTrack = player.PlayTrack;
                 var currentTrackIdx = tracks.IndexOf(currentTrack);
 
                 if (currentTrackIdx >= 0)

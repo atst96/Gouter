@@ -2,280 +2,210 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Threading;
 using CSCore;
 using CSCore.Codecs;
-using CSCore.CoreAudioAPI;
 using CSCore.SoundOut;
 
 namespace Gouter
 {
-    internal class SoundPlayer : NotificationObject, IDisposable
+    internal class SoundPlayer : IDisposable
     {
-        private readonly DispatcherTimer _updateStausTimer;
         private IWaveSource _soundSource;
-        private ISoundOut _soundOut;
-        private bool _isInternalPlayerStopped = true;
+        private ISoundOut _soundDevice;
 
-        public event EventHandler<EventArgs> TrackPlayingEnded;
+        public double Duration { get; private set; }
+        public PlayState State { get; private set; } = PlayState.Stop;
+        public TrackInfo PlayTrack { get; private set; }
+        private volatile bool _isStopRequested = false;
 
-        private bool _isPlaying;
-        public bool IsPlaying
-        {
-            get => this._isPlaying;
-            private set => this.SetProperty(ref this._isPlaying, value);
-        }
+        public event EventHandler<PlayerStateEventArgs> PlayerEventChanged;
 
-        private PlayState _state = PlayState.Stop;
-        public PlayState State
-        {
-            get => this._state;
-            private set
-            {
-                if (this.SetProperty(ref this._state, value))
-                {
-                    this.IsPlaying = value == PlayState.Play;
-                }
-            }
-        }
-
-        private double _currentTime;
-        public double CurrentTime
-        {
-            get => this._currentTime;
-            set
-            {
-                if (this.SetProperty(ref this._currentTime, value) && value >= 0 && value < this.Duration)
-                {
-                    this._soundSource?.SetPosition(TimeSpan.FromMilliseconds(value));
-                }
-            }
-        }
-
-        private double _duration;
-        public double Duration
-        {
-            get => this._duration;
-            private set => this.SetProperty(ref this._duration, value);
-        }
-
-        private float _volume = 1.0f;
-        public float Volumne
-        {
-            get => this._volume;
-            set
-            {
-                if (this.SetProperty(ref this._volume, value))
-                {
-                    if (this._soundOut != null)
-                    {
-                        this._soundOut.Volume = value;
-                    }
-                }
-            }
-        }
-
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public SoundPlayer()
         {
-            this._updateStausTimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromMilliseconds(100),
-            };
-
-            this._updateStausTimer.Tick += this.OnTimerTicked;
         }
 
-        private void OnTimerTicked(object sender, EventArgs e)
+        /// <summary>
+        /// 再生状態の設定と通知を行う。
+        /// </summary>
+        /// <param name="state">再生状態</param>
+        private void OnStateChanged(PlayState state)
         {
-            if (this._soundOut == null)
+            this.State = state;
+            this.PlayerEventChanged?.Invoke(this, new PlayerStateEventArgs(state));
+        }
+
+        /// <summary>
+        /// 音源の初期化処理を行う。
+        /// </summary>
+        /// <param name="path">音声ファイルのフルパス</param>
+        private void SetSoundSource(string path)
+        {
+            var soundSource = CodecFactory.Instance.GetCodec(path);
+
+            this._soundSource = soundSource;
+
+            this._soundDevice.Initialize(soundSource);
+        }
+
+        /// <summary>
+        /// デバイスの再生処理停止イベントが呼び出された。
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnSoundDevicePlayStopped(object sender, PlaybackStoppedEventArgs e)
+        {
+            this._isStopRequested = false;
+            this.OnStateChanged(PlayState.Stop);
+        }
+
+        /// <summary>
+        /// 出力デバイスを設定する。
+        /// </summary>
+        /// <param name="soundDevice"></param>
+        public void SetSoundDevice(ISoundOut soundDevice)
+        {
+            // 再生停止状態でなければ操作を受け付けない。
+            if (this.State != PlayState.Stop && !this._isStopRequested)
+            {
+                throw new InvalidOperationException();
+            }
+
+            // 再生音源のリソースを解放する。
+            if (this._soundSource != null)
+            {
+                this._soundSource.Dispose();
+            }
+
+            // サウンドデバイスのイベント購読を解除する。
+            if (this._soundDevice != null)
+            {
+                this._soundDevice.Stopped -= this.OnSoundDevicePlayStopped;
+            }
+
+            // 新規サウンドデバイスを設定する。
+            this._soundDevice = soundDevice;
+            this._soundDevice.Stopped += this.OnSoundDevicePlayStopped;
+        }
+
+        /// <summary>
+        /// 再生を開始する。
+        /// </summary>
+        /// <returns>Task</returns>
+        public async Task Play()
+        {
+            if (this.State == PlayState.Play)
             {
                 return;
             }
 
-            this.OnCurrentTimeUpdated();
-
-            if (this._soundOut.PlaybackState == PlaybackState.Stopped)
+            // デバイスと再生音源が設定されていない場合は操作を受け付けない。
+            if (this._soundDevice == null || this._soundSource == null)
             {
-                this.StopTimer();
+                throw new InvalidOperationException();
             }
+
+            // デバイスの再生停止処理が終了していない場合は待機する。
+            if (this._isStopRequested)
+            {
+                await Task.Run(() => this._soundDevice.WaitForStopped())
+                    .ConfigureAwait(false);
+            }
+
+            // 再生処理を開始する。
+            this._soundDevice.Play();
         }
 
-        private TrackInfo _currentTrack;
-        public TrackInfo CurrentTrack
-        {
-            get => this._currentTrack;
-            private set => this.SetProperty(ref this._currentTrack, value);
-        }
-
-        public void SetTrack(TrackInfo trackInfo)
-        {
-            this.Stop();
-
-            this.InitializeSoundDevice();
-
-            var previousTrack = this.CurrentTrack;
-
-            //if (object.ReferenceEquals(previousTrack, trackInfo))
-            //{
-            //    this._soundOut?.Resume();
-            //    this._soundSource?.SetPosition(TimeSpan.Zero);
-
-            //    return;
-            //}
-
-            if (previousTrack != null)
-            {
-                previousTrack.SetPlayState(false);
-            }
-
-            this.CurrentTrack = trackInfo;
-
-            this._soundSource = CodecFactory.Instance.GetCodec(trackInfo.Path);
-            this.CurrentTime = this._soundSource.GetPosition().TotalMilliseconds;
-            this.Duration = this._soundSource.GetLength().TotalMilliseconds;
-
-            if (this._soundOut.PlaybackState != PlaybackState.Stopped)
-            {
-                this._soundOut.Stop();
-            }
-
-            this._soundOut.Initialize(this._soundSource);
-        }
-
-        private void InitializeSoundDevice()
-        {
-            if (this._soundOut != null)
-            {
-                return;
-            }
-
-            this._soundOut = new WasapiOut
-            {
-                Device = MMDeviceEnumerator.DefaultAudioEndpoint(DataFlow.Render, Role.Multimedia),
-                Latency = 100,
-            };
-
-            this._soundOut.Stopped += this.OnPlayerStopped;
-        }
-
-        public async void Play()
-        {
-            if (this.CurrentTrack == null || this.State == PlayState.Play)
-            {
-                return;
-            }
-
-            this.InitializeSoundDevice();
-
-            if (this.State != PlayState.Pause)
-            {
-                await this.WaitPlayerStop();
-            }
-
-            this._soundOut.Volume = this.Volumne;
-            this.StartTimer();
-            this.State = PlayState.Play;
-            this._isInternalPlayerStopped = false;
-            this._soundOut.Play();
-
-            this.CurrentTrack.SetPlayState(true);
-        }
-
-        public void Play(TrackInfo trackInfo)
-        {
-            this.SetTrack(trackInfo);
-
-            this.Play();
-        }
-
-        public async Task WaitPlayerStop()
-        {
-            if (this._soundOut != null)
-            {
-                await Task.Run(() => this._soundOut.WaitForStopped());
-            }
-        }
-
-        private void OnPlayerStopped(object sender, PlaybackStoppedEventArgs e)
-        {
-            if (this._isInternalPlayerStopped)
-            {
-                return;
-            }
-
-            bool isEndOfTrack = this.State == PlayState.Play;
-
-            this.StopTimer();
-
-            this.State = PlayState.Stop;
-
-            this.CurrentTrack?.SetPlayState(false);
-
-            this._isInternalPlayerStopped = true;
-
-            if (isEndOfTrack)
-            {
-                this.TrackPlayingEnded?.Invoke(this, EventArgs.Empty);
-            }
-        }
-
+        /// <summary>
+        /// 再生を一時停止する。
+        /// </summary>
         public void Pause()
         {
-            this._isInternalPlayerStopped = true;
-            this.State = PlayState.Pause;
-            this.StopTimer();
-            this._soundOut?.Pause();
-        }
-
-        public async void Stop()
-        {
-            if (this.State == PlayState.Stop)
+            if (this.State == PlayState.Pause || this.State == PlayState.Stop)
             {
                 return;
             }
 
-            this.CurrentTrack?.SetPlayState(false);
-
-            if (this._soundOut != null)
+            if (this._soundSource != null)
             {
-                this._soundOut.Stop();
-                this._soundSource.Position = 0;
+                this._soundDevice.Pause();
+                this.OnStateChanged(PlayState.Pause);
             }
-
-            this.State = PlayState.Stop;
-            this.StopTimer();
-            await this.WaitPlayerStop();
         }
 
+        /// <summary>
+        /// 再生を停止する。デバイスの再生処理終了の待機は行わない。
+        /// </summary>
+        public void Stop()
+        {
+            if (this._soundDevice == null || this.State == PlayState.Stop)
+            {
+                return;
+            }
+
+            this._isStopRequested = true;
+            this._soundDevice.Stop();
+        }
+
+        /// <summary>
+        /// 再生を停止し、デバイスの再生処理終了を待機する。
+        /// </summary>
+        /// <returns></returns>
+        public async Task StopWithWaitInternalPlayer()
+        {
+            if (this._soundDevice == null || this.State == PlayState.Stop)
+            {
+                return;
+            }
+
+            this.Stop();
+
+            await Task.Run(() => this._soundDevice.WaitForStopped())
+                .ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// 再生トラックを指定する。
+        /// </summary>
+        /// <param name="track"></param>
+        public void SetTrack(TrackInfo track)
+        {
+            if (this.State != PlayState.Stop)
+            {
+                throw new InvalidOperationException();
+            }
+
+            this.PlayTrack = track;
+            this.SetSoundSource(track.Path);
+        }
+
+        /// <summary>
+        /// 再生位置を取得する。
+        /// </summary>
+        /// <returns>再生位置</returns>
+        public TimeSpan GetPosition()
+        {
+            return this._soundSource.GetPosition();
+        }
+
+        /// <summary>
+        /// 再生位置を設定する。
+        /// </summary>
+        /// <param name="position">再生位置</param>
+        public void SetPosition(TimeSpan position)
+        {
+            this._soundSource?.SetPosition(position);
+        }
+
+        /// <summary>
+        /// リソース解放を行う。
+        /// </summary>
         public void Dispose()
         {
-            this.Stop();
             this._soundSource?.Dispose();
-            this._soundOut?.Dispose();
-        }
-
-        private void OnCurrentTimeUpdated()
-        {
-            if (this._soundSource == null)
-            {
-                return;
-            }
-
-            double timeMs = this._soundSource.GetPosition().TotalMilliseconds;
-
-            this.SetProperty(ref this._currentTime, timeMs, nameof(SoundPlayer.CurrentTime));
-        }
-
-        private void StartTimer()
-        {
-            this._updateStausTimer.Start();
-        }
-
-        private void StopTimer()
-        {
-            this._updateStausTimer.Stop();
         }
     }
 }
