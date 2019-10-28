@@ -11,7 +11,7 @@ namespace Gouter
     /// <summary>
     /// 再生用サウンドデバイス状態の監視を行う
     /// </summary>
-    internal class SoundDeviceManager : IDisposable, IMMNotificationClient
+    internal class SoundDeviceManager : IDisposable, IMMNotificationClient, ISubscribable<ISoundDeviceObserver>
     {
         // デバイスを状態変化通知を行うクラス
         private readonly MMDeviceEnumerator _deviceEnumerator;
@@ -58,11 +58,14 @@ namespace Gouter
 
         /// <summary>デバイス一覧に追加する。</summary>
         /// <param name="device">デバイス情報</param>
-        private void AddDeviceImpl(MMDevice device)
+        private SoundDeviceInfo AddDeviceImpl(MMDevice device)
         {
             var deviceInfo = new SoundDeviceInfo(device);
+
             this._deviceIdMap.Add(deviceInfo.Id, deviceInfo);
             this.Devices.Add(deviceInfo);
+
+            return deviceInfo;
         }
 
         /// <summary>デバイス一覧から削除する。</summary>
@@ -123,7 +126,7 @@ namespace Gouter
                 return;
             }
 
-            if (device.DeviceState == DeviceState.Active)
+            if (deviceState == DeviceState.Active)
             {
                 // デバイスの状態がActiveに変化した
                 this.AddDeviceImpl(device);
@@ -133,6 +136,9 @@ namespace Gouter
                 // デバイスの状態がActive以外に変化した
                 this.RemoveDeviceImpl(device.DeviceID);
             }
+
+            var deviceInfo = this[deviceId];
+            this._observers.NotifyAll(observer => observer.OnDeviceStateChanged(deviceInfo));
         }
 
         /// <summary>デバイスの追加通知</summary>
@@ -144,13 +150,20 @@ namespace Gouter
                 return;
             }
 
-            this.AddDeviceImpl(device);
+            var deviceInfo = this.AddDeviceImpl(device);
+            this._observers.NotifyAll(observer => observer.OnDeviceAdded(deviceInfo));
         }
 
         /// <summary>デバイスの削除通知</summary>
         /// <param name="deviceId">デバイスID</param>
         void IMMNotificationClient.OnDeviceRemoved(string deviceId)
         {
+            if (!this.TryGet(deviceId, out var deviceInfo))
+            {
+                return;
+            }
+
+            this._observers.NotifyAll(observer => observer.OnDeviceRemoved(deviceInfo));
             this.RemoveDeviceImpl(deviceId);
         }
 
@@ -165,8 +178,12 @@ namespace Gouter
                 return;
             }
 
+            var deviceInfo = this.SystemDefault;
+
             this.TryGetMMDevice(deviceId, out var device);
-            this.SystemDefault.Update(device);
+            deviceInfo.Update(device);
+
+            this._observers.NotifyAll(observer => observer.OnDefaultDeviceChanged(deviceInfo));
         }
 
         /// <summary>デバイスのプロパティ変更通知</summary>
@@ -180,11 +197,34 @@ namespace Gouter
             }
 
             deviceInfo.Update(device);
+
+            this._observers.NotifyAll(observer => observer.OnPropertyValueChanged(deviceInfo));
+        }
+
+        private readonly List<ISoundDeviceObserver> _observers = new List<ISoundDeviceObserver>();
+
+        /// <summary>通知オブジェクトを登録する</summary>
+        /// <param name="observer">通知オブジェクト</param>
+        public void Subscribe(ISoundDeviceObserver observer)
+        {
+            if (!this._observers.Contains(observer))
+            {
+                this._observers.Add(observer);
+            }
+        }
+
+        /// <summary>通知オブジェクトを登録解除する</summary>
+        /// <param name="observer">通知オブジェクト</param>
+        public void Describe(ISoundDeviceObserver observer)
+        {
+            this._observers.Remove(observer);
         }
 
         /// <summary>リソース解放</summary>
         public void Dispose()
         {
+            this._observers.DescribeAll(this);
+
             var enumerator = this._deviceEnumerator;
             enumerator.UnregisterEndpointNotificationCallback(this);
 
