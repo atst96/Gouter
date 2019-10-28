@@ -11,7 +11,7 @@ using System.Windows.Data;
 
 namespace Gouter.ViewModels
 {
-    internal class MainWindowViewModel : ViewModelBase
+    internal class MainWindowViewModel : ViewModelBase, ISoundPlayerObserver
     {
         private readonly Random _rand = new Random();
 
@@ -31,14 +31,14 @@ namespace Gouter.ViewModels
             this.Albums = new SortedNotifiableCollectionWrapper<AlbumPlaylist>(App.PlaylistManager.Albums, AlbumComparer.Instance);
             this.Player = new SoundPlayer();
 
-            this.Player.PlayerEventChanged += this.OnPlayerStateChanged;
+            this.Player.Subscribe(this);
 
             BindingOperations.EnableCollectionSynchronization(this.Albums, new object());
         }
 
-        private void OnPlayerStateChanged(object sender, PlayerStateEventArgs e)
+        void ISoundPlayerObserver.OnPlayStateChanged(PlayState state)
         {
-            if (e.State == PlayState.Stop)
+            if (state == PlayState.Stop)
             {
                 if (this.IsPlayRequired)
                 {

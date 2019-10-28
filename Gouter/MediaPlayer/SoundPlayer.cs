@@ -9,7 +9,7 @@ using CSCore.SoundOut;
 
 namespace Gouter
 {
-    internal class SoundPlayer : IDisposable
+    internal class SoundPlayer : IDisposable, ISubscribable<ISoundPlayerObserver>
     {
         private IWaveSource _soundSource;
         private ISoundOut _soundDevice;
@@ -18,8 +18,6 @@ namespace Gouter
         public PlayState State { get; private set; } = PlayState.Stop;
         public TrackInfo PlayTrack { get; private set; }
         private volatile bool _isStopRequested = false;
-
-        public event EventHandler<PlayerStateEventArgs> PlayerEventChanged;
 
         /// <summary>
         /// コンストラクタ
@@ -35,7 +33,7 @@ namespace Gouter
         private void OnStateChanged(PlayState state)
         {
             this.State = state;
-            this.PlayerEventChanged?.Invoke(this, new PlayerStateEventArgs(state));
+            this._observers.NotifyAll(observer => observer.OnPlayStateChanged(state));
         }
 
         /// <summary>
@@ -200,11 +198,31 @@ namespace Gouter
             this._soundSource?.SetPosition(position);
         }
 
+        private readonly List<ISoundPlayerObserver> _observers = new List<ISoundPlayerObserver>();
+
+        /// <summary>通知オブジェクトを登録する</summary>
+        /// <param name="observer">通知オブジェクト</param>
+        public void Subscribe(ISoundPlayerObserver observer)
+        {
+            if (!this._observers.Contains(observer))
+            {
+                this._observers.Add(observer);
+            }
+        }
+
+        /// <summary>通知オブジェクトを登録解除する</summary>
+        /// <param name="observer">通知オブジェクト</param>
+        public void Describe(ISoundPlayerObserver observer)
+        {
+            this._observers.Remove(observer);
+        }
+
         /// <summary>
         /// リソース解放を行う。
         /// </summary>
         public void Dispose()
         {
+            this._observers.DescribeAll(this);
             this._soundSource?.Dispose();
         }
     }
