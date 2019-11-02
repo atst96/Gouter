@@ -58,7 +58,7 @@ namespace Gouter.Behaviors
             var headerPresenter = listView.FindVisualChild<GridViewHeaderRowPresenter>();
 
             var headers = headerPresenter
-                .FindChildren<GridViewColumnHeader>()
+                .EnumerateChildren<GridViewColumnHeader>()
                 .Where(h => h.Column != null)
                 .Reverse()
                 .ToList();
