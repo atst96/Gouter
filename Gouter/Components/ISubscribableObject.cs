@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Gouter
 {
-    internal interface ICustomObserverObject
+    internal interface ISubscribableObject
     {
     }
 }

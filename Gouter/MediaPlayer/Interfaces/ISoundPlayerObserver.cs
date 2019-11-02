@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Gouter
 {
-    internal interface ISoundPlayerObserver : ICustomObserverObject
+    internal interface ISoundPlayerObserver : ISubscribableObject
     {
         void OnPlayStateChanged(PlayState staet);
     }
