@@ -11,23 +11,43 @@ using System.Windows.Media;
 
 namespace Gouter
 {
+    /// <summary>
+    /// アルバム情報
+    /// </summary>
     internal class AlbumInfo : NotificationObject, IPlaylistInfo
     {
-        private readonly static AlbumManager AlbumManager = App.AlbumManager;
+        /// <summary>アルバムの内部ID</summary>
+        public int Id { get; }
 
+        /// <summary>アルバム識別キー</summary>
+        public string Key { get; }
+
+        /// <summary>アルバム名</summary>
+        public string Name { get; private set; }
+
+        /// <summary>アーティスト名</summary>
+        public string Artist { get; private set; }
+
+        /// <summary>アルバム情報登録日時</summary>
+        public DateTimeOffset RegisteredAt { get; }
+
+        /// <summary>アルバム情報更新日時</summary>
+        public DateTimeOffset UpdatedAt { get; private set; }
+
+        /// <summary>アルバムアートの最大サイズ</summary>
         private const int MaxImageSize = 128;
-
-        private AlbumInfo(string key)
+        
+        /// <summary>トラック情報からアルバム情報を生成する</summary>
+        /// <param name="id">アルバムID</param>
+        /// <param name="key">アルバムキー</param>
+        /// <param name="track">トラック情報</param>
+        public AlbumInfo(int id, string key, Track track)
         {
+            this.Id = id;
             this.Key = key;
-        }
-
-        public AlbumInfo(string key, Track track)
-            : this(key)
-        {
-            this.Id = AlbumManager.GenerateId();
             this.Name = track.Album;
-            this.Artist = AlbumManager.GetAlbumArtist(track);
+            this.Artist = track.GetAlbumArtist();
+            this.IsCompilation = track.GetIsCompiatilnAlbum();
             this.RegisteredAt = DateTimeOffset.Now;
             this.UpdatedAt = this.RegisteredAt;
 
@@ -45,9 +65,11 @@ namespace Gouter
             this.Playlist = new AlbumPlaylist(this);
         }
 
+        /// <summary>DBのモデルデータからアルバム情報を生成する</summary>
+        /// <param name="dataModel">DBモデル</param>
         public AlbumInfo(AlbumDataModel dataModel)
-            : this(dataModel.Key)
         {
+            this.Key = dataModel.Key;
             this.Id = dataModel.Id;
             this.Name = dataModel.Name;
             this.Artist = dataModel.Artist;
@@ -69,14 +91,8 @@ namespace Gouter
             this.Playlist = new AlbumPlaylist(this);
         }
 
-        public int Id { get; }
-        public string Key { get; }
-        public string Name { get; private set; }
-        public string Artist { get; private set; }
-        public DateTimeOffset RegisteredAt { get; }
-        public DateTimeOffset UpdatedAt { get; private set; }
-
         private MemoryStream _artworkStream;
+        /// <summary>アートワークの生データ</summary>
         public MemoryStream ArtworkStream
         {
             get => this._artworkStream;
@@ -97,14 +113,17 @@ namespace Gouter
         }
 
         private ImageSource _artwork;
+        /// <summary>アートワーク</summary>
         public ImageSource Artwork
         {
             get => this._artwork;
             private set => this.SetProperty(ref this._artwork, value);
         }
 
+        /// <summary>コンピレーションアルバムか否かのフラグ</summary>
         public bool IsCompilation { get; private set; }
 
+        /// <summary>プレイリスト情報</summary>
         public AlbumPlaylist Playlist { get; }
     }
 }

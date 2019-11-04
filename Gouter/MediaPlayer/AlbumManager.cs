@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
@@ -13,19 +14,31 @@ using Gouter.Extensions;
 
 namespace Gouter
 {
-    internal class AlbumManager
+    /// <summary>
+    /// アルバム管理を行うクラス
+    /// </summary>
+    internal class AlbumManager : ISubscribable<IAlbumObserver>, IDisposable
     {
+        /// <summary>データベース</summary>
         private readonly Database _database;
 
+        /// <summary>アルバム名の比較を行うComparer</summary>
         public static readonly StringComparer AlbumNameComparer = StringComparer.CurrentCultureIgnoreCase;
 
+        /// <summary>アルバムの最終ID</summary>
         private volatile int _albumLatestIdx = -1;
 
+        /// <summary>アルバムIDとアルバム情報が対応したマップ</summary>
         private readonly Dictionary<int, AlbumInfo> _albumIdMap = new Dictionary<int, AlbumInfo>();
+
+        /// <summary>アルバムキーとアルバム情報が対応したマップ</summary>
         private readonly Dictionary<string, AlbumInfo> _albumKeyMap = new Dictionary<string, AlbumInfo>();
 
+        /// <summary>アルバム一覧</summary>
         public ConcurrentNotifiableCollection<AlbumInfo> Albums { get; } = new ConcurrentNotifiableCollection<AlbumInfo>();
 
+        /// <summary>AlbumMangaerを生成する</summary>
+        /// <param name="database">DB情報</param>
         public AlbumManager(Database database)
         {
             this._database = database ?? throw new InvalidOperationException();
@@ -35,61 +48,29 @@ namespace Gouter
             BindingOperations.EnableCollectionSynchronization(this.Albums, new object());
         }
 
+        /// <summary>アルバムIDを生成する</summary>
+        /// <returns>新規アルバムID</returns>
         public int GenerateId()
         {
             return ++this._albumLatestIdx;
         }
 
-        public static string GetAlbumKey(Track track)
-        {
-            string albumName = track.Album;
-            string albumArtist = GetAlbumArtist(track, "unknown", "###compilation###");
-
-            return $"--#name={{{albumName}}};\n--#artist={{{albumArtist}}};";
-        }
-
-        internal static string GetAlbumArtist(Track track, string unknownValue = "Unknown", string compilationValue = "Various Artists")
-        {
-            if (track.AdditionalFields.TryGetValue("cpil", out var cpil) && string.Equals(cpil, "1"))
-            {
-                return compilationValue;
-            }
-
-            if (!string.IsNullOrEmpty(track.AlbumArtist))
-            {
-                return track.AlbumArtist;
-            }
-
-            if (string.IsNullOrEmpty(track.Artist))
-            {
-                return unknownValue;
-            }
-
-            return track.Artist;
-        }
-
+        /// <summary>アルバム情報を追加する</summary>
+        /// <param name="albumInfo">アルバム情報</param>
         private void AddImpl(AlbumInfo albumInfo)
         {
-            if (this._albumKeyMap.ContainsKey(albumInfo.Key))
-            {
-                throw new InvalidOperationException("アルバムキーが重複しています。");
-            }
-
-            if (this._albumIdMap.ContainsKey(albumInfo.Id))
-            {
-                throw new InvalidOperationException("アルバムIDが重複しています。");
-            }
-
             this._albumIdMap.Add(albumInfo.Id, albumInfo);
             this._albumKeyMap.Add(albumInfo.Key, albumInfo);
 
             this.Albums.Add(albumInfo);
-            App.PlaylistManager.Albums.Add(albumInfo.Playlist);
+            this._observers.NotifyAll(obsr => obsr.OnRegistered(albumInfo));
         }
 
-        public void Register(AlbumInfo albumInfo)
+        /// <summary>アルバム情報を登録する</summary>
+        /// <param name="albumInfo"></param>
+        public void Add(AlbumInfo albumInfo)
         {
-            this.AddImpl(albumInfo);
+            // データベースに登録する
 
             var dataModel = new AlbumDataModel
             {
@@ -102,30 +83,40 @@ namespace Gouter
                 CreatedAt = albumInfo.RegisteredAt,
                 UpdatedAt = albumInfo.UpdatedAt,
             };
+
             dataModel.Insert(this._database);
+
+            this.AddImpl(albumInfo);
         }
 
+        /// <summary>トラック情報からアルバム情報を取得する。アルバム情報が存在しない場合はトラック情報から抽出して登録する。</summary>
+        /// <param name="track">トラック情報</param>
+        /// <returns>アルバム情報</returns>
         public AlbumInfo GetOrAddAlbum(Track track)
         {
-            var albumKey = GetAlbumKey(track);
+            var albumKey = track.GenerateAlbumKey();
 
             if (this._albumKeyMap.TryGetValue(albumKey, out var albumInfo))
             {
                 return albumInfo;
             }
 
-            albumInfo = new AlbumInfo(albumKey, track);
+            albumInfo = new AlbumInfo(this.GenerateId(), albumKey, track);
 
-            this.Register(albumInfo);
+            this.Add(albumInfo);
 
             return albumInfo;
         }
 
+        /// <summary>アルバムIDからアルバム情報を取得する</summary>
+        /// <param name="albumId">アルバムID</param>
+        /// <returns>アルバム情報</returns>
         public AlbumInfo FromId(int albumId)
         {
-            return this.Albums.First(album => album.Id == albumId);
+            return this.Albums.Single(album => album.Id == albumId);
         }
 
+        /// <summary>データベースからアルバム情報をロードする</summary>
         public void LoadDatabase()
         {
             if (this.Albums.Count > 0)
@@ -135,7 +126,7 @@ namespace Gouter
 
             var results = AlbumDataModel.GetAll(this._database);
 
-            foreach(var result in results)
+            foreach (var result in results)
             {
                 var albumInfo = new AlbumInfo(result);
                 this.AddImpl(albumInfo);
@@ -145,6 +136,32 @@ namespace Gouter
             {
                 this._albumLatestIdx = this.Albums.Max(a => a.Id);
             }
+        }
+
+        /// <summary>Observer一覧</summary>
+        private readonly List<IAlbumObserver> _observers = new List<IAlbumObserver>();
+
+        /// <summary>変更の購読を登録する</summary>
+        /// <param name="observer">Observer</param>
+        public void Subscribe(IAlbumObserver observer)
+        {
+            if (!this._observers.Contains(observer))
+            {
+                this._observers.Add(observer);
+            }
+        }
+
+        /// <summary>変更の購読を解除する</summary>
+        /// <param name="observer">Observer</param>
+        public void Describe(IAlbumObserver observer)
+        {
+            this._observers.Remove(observer);
+        }
+
+        /// <summary>リソースを破棄する</summary>
+        public void Dispose()
+        {
+            this._observers.Clear();
         }
     }
 }

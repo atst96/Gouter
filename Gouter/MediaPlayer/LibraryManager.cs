@@ -6,15 +6,30 @@ using ATL;
 
 namespace Gouter
 {
+    /// <summary>
+    /// ライブラリの管理を行う
+    /// </summary>
     internal class LibraryManager : IDisposable
     {
+        /// <summary>データベース</summary>
         private readonly Database _database;
+
+        /// <summary>ライブラリのファイル名</summary>
         public string FileName { get; }
+
+        /// <summary>初期化済みか否かのフラグ</summary>
         public bool IsInitialized { get; private set; }
+
+        /// <summary>アルバム情報マネージャ</summary>
         public AlbumManager Albums { get; }
+
+        /// <summary>トラック情報マネージャ</summary>
         public TrackManager Tracks { get; }
+
+        /// <summary>プレイリスト情報マネージャ</summary>
         public PlaylistManager Playlists { get; }
 
+        /// <summary>ライブラリ情報を生成する</summary>
         public LibraryManager()
         {
             this._database = new Database();
@@ -22,23 +37,25 @@ namespace Gouter
             var db = this._database;
             this.Tracks = new TrackManager(db);
             this.Albums = new AlbumManager(db);
-            this.Playlists = new PlaylistManager();
+            this.Playlists = new PlaylistManager(db, this.Albums);
         }
 
-        /// <summary>
-        /// 初期処理を行う。
-        /// </summary>
+        /// <summary>初期処理を行う</summary>
         /// <param name="filePath"></param>
         public void Initialize(string filePath)
         {
             if (this.IsInitialized)
             {
+                // 初期化処理は一度のみ可能
                 throw new InvalidOperationException();
             }
 
             this.IsInitialized = true;
 
+            // データベースに接続する
             this._database.Connect(filePath);
+
+            // テーブルがなければ作成する
 
             var queryList = new Dictionary<string, string>
             {
@@ -59,15 +76,15 @@ namespace Gouter
             }
         }
 
+        /// <summary>ライブラリを非同期で読み込む</summary>
+        /// <returns>Task</returns>
         public Task LoadLibrary() => Task.Run(() =>
         {
             this.Albums.LoadDatabase();
             this.Tracks.LoadDatabase(this.Albums);
         });
 
-        /// <summary>
-        /// トラックを登録する。
-        /// </summary>
+        /// <summary>トラックを登録する</summary>
         /// <param name="track">トラック情報</param>
         public void RegisterTrack(Track track)
         {
@@ -78,9 +95,7 @@ namespace Gouter
             this.Tracks.Register(trackInfo);
         }
 
-        /// <summary>
-        /// トラックを一括登録する。
-        /// </summary>
+        /// <summary>トラックを一括登録する</summary>
         /// <param name="tracks">トラック</param>
         /// <param name="progress"></param>
         public void RegisterTracks(IEnumerable<Track> tracks, IProgress<int> progress = null)
@@ -98,9 +113,7 @@ namespace Gouter
             transaction.Commit();
         }
 
-        /// <summary>
-        /// リソースを解放する。
-        /// </summary>
+        /// <summary>リソースを解放する</summary>
         public void Dispose()
         {
             this._database?.Dispose();
