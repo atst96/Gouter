@@ -9,9 +9,15 @@ using CSCore.SoundOut;
 
 namespace Gouter
 {
+    /// <summary>
+    /// 音声の再生処理を行うクラス
+    /// </summary>
     internal class SoundPlayer : IDisposable, ISubscribable<ISoundPlayerObserver>
     {
+        /// <summary>音源</summary>
         private IWaveSource _soundSource;
+
+        /// <summary>サウンドデバイス</summary>
         private ISoundOut _soundDevice;
 
         public double Duration { get; private set; }
@@ -19,16 +25,12 @@ namespace Gouter
         public TrackInfo PlayTrack { get; private set; }
         private volatile bool _isStopRequested = false;
 
-        /// <summary>
-        /// コンストラクタ
-        /// </summary>
+        /// <summary>コンストラクタ</summary>
         public SoundPlayer()
         {
         }
 
-        /// <summary>
-        /// 再生状態の設定と通知を行う。
-        /// </summary>
+        /// <summary>再生状態の設定と通知を行う</summary>
         /// <param name="state">再生状態</param>
         private void OnStateChanged(PlayState state)
         {
@@ -36,9 +38,7 @@ namespace Gouter
             this._observers.NotifyAll(observer => observer.OnPlayStateChanged(state));
         }
 
-        /// <summary>
-        /// 音源の初期化処理を行う。
-        /// </summary>
+        /// <summary>音源の初期化処理を行う</summary>
         /// <param name="path">音声ファイルのフルパス</param>
         private void SetSoundSource(string path)
         {
@@ -49,9 +49,7 @@ namespace Gouter
             this._soundDevice.Initialize(soundSource);
         }
 
-        /// <summary>
-        /// デバイスの再生処理停止イベントが呼び出された。
-        /// </summary>
+        /// <summary>デバイスの再生処理停止イベントが呼び出された</summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void OnSoundDevicePlayStopped(object sender, PlaybackStoppedEventArgs e)
@@ -60,9 +58,7 @@ namespace Gouter
             this.OnStateChanged(PlayState.Stop);
         }
 
-        /// <summary>
-        /// 出力デバイスを設定する。
-        /// </summary>
+        /// <summary>出力デバイスを設定する</summary>
         /// <param name="soundDevice"></param>
         public void SetSoundDevice(ISoundOut soundDevice)
         {
@@ -89,9 +85,7 @@ namespace Gouter
             this._soundDevice.Stopped += this.OnSoundDevicePlayStopped;
         }
 
-        /// <summary>
-        /// 再生を開始する。
-        /// </summary>
+        /// <summary>再生を開始する</summary>
         /// <returns>Task</returns>
         public async Task Play()
         {
@@ -117,9 +111,7 @@ namespace Gouter
             this._soundDevice.Play();
         }
 
-        /// <summary>
-        /// 再生を一時停止する。
-        /// </summary>
+        /// <summary>再生を一時停止する</summary>
         public void Pause()
         {
             if (this.State == PlayState.Pause || this.State == PlayState.Stop)
@@ -134,9 +126,7 @@ namespace Gouter
             }
         }
 
-        /// <summary>
-        /// 再生を停止する。デバイスの再生処理終了の待機は行わない。
-        /// </summary>
+        /// <summary>再生を停止する。デバイスの再生処理終了の待機は行わない</summary>
         public void Stop()
         {
             if (this._soundDevice == null || this.State == PlayState.Stop)
@@ -148,9 +138,7 @@ namespace Gouter
             this._soundDevice.Stop();
         }
 
-        /// <summary>
-        /// 再生を停止し、デバイスの再生処理終了を待機する。
-        /// </summary>
+        /// <summary>再生を停止し、デバイスの再生処理終了を待機する</summary>
         /// <returns></returns>
         public async Task StopWithWaitInternalPlayer()
         {
@@ -165,9 +153,7 @@ namespace Gouter
                 .ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// 再生トラックを指定する。
-        /// </summary>
+        /// <summary>再生トラックを指定する</summary>
         /// <param name="track"></param>
         public void SetTrack(TrackInfo track)
         {
@@ -180,18 +166,14 @@ namespace Gouter
             this.SetSoundSource(track.Path);
         }
 
-        /// <summary>
-        /// 再生位置を取得する。
-        /// </summary>
+        /// <summary>再生位置を取得する</summary>
         /// <returns>再生位置</returns>
         public TimeSpan GetPosition()
         {
             return this._soundSource.GetPosition();
         }
 
-        /// <summary>
-        /// 再生位置を設定する。
-        /// </summary>
+        /// <summary>再生位置を設定する</summary>
         /// <param name="position">再生位置</param>
         public void SetPosition(TimeSpan position)
         {
@@ -217,9 +199,7 @@ namespace Gouter
             this._observers.Remove(observer);
         }
 
-        /// <summary>
-        /// リソース解放を行う。
-        /// </summary>
+        /// <summary>リソース解放を行う</summary>
         public void Dispose()
         {
             this._observers.DescribeAll(this);

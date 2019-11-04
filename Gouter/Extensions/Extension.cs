@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Gouter.Extensions
 {
+    /// <summary>
+    /// 拡張メソッド全般
+    /// </summary>
     internal static class Extension
     {
         /// <summary>IEnumerable<T>から要素のインデックスを取得する</summary>

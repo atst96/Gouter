@@ -8,6 +8,9 @@ using System.Windows.Data;
 
 namespace Gouter.Converters
 {
+    /// <summary>
+    /// TimeSpanと時間文字列のコンバータ
+    /// </summary>
     [ValueConversion(typeof(TimeSpan), typeof(string))]
     internal class DurationConverter : IValueConverter
     {

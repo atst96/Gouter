@@ -92,7 +92,7 @@ namespace Gouter
             var albumInfo = this.Albums.GetOrAddAlbum(track);
 
             var trackInfo = new TrackInfo(newTrackId, track, albumInfo);
-            this.Tracks.Register(trackInfo);
+            this.Tracks.Add(trackInfo);
         }
 
         /// <summary>トラックを一括登録する</summary>

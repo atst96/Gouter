@@ -5,6 +5,9 @@ using System.Text;
 
 namespace Gouter
 {
+    /// <summary>
+    /// 通知オブジェクト関連の拡張メソッド
+    /// </summary>
     internal static class OberverExtensions
     {
         /// <summary>監視対象からすべての購読を解除する</summary>

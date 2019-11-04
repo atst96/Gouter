@@ -9,22 +9,28 @@ using System.Windows.Input;
 
 namespace Gouter
 {
+    /// <summary>
+    /// 拡張リストボックス
+    /// </summary>
     internal class ListBoxEx : ListBox
     {
+        /// <summary>ListBoxEx固有のコマンドのパラメータにアイテムにバインドされているデータを使用するかどうかを取得または設定する</summary>
         public bool SetSelectingItemToCommandParameter { get; set; }
 
-        public static readonly DependencyProperty ItemClickCommandProperty =
-            DependencyProperty.Register("ItemClickCommand", typeof(ICommand), typeof(ListBoxEx), new PropertyMetadata(null));
-
+        /// <summary>ダブルクリック時のコマンド</summary>
         public ICommand ItemDoubleClickCommand
         {
-            get => (ICommand)this.GetValue(ItemSelectedCommandProperty);
-            set => this.SetValue(ItemSelectedCommandProperty, value);
+            get => (ICommand)this.GetValue(ItemDoubleClickCommandProperty);
+            set => this.SetValue(ItemDoubleClickCommandProperty, value);
         }
 
-        public static readonly DependencyProperty ItemSelectedCommandProperty =
+        /// <summary>ItemDoubleClickCommandプロパティ</summary>
+        public static readonly DependencyProperty ItemDoubleClickCommandProperty =
             DependencyProperty.Register("ItemDoubleClickCommand", typeof(ICommand), typeof(ListViewEx), new PropertyMetadata(null));
 
+        /// <summary>ListBoxItemがリストボックスのアイテムとして登録された</summary>
+        /// <param name="element">ListBoxItem</param>
+        /// <param name="item">データ</param>
         protected override void PrepareContainerForItemOverride(DependencyObject element, object item)
         {
             var listItem = (ListBoxItem)element;
@@ -34,6 +40,9 @@ namespace Gouter
             base.PrepareContainerForItemOverride(element, item);
         }
 
+        /// <summary>ListBoxItemがリストボックスのアイテムが除外された</summary>
+        /// <param name="element">ListBoxItem</param>
+        /// <param name="item">データ</param>
         protected override void ClearContainerForItemOverride(DependencyObject element, object item)
         {
             var listITem = (ListBoxItem)element;
@@ -43,6 +52,9 @@ namespace Gouter
             base.ClearContainerForItemOverride(element, item);
         }
 
+        /// <summary>アイテムのダブルクリック通知</summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OnItemMouseDoubleClicked(object sender, MouseButtonEventArgs e)
         {
             var praameter = this.SetSelectingItemToCommandParameter

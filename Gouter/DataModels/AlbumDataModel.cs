@@ -8,8 +8,12 @@ using SqlKata.Execution;
 
 namespace Gouter.DataModels
 {
+    /// <summary>
+    /// アルバム情報のデータモデル
+    /// </summary>
     internal class AlbumDataModel : DataModelBase<AlbumDataModel>
     {
+        /// <summary>テーブル名</summary>
         public static string TableName { get; } = Database.TableNames.Albums;
 
         public int Id { get; set; }
@@ -21,11 +25,17 @@ namespace Gouter.DataModels
         public DateTimeOffset CreatedAt { get; set; }
         public DateTimeOffset UpdatedAt { get; set; }
 
+        /// <summary>クエリビルダを取得する</summary>
+        /// <param name="database">データベース</param>
+        /// <returns>クエリビルダ</returns>
         public static SqlKata.Query GetQueryBuilder(Database database)
         {
             return GetQueryBuilder(database, TableName);
         }
 
+        /// <summary>テーブル内のアルバム情報を全件取得する</summary>
+        /// <param name="database">データベース</param>
+        /// <returns>アルバム情報一覧</returns>
         public static IEnumerable<AlbumDataModel> GetAll(Database database)
         {
             var awTableName = Database.TableNames.AlbumArtworks;
@@ -35,6 +45,8 @@ namespace Gouter.DataModels
                 .Get<AlbumDataModel>();
         }
 
+        /// <summary>テーブルにアルバム情報を登録する</summary>
+        /// <param name="database">データベース</param>
         public void Insert(Database database)
         {
             var artworkStream = this.Artwork != null
@@ -70,6 +82,8 @@ namespace Gouter.DataModels
             artworkStream?.Dispose();
         }
 
+        /// <summary>テーブルからアルバム情報を削除する</summary>
+        /// <param name="database">アルバム名</param>
         public void Delete(Database database)
         {
             GetQueryBuilder(database).Where("id", this.Id).Delete();

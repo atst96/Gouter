@@ -9,24 +9,31 @@ using System.Windows.Media;
 
 namespace Gouter
 {
+    /// <summary>
+    /// ジオメトリアイコン
+    /// </summary>
     internal class GeometryIcon : Control
     {
+        /// <summary>アイコンの表示色を取得または設定する</summary>
         public Brush Fill
         {
-            get => (Brush)this.GetValue(FillProperty);
-            set => this.SetValue(FillProperty, value);
+            get => (Brush)this.GetValue(GeometryIcon.FillProperty);
+            set => this.SetValue(GeometryIcon.FillProperty, value);
         }
 
-        public static readonly DependencyProperty FillProperty =
-            DependencyProperty.Register("Fill", typeof(Brush), typeof(GeometryIcon), new PropertyMetadata(null));
+        /// <summary>Fillプロパティ</summary>
+        public static readonly DependencyProperty FillProperty = DependencyProperty
+            .Register("Fill", typeof(Brush), typeof(GeometryIcon), new PropertyMetadata(null));
 
+        /// <summary>表示データを取得または設定する</summary>
         public Geometry Data
         {
             get => (Geometry)this.GetValue(DataProperty);
             set => this.SetValue(DataProperty, value);
         }
 
-        public static readonly DependencyProperty DataProperty =
-            DependencyProperty.Register("Data", typeof(Geometry), typeof(GeometryIcon), new PropertyMetadata(null));
+        /// <summary>Dataプロパティ</summary>
+        public static readonly DependencyProperty DataProperty = DependencyProperty
+            .Register("Data", typeof(Geometry), typeof(GeometryIcon), new PropertyMetadata(null));
     }
 }

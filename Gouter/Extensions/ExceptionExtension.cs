@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Gouter.Extensions
 {
+    /// <summary>
+    /// 例外クラス関係の拡張メソッド
+    /// </summary>
     internal static class ExceptionExtension
     {
         /// <summary>例外からメッセージを生成する</summary>

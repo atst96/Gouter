@@ -8,8 +8,12 @@ using SqlKata.Execution;
 
 namespace Gouter.DataModels
 {
+    /// <summary>
+    /// トラック情報のデータモデル
+    /// </summary>
     internal class TrackDataModel : DataModelBase<TrackDataModel>
     {
+        /// <summary>テーブル名</summary>
         public static string TableName { get; } = Database.TableNames.Tracks;
 
         public int Id { get; set; }
@@ -26,16 +30,24 @@ namespace Gouter.DataModels
         public DateTimeOffset CreatedAt { get; set; }
         public DateTimeOffset UpdatedAt { get; set; }
 
+        /// <summary>クエリビルダを取得する</summary>
+        /// <param name="database">データベース</param>
+        /// <returns>テーブル名</returns>
         private static SqlKata.Query GetQueryBuilder(Database database)
         {
             return GetQueryBuilder(database, TableName);
         }
 
+        /// <summary>テーブル内のトラック情報を全件取得する</summary>
+        /// <param name="database">データベース</param>
+        /// <returns>トラック情報一覧</returns>
         public static IEnumerable<TrackDataModel> GetAll(Database database)
         {
             return GetQueryBuilder(database).Get<TrackDataModel>();
         }
 
+        /// <summary>テーブルにトラック情報を登録する</summary>
+        /// <param name="database">データベース</param>
         public void Insert(Database database)
         {
             GetQueryBuilder(database).Insert(new Dictionary<string, object>
@@ -56,6 +68,8 @@ namespace Gouter.DataModels
             });
         }
 
+        /// <summary>テーブルからトラック情報を削除する</summary>
+        /// <param name="database">データベース</param>
         public void Delete(Database database)
         {
             GetQueryBuilder(database).Where("id", this.Id).Delete();

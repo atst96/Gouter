@@ -11,6 +11,9 @@ using System.Windows.Media.Imaging;
 
 namespace Gouter.Extensions
 {
+    /// <summary>
+    /// WPFに関する拡張メソッド
+    /// </summary>
     internal static class WpfExtensions
     {
         /// <summary>一致する型の親要素を探索する</summary>

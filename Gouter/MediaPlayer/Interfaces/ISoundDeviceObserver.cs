@@ -4,6 +4,9 @@ using System.Text;
 
 namespace Gouter
 {
+    /// <summary>
+    /// サウンドデバイスの通知Interface
+    /// </summary>
     internal interface ISoundDeviceObserver : ISubscribableObject
     {
         void OnDefaultDeviceChanged(SoundDeviceInfo deviceInfo);
