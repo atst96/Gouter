@@ -10,7 +10,7 @@ namespace Gouter.Utilities
 {
     internal static class MessagePackUtility
     {
-        private static readonly IFormatterResolver _messagPackResolver = MessagePack.Resolvers.StandardResolverAllowPrivate.Instance;
+        private static readonly MessagePackSerializerOptions _messagPackOptions = MessagePack.Resolvers.StandardResolverAllowPrivate.Options;
 
         public static async ValueTask<T> DeserializeFile<T>(string path)
         {
@@ -26,9 +26,9 @@ namespace Gouter.Utilities
             }
         }
 
-        public static Task<T> DeserializeAsync<T>(Stream stream)
+        public static ValueTask<T> DeserializeAsync<T>(Stream stream)
         {
-            return MessagePackSerializer.DeserializeAsync<T>(stream, _messagPackResolver);
+            return MessagePackSerializer.DeserializeAsync<T>(stream, _messagPackOptions);
         }
 
         public static async Task SerializeFile<T>(T @object, string path)
@@ -48,7 +48,7 @@ namespace Gouter.Utilities
 
         public static Task SerializeAsync<T>(T @object, Stream stream)
         {
-            return MessagePackSerializer.SerializeAsync(stream, @object, _messagPackResolver);
+            return MessagePackSerializer.SerializeAsync(stream, @object, _messagPackOptions);
         }
     }
 }
