@@ -75,6 +75,31 @@ namespace Gouter
             this._connection?.Dispose();
         }
 
+
+        /// <summary>
+        /// テーブルを準備する。
+        /// </summary>
+        public void PrepareTable()
+        {
+            // データベースの初期化処理
+            var queryList = new Dictionary<string, string>
+            {
+                [TableNames.Albums] = Queries.CreateAlbumsTable,
+                [TableNames.Tracks] = Queries.CreateTracksTable,
+                [TableNames.AlbumArtworks] = Queries.CreateAlbumArtworksTable,
+            };
+
+            var tables = new HashSet<string>(this.EnumerateTableNames());
+
+            foreach (var (tableName, query) in queryList)
+            {
+                if (!tables.Contains(tableName))
+                {
+                    this.ExecuteNonQuery(query);
+                }
+            }
+        }
+
         /// <summary>
         /// トランザクションを開始する。
         /// </summary>

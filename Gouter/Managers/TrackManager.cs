@@ -13,7 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Data;
 
-namespace Gouter
+namespace Gouter.Managers
 {
     /// <summary>
     /// トラック情報の管理を行う
@@ -152,12 +152,10 @@ namespace Gouter
         /// <param name="findDirectories"></param>
         /// <param name="excludeDirectories"></param>
         /// <returns></returns>
-        public static IList<string> FindNewFiles(IEnumerable<string> findDirectories, IEnumerable<string> excludeDirectories)
+        public static IList<string> FindNewFiles(HashSet<string> registeredFiles, IEnumerable<string> findDirectories, IEnumerable<string> excludeDirectories)
         {
             var finds = NormalizeDirectories(findDirectories);
             var excludes = NormalizeDirectories(excludeDirectories);
-
-            var registeredFiles = new HashSet<string>(App.TrackManager.Tracks.Select(t => t.Path));
 
             var files = finds
                 .SelectMany(path => GetFiles(path))
@@ -195,7 +193,7 @@ namespace Gouter
 
         /// <summary>データベースから読み込む</summary>
         /// <param name="albumManager"></param>
-        public void LoadDatabase(AlbumManager albumManager)
+        public void LoadLibrary(AlbumManager albumManager)
         {
             if (this.Tracks.Count > 0)
             {

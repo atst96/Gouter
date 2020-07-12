@@ -12,7 +12,7 @@ using ATL;
 using Gouter.DataModels;
 using Gouter.Extensions;
 
-namespace Gouter
+namespace Gouter.Managers
 {
     /// <summary>
     /// アルバム管理を行うクラス
@@ -116,11 +116,14 @@ namespace Gouter
             return this.Albums.Single(album => album.Id == albumId);
         }
 
-        /// <summary>データベースからアルバム情報をロードする</summary>
-        public void LoadDatabase()
+        /// <summary>
+        /// データベースからアルバム情報をロードする
+        /// </summary>
+        public void LoadLibrary()
         {
             if (this.Albums.Count > 0)
             {
+                // アルバムの読み込みは一度のみ。
                 throw new InvalidOperationException();
             }
 

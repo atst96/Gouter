@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using Gouter.Components.TypeHandlers;
 using Gouter.Extensions;
+using Gouter.Managers;
 using Gouter.Utilities;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
@@ -23,16 +24,7 @@ namespace Gouter
         internal const string Name = "Gouter";
         internal const string Version = "0.0.0.0";
 
-        internal static MediaPlayer MediaPlayer { get; } = new MediaPlayer();
-
-        [Obsolete]
-        internal static LibraryManager LibraryManager => MediaPlayer.Library;
-        [Obsolete]
-        internal static PlaylistManager PlaylistManager => LibraryManager.Playlists;
-        [Obsolete]
-        internal static AlbumManager AlbumManager => LibraryManager.Albums;
-        [Obsolete]
-        internal static TrackManager TrackManager => LibraryManager.Tracks;
+        internal MediaManager MediaManager { get; private set; }
 
         private readonly Assembly _assembly = Assembly.GetExecutingAssembly();
 
@@ -44,7 +36,7 @@ namespace Gouter
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            App.Instance = (App)Application.Current;
+            App.Instance = (App)Current;
 
             base.OnStartup(e);
 
@@ -69,11 +61,14 @@ namespace Gouter
             this.ShutdownMode = ShutdownMode.OnMainWindowClose;
 
             this.InitializeDapper();
+
+            var libraryPath = this.GetLocalFilePath(Config.LibraryFileName);
+            this.MediaManager = MediaManager.CreateMediaManager(libraryPath);
         }
 
         protected override void OnExit(ExitEventArgs e)
         {
-            MediaPlayer.Close();
+            // this.MediaManager.Close();
 
             if (this.IsRequireSaveSettings)
             {
