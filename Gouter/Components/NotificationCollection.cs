@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Gouter
 {
-    public class NotifiableCollection<T> : IList<T>, INotifyCollectionChanged, INotifyPropertyChanged
+    public class NotifiableCollection<T> : IList<T>, IReadOnlyList<T>, INotifyCollectionChanged, INotifyPropertyChanged
     {
         private List<T> _list;
 

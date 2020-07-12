@@ -1,11 +1,14 @@
 ﻿using ATL;
 using Gouter.DataModels;
 using Gouter.Extensions;
+using Gouter.Utils;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Data;
 using System.Data.SQLite;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -44,35 +47,11 @@ namespace Gouter.Managers
             BindingOperations.EnableCollectionSynchronization(this.Tracks, new object());
         }
 
-        /// <summary>再帰的にファイル一覧を取得する</summary>
-        /// <param name="directory">ディレクトリパス</param>
-        /// <returns>ファイル一覧</returns>
-        private static IEnumerable<string> GetFiles(string directory)
-        {
-            return Directory.EnumerateFiles(directory, "*.*", SearchOption.AllDirectories);
-        }
-
         /// <summary>トラックIDを生成する</summary>
         /// <returns></returns>
         public int GenerateId()
         {
             return ++this._latestTrackIdx;
-        }
-
-        /// <summary>検索するファイルの拡張子</summary>
-        public static readonly HashSet<string> SupportedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ".wav", ".mp3", ".acc", ".m4a", ".flac", ".ogg"
-        };
-
-        /// <summary>対応するメディアの拡張子かどうかを判定する</summary>
-        /// <param name="path">ファイルパス</param>
-        /// <returns>対応メディア</returns>
-        public static bool IsSupportedExtension(string path)
-        {
-            var extension = Path.GetExtension(path);
-
-            return SupportedExtensions.Contains(extension);
         }
 
         /// <summary>トラック情報を登録する</summary>
@@ -112,80 +91,43 @@ namespace Gouter.Managers
             dataModel.Insert(this._database);
 
             this.AddImpl(trackInfo);
-            
+
             return trackInfo;
         }
 
-        /// <summary>再帰検索の際にディレクトリが重複しないかを検証する</summary>
-        /// <param name="path">検証パス</param>
-        /// <param name="directories">ディレクトリ一覧</param>
-        /// <returns>ディレクトリの重複有無</returns>
-        private static bool IsContainsDirectory(string path, IEnumerable<string> directories)
+        /// <summary>
+        /// 未登録の楽曲情報を取得する。
+        /// </summary>
+        /// <param name="musicDirectories">音楽ファイルのディレクトリリスト</param>
+        /// <param name="excludeDirectories">除外するディレクトリリスト</param>
+        /// <returns>楽曲情報リスト</returns>
+        public IReadOnlyList<Track> GetUnregisteredTracks(IReadOnlyCollection<string> musicDirectories, IReadOnlyCollection<string> excludeDirectories)
         {
-            return directories.Any(dir => !path.Equals(dir) && path.StartsWith(dir));
-        }
+            var registeredFiles = this.Tracks.Select(t => t.Path).ToImmutableHashSet();
 
-        /// <summary>ディレクトリセパレータ</summary>
-        private static readonly string DirectorySeparator = Path.DirectorySeparatorChar.ToString();
+            var findDirs = FilePathUtils.NormalizeDirectories(musicDirectories);
+            var excludeDirs = FilePathUtils.NormalizeDirectories(excludeDirectories);
 
-        /// <summary>ディレクトリパスを正規化する</summary>
-        /// <param name="paths">ディレクトリパス一覧</param>
-        /// <returns>正規化済みディレクトリ一覧</returns>
-        private static IList<string> NormalizeDirectories(IEnumerable<string> paths)
-        {
-            var directories = paths
-                .Select(path => path.EndsWith(DirectorySeparator) ? path : (path + DirectorySeparator))
-                .ToList();
-
-            for (int i = directories.Count - 1; i >= 0; --i)
-            {
-                if (IsContainsDirectory(directories[i], directories))
-                {
-                    directories.RemoveAt(i);
-                }
-            }
-
-            return directories;
-        }
-
-        /// <summary>新規ファイルを列挙する</summary>
-        /// <param name="findDirectories"></param>
-        /// <param name="excludeDirectories"></param>
-        /// <returns></returns>
-        public static IList<string> FindNewFiles(HashSet<string> registeredFiles, IEnumerable<string> findDirectories, IEnumerable<string> excludeDirectories)
-        {
-            var finds = NormalizeDirectories(findDirectories);
-            var excludes = NormalizeDirectories(excludeDirectories);
-
-            var files = finds
-                .SelectMany(path => GetFiles(path))
+            var foundFiles = findDirs
+                .SelectMany(path => FilePathUtils.GetFiles(path, true))
                 .AsParallel()
-                .Where(path => IsSupportedExtension(path) && !registeredFiles.Contains(path) && !IsContainsDirectory(path, excludes));
+                .Where(path =>
+                    FilePathUtils.IsSupportedMediaExtension(path)
+                        && !registeredFiles.Contains(path)
+                        && !FilePathUtils.IsContainsDirectory(path, excludeDirs));
 
-            var list = files.ToList();
+            var tracks = new List<Track>(foundFiles.Count());
 
-            return list;
-        }
-
-        /// <summary>ファイル一覧からトラック情報を取得する</summary>
-        /// <param name="files"></param>
-        /// <param name="progress"></param>
-        /// <returns></returns>
-        public static IList<Track> GetTracks(IList<string> files, IProgress<int> progress = null)
-        {
-            var tracks = new List<Track>(files.Count);
-
-            int count = 0;
-
-            foreach (var path in files)
+            foreach (var path in foundFiles)
             {
                 try
                 {
                     tracks.Add(new Track(path));
                 }
-                catch { /* pass */ }
-
-                progress?.Report(++count);
+                catch
+                {
+                    Debug.WriteLine($"読み込み失敗: {path}");
+                }
             }
 
             return tracks;

@@ -91,7 +91,7 @@ namespace Gouter.Managers
         /// </summary>
         /// <returns></returns>
         public Task LoadLibrary() => Task.Run(() =>
-        { 
+        {
             this.Albums.LoadLibrary();
             this.Tracks.LoadLibrary(this.Albums);
         });
@@ -116,13 +116,21 @@ namespace Gouter.Managers
 
             using var transaction = this._database.BeginTransaction();
 
-            foreach (var track in tracks.AsParallel())
+            try
             {
-                this.RegisterTrack(track);
-                progress?.Report(++count);
-            }
+                foreach (var track in tracks.AsParallel())
+                {
+                    this.RegisterTrack(track);
+                    progress?.Report(++count);
+                }
 
-            transaction.Commit();
+                transaction.Commit();
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                throw;
+            }
         }
 
         /// <summary>
