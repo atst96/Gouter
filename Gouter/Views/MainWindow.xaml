@@ -15,6 +15,7 @@
     Title="Gouter" Height="450" Width="800"
     UseLayoutRounding="True"
     FontFamily="Meiryo"
+    xmlns:sys="clr-namespace:System;assembly=System.Runtime"
     DataContext="{app:ViewModelConnector vm:MainWindowViewModel}"
     d:DataContext="{d:DesignInstance vm:MainWindowViewModel, IsDesignTimeCreatable=True}">
     <Window.Resources>
@@ -207,43 +208,30 @@
 
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="240" />
-                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="200" />
+                <ColumnDefinition Width="1" />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
-            <TabControl>
-                <TabItem Header="アルバム">
-                    <ListBox
-                        DockPanel.Dock="Left"
-                        Grid.Column="0"
-                        BorderThickness="0"
-                        SelectionMode="Single"
-                        AlternationCount="2"
-                        ItemsPanel="{StaticResource ItemsPanelTemplate}"
-                        VirtualizingPanel.ScrollUnit="Item"
-                        VirtualizingPanel.IsVirtualizing="True"
-                        VirtualizingPanel.VirtualizationMode="Recycling"
-                        ItemsSource="{Binding Albums, Mode=OneTime}"
-                        SelectedItem="{Binding SelectedAlbum, Mode=TwoWay}">
-                        <i:Interaction.Triggers>
-                            <i:EventTrigger EventName="MouseDoubleClick">
-                                <i:InvokeCommandAction Command="{Binding DataContext.AlbumPlaylistSelectedCommand, Mode=OneTime, RelativeSource={RelativeSource AncestorType=view:MainWindow}}"  />
-                            </i:EventTrigger>
-                        </i:Interaction.Triggers>
-                        <ListBox.ItemContainerStyle>
-                            <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
-                                <Setter Property="Padding" Value="8" />
-                                <Setter Property="Height" Value="64" />
-                            </Style>
-                        </ListBox.ItemContainerStyle>
-                    </ListBox>
-                </TabItem>
-            </TabControl>
+            <ListBox
+                DockPanel.Dock="Left"
+                Grid.Column="0"
+                BorderThickness="0"
+                SelectionMode="Single"
+                AlternationCount="2">
+                <ListBox.Items>
+                    <sys:String>アルバム</sys:String>
+                </ListBox.Items>
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                        <Setter Property="Padding" Value="8,4" />
+                    </Style>
+                </ListBox.ItemContainerStyle>
+            </ListBox>
 
-            <GridSplitter
+            <Border
                 Grid.Column="1"
-                Width="3"
+                Width="1"
                 VerticalAlignment="Stretch"
                 HorizontalAlignment="Center"
                 Background="{StaticResource ToolBar.Static.BorderBrush}" />
