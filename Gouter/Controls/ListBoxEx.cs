@@ -26,7 +26,7 @@ namespace Gouter
 
         /// <summary>ItemDoubleClickCommandプロパティ</summary>
         public static readonly DependencyProperty ItemDoubleClickCommandProperty =
-            DependencyProperty.Register("ItemDoubleClickCommand", typeof(ICommand), typeof(ListViewEx), new PropertyMetadata(null));
+            DependencyProperty.Register("ItemDoubleClickCommand", typeof(ICommand), typeof(ListBoxEx), new PropertyMetadata(null));
 
         /// <summary>ListBoxItemがリストボックスのアイテムとして登録された</summary>
         /// <param name="element">ListBoxItem</param>
