@@ -41,14 +41,19 @@ namespace Gouter.Commands.MainWindow
 
                 var newTracks = trackManager.GetUnregisteredTracks(setting.MusicDirectories, setting.ExcludeDirectories);
 
-                if (newTracks.Count > 0)
+                if (newTracks.Count <= 0)
                 {
-                    this._viewModel.Status = newTracks.Count + "件の楽曲が見つかりました。楽曲情報をライブラリに登録しています...";
-
-                    progress.Reset(newTracks.Count);
-
-                    mediaManager.RegisterTracks(newTracks, progress);
+                    this._viewModel.Status = null;
+                    return;
                 }
+
+                this._viewModel.Status = $"{newTracks.Count}件の楽曲が見つかりました。楽曲情報をライブラリに登録しています...";
+
+                progress.Reset(newTracks.Count);
+
+                mediaManager.RegisterTracks(newTracks, progress);
+
+                this._viewModel.Status = $"{newTracks.Count}件の楽曲が追加されました";
             });
         }
     }
