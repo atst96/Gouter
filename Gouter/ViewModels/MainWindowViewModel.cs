@@ -2,6 +2,7 @@
 using Gouter.Commands.MainWindow;
 using Gouter.Extensions;
 using Gouter.Managers;
+using Gouter.Players;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,12 +17,17 @@ namespace Gouter.ViewModels
     {
         private readonly Random _rand = new Random();
 
-        public MediaManager MediaManager { get; } = App.Instance.MediaManager;
+        private static readonly App _app = App.Instance;
+
+        public MediaManager MediaManager { get; } = _app.MediaManager;
+
+        public MediaPlayer NewPlayer { get; } = _app.MediaPlayer;
+
         public PlaylistManager Playlists => this.MediaManager.Playlists;
 
         public SortedNotifiableCollectionWrapper<AlbumPlaylist> Albums { get; }
 
-        public SoundPlayer Player { get; }
+        public SoundPlayer Player => this.NewPlayer.InternalPlayer;
 
         private AlbumPlaylist _selectedAlbumPlaylist;
         public AlbumPlaylist SelectedAlbumPlaylist
@@ -33,7 +39,6 @@ namespace Gouter.ViewModels
         public MainWindowViewModel() : base()
         {
             this.Albums = new SortedNotifiableCollectionWrapper<AlbumPlaylist>(this.Playlists.Albums, AlbumComparer.Instance);
-            this.Player = new SoundPlayer();
 
             this.Player.Subscribe(this);
 

@@ -2,14 +2,11 @@
 using Gouter.Components.TypeHandlers;
 using Gouter.Extensions;
 using Gouter.Managers;
+using Gouter.Players;
 using Gouter.Utilities;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data.SQLite;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
@@ -22,18 +19,48 @@ namespace Gouter
     internal partial class App : Application
     {
         internal const string Name = "Gouter";
+
         internal const string Version = "0.0.0.0";
 
+        /// <summary>
+        /// メディア管理
+        /// </summary>
         internal MediaManager MediaManager { get; private set; }
 
+        /// <summary>
+        /// メディア再生
+        /// </summary>
+        internal MediaPlayer MediaPlayer { get; private set; }
+
+        /// <summary>
+        /// サウンドデバイスのリスナー
+        /// </summary>
+        internal SoundDeviceListener SoundDeviceListener { get; } = new SoundDeviceListener();
+
+        /// <summary>
+        /// アセンブリ情報
+        /// </summary>
         private readonly Assembly _assembly = Assembly.GetExecutingAssembly();
 
+        /// <summary>
+        /// Appインスタンス
+        /// </summary>
         internal static App Instance { get; private set; }
 
+        /// <summary>
+        /// アプリケーション設定
+        /// </summary>
         internal ApplicationSetting Setting { get; private set; }
 
+        /// <summary>
+        /// 終了時に設定ファイルを保存するかどうかのフラグ。
+        /// </summary>
         public bool IsRequireSaveSettings { get; private set; } = true;
 
+        /// <summary>
+        /// アプリケーション起動時
+        /// </summary>
+        /// <param name="e"></param>
         protected override void OnStartup(StartupEventArgs e)
         {
             App.Instance = (App)Current;
@@ -64,8 +91,13 @@ namespace Gouter
 
             var libraryPath = this.GetLocalFilePath(Config.LibraryFileName);
             this.MediaManager = MediaManager.CreateMediaManager(libraryPath);
+            this.MediaPlayer = new MediaPlayer(this.MediaManager);
         }
 
+        /// <summary>
+        /// アプリケーション終了時
+        /// </summary>
+        /// <param name="e"></param>
         protected override void OnExit(ExitEventArgs e)
         {
             // this.MediaManager.Close();
@@ -78,6 +110,10 @@ namespace Gouter
             base.OnExit(e);
         }
 
+        /// <summary>
+        /// 設定ファイルを読み込む。
+        /// </summary>
+        /// <returns></returns>
         private async Task LoadSettings()
         {
             var settingFilePath = this.GetLocalFilePath(Config.SettingFileName);
@@ -90,23 +126,35 @@ namespace Gouter
             }
         }
 
-        private async Task SaveSettings()
+        /// <summary>
+        /// 設定ファイルを保存する。
+        /// </summary>
+        /// <returns></returns>
+        private Task SaveSettings()
         {
             var settingFilePath = this.GetLocalFilePath(Config.SettingFileName);
 
-            await MessagePackUtility.SerializeFile(this.Setting, settingFilePath).ConfigureAwait(false);
+            return MessagePackUtility.SerializeFile(this.Setting, settingFilePath);
         }
 
+        /// <summary>
+        /// 現在のディレクトリを取得する。
+        /// </summary>
+        /// <returns>現在のディレクトリのパス</returns>
         public string GetAssemlyDirectory()
-        {
-            return Path.GetDirectoryName(this._assembly.Location);
-        }
+            => Path.GetDirectoryName(this._assembly.Location);
 
-        public string GetLocalFilePath(string filename)
-        {
-            return Path.Combine(this.GetAssemlyDirectory(), filename);
-        }
+        /// <summary>
+        /// カレントディレクトリのファイルパスを取得する。
+        /// </summary>
+        /// <param name="relativePath">相対ファイル名</param>
+        /// <returns>ファイルの絶対パス</returns>
+        public string GetLocalFilePath(string relativePath)
+            => Path.Combine(this.GetAssemlyDirectory(), relativePath);
 
+        /// <summary>
+        /// Dapperを初期化する。
+        /// </summary>
         private void InitializeDapper()
         {
             DefaultTypeMap.MatchNamesWithUnderscores = true;
@@ -114,6 +162,9 @@ namespace Gouter
             SqlMapper.AddTypeHandler(new DateTimeOffsetTypeHandler());
         }
 
+        /// <summary>
+        /// アプリケーションを強制終了する。
+        /// </summary>
         public void ForceShutdown()
         {
             this.IsRequireSaveSettings = false;

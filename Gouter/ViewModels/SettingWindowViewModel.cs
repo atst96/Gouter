@@ -1,6 +1,7 @@
 ﻿using CSCore.CoreAudioAPI;
 using Gouter.Commands.SettingWindow;
 using Gouter.Managers;
+using Gouter.Players;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,11 @@ namespace Gouter.ViewModels
 {
     internal class SettingWindowViewModel : ViewModelBase
     {
-        private MediaManager _mediaManager = App.Instance.MediaManager;
+        private static readonly App AppInstance = App.Instance;
+
+        private readonly MediaManager _mediaManager = AppInstance.MediaManager;
+        private readonly MediaPlayer _mediaPlayer = AppInstance.MediaPlayer;
+        private readonly SoundDeviceListener _soundDeviceListener = AppInstance.SoundDeviceListener;
 
         public SettingWindowViewModel()
         {
@@ -26,7 +31,7 @@ namespace Gouter.ViewModels
                 this.MusicDirectories.Add(musicDirectory);
             }
 
-            //this.SoundDevices = this._mediaPlayer.DeviceManager.Devices;
+            this.SoundDevices = this._soundDeviceListener.Devices;
         }
 
         public ApplicationSetting Setting { get; }

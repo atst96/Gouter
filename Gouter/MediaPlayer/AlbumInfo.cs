@@ -35,7 +35,7 @@ namespace Gouter
         public DateTimeOffset UpdatedAt { get; private set; }
 
         /// <summary>アルバムアートの最大サイズ</summary>
-        private const int MaxImageSize = 128;
+        private const int MaxImageSize = 80;
         
         /// <summary>トラック情報からアルバム情報を生成する</summary>
         /// <param name="id">アルバムID</param>
