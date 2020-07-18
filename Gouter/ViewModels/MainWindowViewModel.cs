@@ -46,25 +46,25 @@ namespace Gouter.ViewModels
 
         void IMediaPlayerObserver.OnPlayStateChanged(PlayState state)
         {
-            if (state == PlayState.Stop)
-            {
-                if (this.IsPlayRequired)
-                {
-                    if (this.IsLoop)
-                    {
-                        this.SkipToNextTrack();
-                        this.Player.Play();
-                    }
-                    else
-                    {
-                        this.IsPlayRequired = false;
-                        if (this.PauseCommand.CanExecute(null))
-                        {
-                            this.PauseCommand.Execute(null);
-                        }
-                    }
-                }
-            }
+            //if (state == PlayState.Stop)
+            //{
+            //    if (this.IsPlayRequired)
+            //    {
+            //        if (this.IsLoop)
+            //        {
+            //            this.SkipToNextTrack();
+            //            this.Player.Play();
+            //        }
+            //        else
+            //        {
+            //            this.IsPlayRequired = false;
+            //            if (this.PauseCommand.CanExecute(null))
+            //            {
+            //                this.PauseCommand.Execute(null);
+            //            }
+            //        }
+            //    }
+            //}
         }
 
         private Command _initializeCommand;
@@ -173,82 +173,8 @@ namespace Gouter.ViewModels
         public async void Play(TrackInfo track, IPlaylist playlist)
         {
             this.IsPlayRequired = true;
-            await this.Player.ChangeTrack(track, playlist);
-            this.Player.Play();
-            this.AddHistory(track);
-        }
-
-        private LinkedListNode<TrackInfo> _currentNode;
-
-        public void SkipToPreviousTrack()
-        {
-            if (this.PlayingPlaylist == null)
-            {
-                return;
-            }
-
-            var player = this.Player;
-            var previousNode = this._currentNode?.Previous;
-
-            if (player.GetPosition().TotalMilliseconds > 3000.0 || previousNode == null)
-            {
-                player.SetPosition(TimeSpan.Zero);
-                return;
-            }
-
-            player.ChangeTrack(previousNode.Value);
-            this._currentNode = previousNode;
-        }
-
-        public void SkipToNextTrack()
-        {
-            if (this.PlayingPlaylist == null)
-            {
-                return;
-            }
-
-            var player = this.Player;
-
-            var nextNode = this._currentNode?.Next;
-            if (nextNode != null)
-            {
-                player.ChangeTrack(nextNode.Value);
-                this._currentNode = nextNode;
-
-                return;
-            }
-
-            var playlist = this.PlayingPlaylist;
-            var tracks = playlist.Tracks;
-
-            TrackInfo nextTrack = default;
-
-            if (this.IsShuffle)
-            {
-                int nextTrackIdx = this._rand.Next(0, tracks.Count - 1);
-
-                nextTrack = tracks[nextTrackIdx];
-            }
-            else
-            {
-                var currentTrack = player.Track;
-                var currentTrackIdx = tracks.IndexOf(currentTrack);
-
-                if (currentTrackIdx >= 0)
-                {
-                    int nextTrackIdx = tracks.Count - 1 <= currentTrackIdx
-                        ? 0
-                        : currentTrackIdx + 1;
-
-                    nextTrack = tracks[nextTrackIdx];
-                }
-            }
-
-            if (nextTrack != default)
-            {
-                player.ChangeTrack(nextTrack);
-                this.AddHistory(nextTrack);
-            }
+            await this.Player.SwitchTrack(track, playlist).ConfigureAwait(false);
+            await this.Player.Play().ConfigureAwait(false);
         }
 
         private bool _isOpenAlbumPlaylistTrackList = false;
@@ -256,39 +182,6 @@ namespace Gouter.ViewModels
         {
             get => this._isOpenAlbumPlaylistTrackList;
             set => this.SetProperty(ref this._isOpenAlbumPlaylistTrackList, value);
-        }
-
-        public void AddHistory(TrackInfo nextTrack)
-        {
-            var history = this._playHistory;
-            var currentNode = this._currentNode;
-
-            if (currentNode == null)
-            {
-                this._currentNode = history.AddLast(nextTrack);
-            }
-            else if (!object.ReferenceEquals(this._currentNode.Value, nextTrack))
-            {
-                this._currentNode = history.AddAfter(currentNode, nextTrack);
-
-                history.RemoveAfterAll(this._currentNode.Next);
-            }
-
-            //if (history.Count == 0 || !object.ReferenceEquals(history.Last.Value, currentTrack))
-            //{
-            //    history.AddLast(nextTrack);
-            //}
-
-            //if (history.Count > MaxHistoryCount)
-            //{
-            //    history.RemoveFirst();
-            //}
-        }
-
-        public void SwitchPlaylist(IPlaylist album, TrackInfo track)
-        {
-            this.PlayingPlaylist = album;
-            this.AddHistory(track);
         }
 
         private Command _openSettingWindowCommand;

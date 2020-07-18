@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms.VisualStyles;
 using CSCore;
 using CSCore.Codecs;
 using CSCore.CoreAudioAPI;
+using CSCore.DSP;
 using CSCore.SoundOut;
+using Gouter.Extensions;
 using Gouter.Managers;
 
 namespace Gouter.Players
@@ -16,24 +19,47 @@ namespace Gouter.Players
     /// </summary>
     internal class MediaPlayer : NotificationObject, IDisposable, ISubscribable<IMediaPlayerObserver>, ISoundPlayerObserver
     {
+        private volatile bool _isTrackChanging = false;
+        private static Random _rand = new Random();
+
         /// <summary>
         /// メディア管理クラス
         /// </summary>
         public MediaManager MediaManager { get; }
 
         /// <summary>
-        /// 出力デバイス
+        /// オーディオ出力先
         /// </summary>
         private ISoundOut _audioRenderer;
 
         /// <summary>
-        /// オブザーバ
+        /// ループモード
         /// </summary>
+        public LoopMode LoopMode { get; set; } = LoopMode.Playlist;
+
+        /// <summary>
+        /// シャッフルモード
+        /// </summary>
+        public ShuffleMode ShuffleMode { get; set; } = ShuffleMode.Random;
+
+        /// <summary>
+        /// 再生履歴の最大数を取得または設定する。
+        /// </summary>
+        public int MaxHistoryCount { get; set; } = 50;
+
+        // 現在の再生履歴の位置
+        private LinkedListNode<TrackInfo> _currentHistoryNode;
+
+        // 再生履歴リスト
+        private LinkedList<TrackInfo> _playHistory = new LinkedList<TrackInfo>();
+
+        // オブザーバ
         private readonly IList<IMediaPlayerObserver> _observers = new List<IMediaPlayerObserver>();
 
         private bool _isDisposed;
 
         private TrackInfo _track;
+
         /// <summary>
         /// 再生中のトラック情報
         /// </summary>
@@ -87,14 +113,42 @@ namespace Gouter.Players
                 Device = App.Instance.SoundDeviceListener.SystemDefault.GetDevice(),
             };
 
-        public ValueTask ChangeTrack(TrackInfo track) => this.ChangeTrack(track, null);
+        /// <summary>
+        /// トラックを切り替える。
+        /// </summary>
+        /// <param name="track"></param>
+        /// <param name="isClearHistory"></param>
+        /// <returns></returns>
+        public ValueTask SwitchTrack(TrackInfo track, bool isClearHistory = true, bool isUpdateHistory = true)
+            => this.SwitchTrack(track, null, isClearHistory, isUpdateHistory);
 
-        public async ValueTask ChangeTrack(TrackInfo track, IPlaylist nextPlaylist)
+        /// <summary>
+        /// トラックを切り替える。
+        /// </summary>
+        /// <param name="track"></param>
+        /// <param name="nextPlaylist"></param>
+        /// <param name="isClearHistory"></param>
+        /// <returns></returns>
+        public async ValueTask SwitchTrack(TrackInfo track, IPlaylist nextPlaylist, bool isClearHistory = true, bool isUpdateHistory = true)
         {
+            if (isClearHistory)
+            {
+                this._playHistory.Clear();
+            }
+
+            if (isUpdateHistory)
+            {
+                this.AddPlayHistory(track);
+            }
+
             if (this.Track != track && this.State != PlayState.Stop)
             {
-                // トラックが再生中であれば停止する
+                // 再生中であれば停止する
+                this._isTrackChanging = true;
+
                 await this._player.StopAndWait().ConfigureAwait(false);
+
+                this._isTrackChanging = false;
             }
 
             if (nextPlaylist != null && this.Playlist != nextPlaylist)
@@ -109,17 +163,148 @@ namespace Gouter.Players
                 throw new InvalidOperationException();
             }
 
+
             if (this.Track != track)
             {
                 this.Track = track;
                 this._player.ChangeSoundSource(track.Path);
             }
         }
+
         /// <summary>
         /// 再生を行う
         /// </summary>
-        public async void Play()
-            => await this._player.Play();
+        public ValueTask Play() => this._player.Play();
+
+        /// <summary>
+        /// 前のトラックを再生する。
+        /// </summary>
+        /// <returns></returns>
+        public async ValueTask PlayPrevious()
+        {
+            var playlist = this._playlist;
+            if (playlist == null)
+            {
+                return;
+            }
+
+            var previousNode = this._currentHistoryNode?.Previous;
+
+            var temp = TimeSpan.FromSeconds(3.0);
+
+            if (this.GetPosition() > temp || previousNode?.Value == default)
+            {
+                // 再生履歴なし or 再生位置が指定時間以上
+                this.SetPosition(TimeSpan.Zero);
+            }
+            else
+            {
+                await this.SwitchTrack(previousNode.Value, false, false).ConfigureAwait(false);
+                this._currentHistoryNode = previousNode;
+            }
+
+            await this.Play().ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// 次のトラックを再生する。
+        /// </summary>
+        /// <returns></returns>
+        public async ValueTask PlayNext()
+        {
+            var playlist = this._playlist;
+            if (playlist == null)
+            {
+                return;
+            }
+
+            TrackInfo nextTrack;
+
+            // 再生履歴に次のトラックがある場合
+            var nextHistoryNode = this._currentHistoryNode.Next;
+            if (nextHistoryNode != null)
+            {
+                nextTrack = nextHistoryNode.Value;
+            }
+            else
+            {
+                nextTrack = this.GetNextTrack(this._currentHistoryNode.Value, playlist);
+            }
+
+            await this.SwitchTrack(nextTrack, false).ConfigureAwait(false);
+            await this.Play().ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// 次のトラックを選択する。
+        /// </summary>
+        /// <param name="currentTrack">現在のトラック</param>
+        /// <param name="playlist">プレイリスト</param>
+        /// <returns></returns>
+        public TrackInfo GetNextTrack(TrackInfo currentTrack, IPlaylist playlist)
+        {
+            if (this.LoopMode == LoopMode.SingleTrack)
+            {
+                return currentTrack;
+            }
+
+            var tracks = playlist.Tracks;
+
+            if (this.ShuffleMode == ShuffleMode.None)
+            {
+                int trackIndex = tracks.IndexOf(currentTrack);
+                int index = trackIndex < tracks.Count - 1 ? trackIndex + 1 : 0;
+
+                return tracks[index];
+            }
+            else if (this.ShuffleMode == ShuffleMode.Random)
+            {
+                int index = _rand.Next(0, tracks.Count - 1);
+
+                return tracks[index];
+            }
+
+            throw new NotSupportedException();
+        }
+
+        /// <summary>
+        /// トラックを再生履歴に追加する。
+        /// </summary>
+        /// <param name="nextTrack">次のトラック</param>
+        public void AddPlayHistory(TrackInfo nextTrack)
+        {
+            var history = this._playHistory;
+            var currentNode = this._currentHistoryNode;
+
+            if (history.Count == 0)
+            {
+                // 再生履歴がない場合
+                this._currentHistoryNode = history.AddLast(nextTrack);
+            }
+            else if (currentNode.Value != nextTrack)
+            {
+                // 再生履歴あり
+                this._currentHistoryNode = history.AddAfter(currentNode, nextTrack);
+
+                history.RemoveAfterAll(this._currentHistoryNode.Next);
+            }
+
+            this.OrganizeHistory();
+        }
+
+        /// <summary>
+        /// 再生履歴を整理する
+        /// </summary>
+        private void OrganizeHistory()
+        {
+            var history = this._playHistory;
+
+            // 履歴件数がMaxCountを超える場合は先頭の履歴を削除
+            while (history.Count > 0 && history.Count > this.MaxHistoryCount)
+            {
+                history.RemoveFirst();
+            }
+        }
 
         /// <summary>
         /// 再生中かどうかを取得する。
@@ -167,7 +352,12 @@ namespace Gouter.Players
         /// </summary>
         /// <param name="observer">通知オブジェクト</param>
         public void Subscribe(IMediaPlayerObserver observer)
-            => this._observers.Add(observer);
+        {
+            if (!this._observers.Contains(observer))
+            {
+                this._observers.Add(observer);
+            }
+        }
 
         /// <summary>
         /// 通知オブジェクトの購読解除を行う。
@@ -215,6 +405,20 @@ namespace Gouter.Players
             this.RaisePropertyChanged(nameof(this.IsPlaying));
             this.RaisePropertyChanged(nameof(this.IsPausing));
             this.RaisePropertyChanged(nameof(this.IsStopping));
+
+            if (state == PlayState.Stop)
+            {
+                // スキップ処理を見直す
+                if (!this._isTrackChanging)
+                {
+                    if (this.LoopMode == LoopMode.None)
+                    {
+                        return;
+                    }
+
+                    this.PlayNext();
+                }
+            }
         }
     }
 }

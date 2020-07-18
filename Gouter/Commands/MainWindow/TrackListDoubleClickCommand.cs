@@ -23,7 +23,6 @@ namespace Gouter.Commands.MainWindow
 
         public override void Execute(TrackInfo parameter)
         {
-            this._viewModel.SwitchPlaylist(this._viewModel.SelectedAlbum, parameter);
             this._viewModel.Play(parameter, this._viewModel.SelectedAlbumPlaylist);
         }
     }

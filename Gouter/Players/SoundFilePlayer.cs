@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 using CSCore;
@@ -17,6 +20,10 @@ namespace Gouter.Players
     {
         // フェード終了後の再生状態
         private PlayState? _afterFadeState = null;
+
+        private EventHandler _playStopped;
+
+        private readonly object @_lockObject = new object();
 
         // 音源
         private ISampleSource _inputSource;
@@ -78,11 +85,14 @@ namespace Gouter.Players
         /// 再生状態の設定と通知を行う
         /// </summary>
         /// <param name="state">再生状態</param>
-        private void OnStateChanged(PlayState state)
+        private void OnStateChanged(PlayState state) => this._dispatcher.Invoke(() =>
         {
-            this.State = state;
-            this._observers.NotifyAll(observer => observer.OnPlayStateChanged(state));
-        }
+            lock (this.@_lockObject)
+            {
+                this.State = state;
+                this._observers.NotifyAll(observer => observer.OnPlayStateChanged(state));
+            }
+        });
 
         /// <summary>
         /// 音源の初期化処理を行う
@@ -106,6 +116,7 @@ namespace Gouter.Players
             this._outputSource = this._fadeInOut.ToWaveSource();
 
             this._fadeInOut.FadeStrategy.FadingFinished += this.OnFadeInOutFinished;
+
             this._soundDevice.Initialize(this._outputSource);
         }
 
@@ -121,6 +132,7 @@ namespace Gouter.Players
         {
             this._isStopRequested = false;
             this.OnStateChanged(PlayState.Stop);
+            this._playStopped?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -156,7 +168,7 @@ namespace Gouter.Players
         /// 再生を開始する
         /// </summary>
         /// <param name="enableFadeIn">フェ＝ドインを行うかどうかのフラグ</param>
-        public async Task Play(bool enableFadeIn = true)
+        public async ValueTask Play(bool enableFadeIn = true)
         {
             if (this.State == PlayState.Play)
             {
@@ -184,13 +196,35 @@ namespace Gouter.Players
             // デバイスの再生停止処理が終了していない場合は待機する。
             if (this._isStopRequested)
             {
-                await Task.Run(() => this._soundDevice.WaitForStopped())
-                    .ConfigureAwait(false);
+                await this.WaitForStopped().ConfigureAwait(false);
             }
 
             // 再生処理を開始する。
             this._soundDevice.Play();
+
             this.OnStateChanged(PlayState.Play);
+        }
+
+        /// <summary>
+        /// 出力デバイスの再生停止が完了するまで待機する。
+        /// </summary>
+        /// <returns></returns>
+        public async ValueTask WaitForStopped()
+        {
+            var device = this._soundDevice;
+            if (device == null || this.State == PlayState.Stop)
+            {
+                return;
+            }
+
+            var semaphore = new SemaphoreSlim(0, 1);
+            void waitHandler(object s, EventArgs e) => semaphore.Release();
+
+            this._playStopped += waitHandler;
+
+            await semaphore.WaitAsync().ConfigureAwait(false);
+
+            this._playStopped -= waitHandler;
         }
 
         /// <summary>
@@ -251,16 +285,16 @@ namespace Gouter.Players
         /// 再生を停止し、デバイスの再生処理終了を待機する
         /// </summary>
         /// <returns></returns>
-        public async ValueTask StopAndWait()
+        public ValueTask StopAndWait()
         {
             if (this._soundDevice == null || this.State == PlayState.Stop)
             {
-                return;
+                return new ValueTask();
             }
 
             this.Stop();
 
-            await this._dispatcher.InvokeAsync(() => this._soundDevice.WaitForStopped());
+            return this.WaitForStopped();
         }
 
         /// <summary>
@@ -374,6 +408,11 @@ namespace Gouter.Players
             this._fadeInOut.Dispose();
             this._equalizer.Dispose();
             this._inputSource.Dispose();
+        }
+
+        public TimeSpan GetDuration()
+        {
+            return this._soundDevice.WaveSource.GetTime(this._soundDevice.WaveSource.Length);
         }
 
         /// <summary>

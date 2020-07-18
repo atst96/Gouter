@@ -21,14 +21,9 @@ namespace Gouter.Commands.MainWindow
             return true;
         }
 
-        public override void Execute(object parameter)
+        public override async void Execute(object parameter)
         {
-            this._viewModel.SkipToPreviousTrack();
-
-            if (this._viewModel.IsPlayRequired)
-            {
-                this._viewModel.Player.Play();
-            }
+            await this._viewModel.Player.PlayPrevious();
         }
     }
 }
