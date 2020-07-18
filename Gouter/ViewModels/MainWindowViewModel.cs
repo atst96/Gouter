@@ -5,6 +5,7 @@ using Gouter.Managers;
 using Gouter.Players;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,7 +14,7 @@ using System.Windows.Data;
 
 namespace Gouter.ViewModels
 {
-    internal class MainWindowViewModel : ViewModelBase, ISoundPlayerObserver
+    internal class MainWindowViewModel : ViewModelBase, IMediaPlayerObserver
     {
         private readonly Random _rand = new Random();
 
@@ -21,13 +22,11 @@ namespace Gouter.ViewModels
 
         public MediaManager MediaManager { get; } = _app.MediaManager;
 
-        public MediaPlayer NewPlayer { get; } = _app.MediaPlayer;
+        public MediaPlayer Player { get; } = _app.MediaPlayer;
 
         public PlaylistManager Playlists => this.MediaManager.Playlists;
 
         public SortedNotifiableCollectionWrapper<AlbumPlaylist> Albums { get; }
-
-        public SoundPlayer Player => this.NewPlayer.InternalPlayer;
 
         private AlbumPlaylist _selectedAlbumPlaylist;
         public AlbumPlaylist SelectedAlbumPlaylist
@@ -45,7 +44,7 @@ namespace Gouter.ViewModels
             BindingOperations.EnableCollectionSynchronization(this.Albums, new object());
         }
 
-        void ISoundPlayerObserver.OnPlayStateChanged(PlayState state)
+        void IMediaPlayerObserver.OnPlayStateChanged(PlayState state)
         {
             if (state == PlayState.Stop)
             {
@@ -171,10 +170,10 @@ namespace Gouter.ViewModels
             this.Player.Play();
         }
 
-        public void Play(TrackInfo track)
+        public async void Play(TrackInfo track, IPlaylist playlist)
         {
             this.IsPlayRequired = true;
-            this.Player.SetTrack(track);
+            await this.Player.ChangeTrack(track, playlist);
             this.Player.Play();
             this.AddHistory(track);
         }
@@ -197,7 +196,7 @@ namespace Gouter.ViewModels
                 return;
             }
 
-            player.SetTrack(previousNode.Value);
+            player.ChangeTrack(previousNode.Value);
             this._currentNode = previousNode;
         }
 
@@ -213,7 +212,7 @@ namespace Gouter.ViewModels
             var nextNode = this._currentNode?.Next;
             if (nextNode != null)
             {
-                player.SetTrack(nextNode.Value);
+                player.ChangeTrack(nextNode.Value);
                 this._currentNode = nextNode;
 
                 return;
@@ -232,7 +231,7 @@ namespace Gouter.ViewModels
             }
             else
             {
-                var currentTrack = player.PlayTrack;
+                var currentTrack = player.Track;
                 var currentTrackIdx = tracks.IndexOf(currentTrack);
 
                 if (currentTrackIdx >= 0)
@@ -247,7 +246,7 @@ namespace Gouter.ViewModels
 
             if (nextTrack != default)
             {
-                player.SetTrack(nextTrack);
+                player.ChangeTrack(nextTrack);
                 this.AddHistory(nextTrack);
             }
         }
