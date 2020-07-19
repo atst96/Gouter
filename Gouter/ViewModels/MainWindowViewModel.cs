@@ -8,9 +8,11 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
+using System.Windows.Threading;
 
 namespace Gouter.ViewModels
 {
@@ -41,30 +43,11 @@ namespace Gouter.ViewModels
 
             this.Player.Subscribe(this);
 
-            BindingOperations.EnableCollectionSynchronization(this.Albums, new object());
-        }
+            var timerInterval = TimeSpan.FromSeconds(0.1d);
+            this._timer = new DispatcherTimer(timerInterval, DispatcherPriority.Render, this.OnTimerTick, Dispatcher.CurrentDispatcher);
+            this._timer.Tick += this.OnTimerTick;
 
-        void IMediaPlayerObserver.OnPlayStateChanged(PlayState state)
-        {
-            //if (state == PlayState.Stop)
-            //{
-            //    if (this.IsPlayRequired)
-            //    {
-            //        if (this.IsLoop)
-            //        {
-            //            this.SkipToNextTrack();
-            //            this.Player.Play();
-            //        }
-            //        else
-            //        {
-            //            this.IsPlayRequired = false;
-            //            if (this.PauseCommand.CanExecute(null))
-            //            {
-            //                this.PauseCommand.Execute(null);
-            //            }
-            //        }
-            //    }
-            //}
+            BindingOperations.EnableCollectionSynchronization(this.Albums, new object());
         }
 
         private Command _initializeCommand;
@@ -180,5 +163,61 @@ namespace Gouter.ViewModels
         private Command _openSettingWindowCommand;
         public Command OpenSettingWindowCommand => this._openSettingWindowCommand ??= (new OpenSettingWindowCommand(this));
 
+        private double _currentTime = 0.0d;
+        private double _duration = 0.0d;
+
+        /// <summary>
+        /// 楽曲の現在位置
+        /// </summary>
+        public double CurrentTime
+        {
+            get => this._currentTime;
+            set => this.SetProperty(ref this._currentTime, value);
+        }
+
+        /// <summary>
+        /// 楽曲の長さ(尺)
+        /// </summary>
+        public double Duration
+        {
+            get => this._duration;
+            set => this.SetProperty(ref this._duration, value);
+        }
+
+        private readonly DispatcherTimer _timer;
+
+        void IMediaPlayerObserver.OnPlayStateChanged(PlayState state)
+        {
+            switch (state)
+            {
+                case PlayState.Play:
+                    this.Duration = this.Player.GetDuration().TotalMilliseconds;
+                    this._timer.Start();
+                    this.UpdateTime();
+                    break;
+
+                case PlayState.Pause:
+                case PlayState.Stop:
+                    this._timer.Start();
+                    this.UpdateTime();
+                    break;
+            }
+
+        }
+
+        public bool IsSeeking { get; set; }
+
+        private void UpdateTime()
+        {
+            if (!this.IsSeeking && this.Player.Track != null)
+            {
+                this.CurrentTime = this.Player.GetPosition().TotalMilliseconds;
+            }
+        }
+
+        private void OnTimerTick(object sender, EventArgs e)
+        {
+            this.UpdateTime();
+        }
     }
 }

@@ -11,6 +11,7 @@
     xmlns:b="clr-namespace:Gouter.Behaviors"
     xmlns:conv="clr-namespace:Gouter.Converters"
     xmlns:cnm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+    xmlns:controls="clr-namespace:Gouter.Controls"
     mc:Ignorable="d"
     Title="Gouter" Height="450" Width="800"
     UseLayoutRounding="True"
@@ -152,30 +153,38 @@
                     <Image
                         DockPanel.Dock="Left"
                         Height="54" Width="54"
-                        b:TrackBehavior.AlbumArt="{Binding Player.CurrentTrack, Mode=OneWay}"
+                        b:TrackBehavior.AlbumArt="{Binding Player.Track, Mode=OneWay}"
                         RenderOptions.BitmapScalingMode="HighQuality" />
 
-                    <Slider
+                    <controls:SliderEx
                         Margin="6,0,6,6"
                         Minimum="0"
                         IsMoveToPointEnabled="True"
-                        Value="{Binding Player.CurrentTime, Mode=TwoWay}"
-                        Maximum="{Binding Player.Duration, Mode=OneWay}"
-                        ToolTip="{Binding Player.CurrentTime, Mode=OneWay, Converter={StaticResource MillisecondsToTimeStringConverter}}"
-                        DockPanel.Dock="Bottom" />
+                        Value="{Binding CurrentTime, Mode=OneWay}"
+                        Maximum="{Binding Duration, Mode=OneWay}"
+                        ToolTip="{Binding CurrentTime, Mode=OneWay, Converter={StaticResource MillisecondsToTimeStringConverter}}"
+                        DockPanel.Dock="Bottom"
+                        Style="{StaticResource {x:Type Slider}}">
+                        <i:Interaction.Behaviors>
+                            <b:SliderMediaPlayerControlBehavior
+                                IsSeeking="{Binding IsSeeking, Mode=OneWayToSource}"
+                                Player="{Binding Player, Mode=OneTime}"
+                                Position="{Binding CurrentTime, Mode=TwoWay}"/>
+                        </i:Interaction.Behaviors>
+                    </controls:SliderEx>
 
                     <TextBlock
                         Margin="6"
                         DockPanel.Dock="Right"
                         VerticalAlignment="Center">
-                        <Run Text="{Binding Player.CurrentTime, Mode=OneWay, Converter={StaticResource MillisecondsToTimeStringConverter}}" /><!--
+                        <Run Text="{Binding CurrentTime, Mode=OneWay, Converter={StaticResource MillisecondsToTimeStringConverter}}" /><!--
                      --><Run Text=" / " /><!--
-                     --><Run Text="{Binding Player.Duration, Mode=OneWay, Converter={StaticResource MillisecondsToTimeStringConverter}}" />
+                     --><Run Text="{Binding Duration, Mode=OneWay, Converter={StaticResource MillisecondsToTimeStringConverter}}" />
                     </TextBlock>
 
                     <TextBlock
                         Margin="12,6,6,6"
-                        Text="{Binding Player.CurrentTrack.Title}"
+                        Text="{Binding Player.Track.Title}"
                         FontWeight="Bold"
                         VerticalAlignment="Center"
                         TextWrapping="NoWrap"

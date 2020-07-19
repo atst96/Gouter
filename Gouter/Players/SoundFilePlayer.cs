@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
@@ -21,11 +22,10 @@ namespace Gouter.Players
         // フェード終了後の再生状態
         private PlayState? _afterFadeState = null;
 
-        private EventHandler _playStopped;
-
         private readonly object @_lockObject = new object();
 
         // 音源
+        private volatile bool _isSoundSourceInitialized;
         private ISampleSource _inputSource;
         private FadeInOut _fadeInOut;
         private Equalizer _equalizer;
@@ -48,7 +48,7 @@ namespace Gouter.Players
         /// <summary>
         /// フェードイン／アウトにかける時間を取得または設定する。
         /// </summary>
-        public TimeSpan? FadeInOutDuration { get; set; }
+        public TimeSpan? FadeInOutDuration { get; set; } = TimeSpan.FromMilliseconds(100);
 
         /// <summary>
         /// 再生状態を取得する。
@@ -107,6 +107,7 @@ namespace Gouter.Players
 
             this.ReleaseAudioSources();
 
+            this._isSoundSourceInitialized = true;
             this._inputSource = GetSoundSource(path).ToSampleSource();
             this._equalizer = Equalizer.Create10BandEqualizer(this._inputSource);
             this._fadeInOut = new FadeInOut(this._equalizer)
@@ -120,6 +121,8 @@ namespace Gouter.Players
             var device = this._soundDevice;
             device.Initialize(this._outputSource);
             device.Volume = this._volume;
+
+            this._isSoundSourceInitialized = true;
         }
 
         private static IWaveSource GetSoundSource(string path)
@@ -134,7 +137,6 @@ namespace Gouter.Players
         {
             this._isStopRequested = false;
             this.OnStateChanged(PlayState.Stop);
-            this._playStopped?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -214,19 +216,20 @@ namespace Gouter.Players
         public async ValueTask WaitForStopped()
         {
             var device = this._soundDevice;
-            if (device == null || this.State == PlayState.Stop)
+            if (device == null || (device.PlaybackState == PlaybackState.Stopped && this.State == PlayState.Stop))
             {
                 return;
             }
 
-            var semaphore = new SemaphoreSlim(0, 1);
-            void waitHandler(object s, EventArgs e) => semaphore.Release();
+            // StateがStopになるまで待機
 
-            this._playStopped += waitHandler;
-
-            await semaphore.WaitAsync().ConfigureAwait(false);
-
-            this._playStopped -= waitHandler;
+            await Task.Run(() =>
+            {
+                while (device.PlaybackState != PlaybackState.Stopped || this.State != PlayState.Stop)
+                {
+                    Thread.Sleep(20);
+                }
+            });
         }
 
         /// <summary>
@@ -266,7 +269,8 @@ namespace Gouter.Players
         /// <param name="isFadeOutEnable">フェードアウトを行うかどうかのフラグ</param>
         public void Stop(bool isFadeOutEnable = true)
         {
-            if (this._soundDevice == null || this.State == PlayState.Stop)
+            var device = this._soundDevice;
+            if (device == null || (device.PlaybackState == PlaybackState.Stopped && this.State == PlayState.Stop))
             {
                 return;
             }
@@ -289,7 +293,8 @@ namespace Gouter.Players
         /// <returns></returns>
         public ValueTask StopAndWait()
         {
-            if (this._soundDevice == null || this.State == PlayState.Stop)
+            var device = this._soundDevice;
+            if (device == null || (device.PlaybackState == PlaybackState.Stopped && this.State == PlayState.Stop))
             {
                 return new ValueTask();
             }
@@ -359,18 +364,14 @@ namespace Gouter.Players
         /// </summary>
         /// <returns>再生位置</returns>
         public TimeSpan GetPosition()
-        {
-            return this._inputSource.GetPosition();
-        }
+            => this._isSoundSourceInitialized ? this._inputSource.GetPosition() : TimeSpan.Zero;
 
         /// <summary>
         /// 再生位置を設定する
         /// </summary>
         /// <param name="position">再生位置</param>
         public void SetPosition(TimeSpan position)
-        {
-            this._inputSource?.SetPosition(position);
-        }
+            => this._inputSource?.SetPosition(position);
 
         private readonly List<ISoundPlayerObserver> _observers = new List<ISoundPlayerObserver>();
 
@@ -412,10 +413,12 @@ namespace Gouter.Players
             this._inputSource.Dispose();
         }
 
+        /// <summary>
+        /// 楽曲の長さ(尺)を取得する。
+        /// </summary>
+        /// <returns></returns>
         public TimeSpan GetDuration()
-        {
-            return this._soundDevice.WaveSource.GetTime(this._soundDevice.WaveSource.Length);
-        }
+            => this._isSoundSourceInitialized ? this._inputSource.GetLength() : TimeSpan.Zero;
 
         /// <summary>
         /// リソース解放を行う

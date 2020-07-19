@@ -23,7 +23,7 @@ namespace Gouter.Commands.MainWindow
 
         public override void Execute(object parameter)
         {
-            this._viewModel.Play(this._viewModel.SelectedTrack, this._viewModel.CurrentPlaylist);
+            this._viewModel.Play();
         }
     }
 }

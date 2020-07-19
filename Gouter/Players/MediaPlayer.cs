@@ -154,7 +154,7 @@ namespace Gouter.Players
                 this.AddPlayHistory(track);
             }
 
-            if (this.Track != track && this.State != PlayState.Stop)
+            if (this.State != PlayState.Stop)
             {
                 // 再生中であれば停止する
                 this._isTrackChanging = true;
@@ -162,6 +162,11 @@ namespace Gouter.Players
                 await this._player.StopAndWait().ConfigureAwait(false);
 
                 this._isTrackChanging = false;
+
+                if (this.Track == track)
+                {
+                    this._player.SetPosition(TimeSpan.Zero);
+                }
             }
 
             if (nextPlaylist != null && this.Playlist != nextPlaylist)
@@ -327,8 +332,7 @@ namespace Gouter.Players
         /// <summary>
         /// 再生を一時停止する
         /// </summary>
-        public void Pause()
-            => this._player.Pause();
+        public void Pause() => this._player.Pause();
 
         /// <summary>
         /// 一時停止中かどうかを取得する。
@@ -352,6 +356,12 @@ namespace Gouter.Players
         /// <returns>再生位置</returns>
         public TimeSpan GetPosition()
             => this._player.GetPosition();
+
+        /// <summary>
+        /// 楽曲の長さ(尺)を取得する。
+        /// </summary>
+        /// <returns></returns>
+        public TimeSpan GetDuration() => this._player.GetDuration();
 
         /// <summary>
         /// 再生位置を設定する
@@ -412,7 +422,7 @@ namespace Gouter.Players
         /// 内部プレーヤの状態が変化した
         /// </summary>
         /// <param name="state">状態</param>
-        void ISoundPlayerObserver.OnPlayStateChanged(PlayState state)
+        async void ISoundPlayerObserver.OnPlayStateChanged(PlayState state)
         {
             this.State = state;
             this.RaisePropertyChanged(nameof(this.IsPlaying));
@@ -421,17 +431,19 @@ namespace Gouter.Players
 
             if (state == PlayState.Stop)
             {
+                if (this.LoopMode == LoopMode.None)
+                {
+                    return;
+                }
+
                 // スキップ処理を見直す
                 if (!this._isTrackChanging)
                 {
-                    if (this.LoopMode == LoopMode.None)
-                    {
-                        return;
-                    }
-
-                    this.PlayNext();
+                    await this.PlayNext();
                 }
             }
+
+            this._observers.NotifyAll(o => o.OnPlayStateChanged(state));
         }
     }
 }
