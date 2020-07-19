@@ -119,7 +119,7 @@
                         Width="80"
                         IsMoveToPointEnabled="True"
                         Minimum="0.0" Maximum="1.0"
-                        Value="{Binding Player.Volumne, Mode=TwoWay}"
+                        Value="{Binding Player.Volume, Mode=TwoWay}"
                         VerticalAlignment="Center" />
                 </StackPanel>
 

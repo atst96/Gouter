@@ -30,7 +30,7 @@ namespace Gouter.Players
         private FadeInOut _fadeInOut;
         private Equalizer _equalizer;
         private IWaveSource _outputSource;
-        private float _volume;
+        private float _volume = 0.5f;
 
         // サウンドデバイス
         private ISoundOut _soundDevice;
@@ -117,7 +117,9 @@ namespace Gouter.Players
 
             this._fadeInOut.FadeStrategy.FadingFinished += this.OnFadeInOutFinished;
 
-            this._soundDevice.Initialize(this._outputSource);
+            var device = this._soundDevice;
+            device.Initialize(this._outputSource);
+            device.Volume = this._volume;
         }
 
         private static IWaveSource GetSoundSource(string path)

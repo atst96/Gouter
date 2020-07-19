@@ -43,6 +43,19 @@ namespace Gouter.Players
         public ShuffleMode ShuffleMode { get; set; } = ShuffleMode.Random;
 
         /// <summary>
+        /// 再生時のボリューム
+        /// </summary>
+        public float Volume
+        {
+            get => this._player.Volume;
+            set
+            {
+                this._player.Volume = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
         /// 再生履歴の最大数を取得または設定する。
         /// </summary>
         public int MaxHistoryCount { get; set; } = 50;

@@ -99,13 +99,6 @@ namespace Gouter.ViewModels
             set => this.SetProperty(ref this._status, value);
         }
 
-        private double _volume = 1.0;
-        public double Volume
-        {
-            get => this._volume;
-            set => this.SetProperty(ref this._volume, value);
-        }
-
         private Command<TrackInfo> _trackListDoubleClickCommand;
         public Command<TrackInfo> TrackListDoubleClickCommand => this._trackListDoubleClickCommand ??= new TrackListDoubleClickCommand(this);
 
@@ -186,5 +179,6 @@ namespace Gouter.ViewModels
 
         private Command _openSettingWindowCommand;
         public Command OpenSettingWindowCommand => this._openSettingWindowCommand ??= (new OpenSettingWindowCommand(this));
+
     }
 }
