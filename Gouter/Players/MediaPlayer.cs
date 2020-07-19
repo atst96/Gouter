@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms.VisualStyles;
 using CSCore;
@@ -21,6 +22,8 @@ namespace Gouter.Players
     {
         private volatile bool _isTrackChanging = false;
         private static Random _rand = new Random();
+        private CancellationTokenSource _cancellationTokenSource;
+        private SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
 
         /// <summary>
         /// メディア管理クラス
@@ -144,55 +147,97 @@ namespace Gouter.Players
         /// <returns></returns>
         public async ValueTask SwitchTrack(TrackInfo track, IPlaylist nextPlaylist, bool isClearHistory = true, bool isUpdateHistory = true)
         {
-            if (isClearHistory)
+            var cancellationTokenSource = this.IssueCancellationTokenSource();
+            try
             {
-                this._playHistory.Clear();
-            }
+                await this._semaphore.WaitAsync(cancellationTokenSource.Token).ConfigureAwait(false);
 
-            if (isUpdateHistory)
-            {
-                this.AddPlayHistory(track);
-            }
-
-            if (this.State != PlayState.Stop)
-            {
-                // 再生中であれば停止する
-                this._isTrackChanging = true;
-
-                await this._player.StopAndWait().ConfigureAwait(false);
-
-                this._isTrackChanging = false;
-
-                if (this.Track == track)
+                try
                 {
-                    this._player.SetPosition(TimeSpan.Zero);
+                    if (isClearHistory)
+                    {
+                        this._playHistory.Clear();
+                    }
+
+                    if (isUpdateHistory)
+                    {
+                        this.AddPlayHistory(track);
+                    }
+
+                    if (this.State != PlayState.Stop)
+                    {
+                        // 再生中であれば停止する
+                        this._isTrackChanging = true;
+
+                        await this._player.StopAndWait(cancellationTokenSource.Token).ConfigureAwait(false);
+
+                        this._isTrackChanging = false;
+
+                        if (this.Track == track)
+                        {
+                            this._player.SetPosition(TimeSpan.Zero);
+                        }
+                    }
+
+                    cancellationTokenSource.Token.ThrowIfCancellationRequested();
+                    if (nextPlaylist != null && this.Playlist != nextPlaylist)
+                    {
+                        this.Playlist = nextPlaylist;
+                    }
+
+                    var playlist = this.Playlist;
+                    if (playlist == null || !playlist.Tracks.Contains(track))
+                    {
+                        throw new InvalidOperationException();
+                    }
+
+                    if (this.Track != track)
+                    {
+                        this.Track = track;
+                        this._player.ChangeSoundSource(track.Path);
+                    }
+                }
+                finally
+                {
+                    this._semaphore.Release();
                 }
             }
-
-            if (nextPlaylist != null && this.Playlist != nextPlaylist)
+            finally
             {
-                this.Playlist = nextPlaylist;
-            }
-
-            var playlist = this.Playlist;
-
-            if (playlist == null || !playlist.Tracks.Contains(track))
-            {
-                throw new InvalidOperationException();
-            }
-
-
-            if (this.Track != track)
-            {
-                this.Track = track;
-                this._player.ChangeSoundSource(track.Path);
+                cancellationTokenSource.Dispose();
+                this.CleanupCancellationTokenSource();
             }
         }
+
+        private object @lockObj = new object();
 
         /// <summary>
         /// 再生を行う
         /// </summary>
-        public ValueTask Play() => this._player.Play();
+        public async ValueTask Play()
+        {
+            var cancellationTokenSource = this.IssueCancellationTokenSource();
+
+            try
+            {
+                await this._semaphore.WaitAsync(cancellationTokenSource.Token).ConfigureAwait(false);
+
+                try
+                {
+                    await this._player.Play(cancellationToken: cancellationTokenSource.Token).ConfigureAwait(false);
+                }
+                finally
+                {
+                    this._semaphore.Release();
+
+                }
+            }
+            finally
+            {
+                cancellationTokenSource.Dispose();
+                this.CleanupCancellationTokenSource();
+            }
+        }
 
         /// <summary>
         /// 前のトラックを再生する。
@@ -251,6 +296,37 @@ namespace Gouter.Players
 
             await this.SwitchTrack(nextTrack, false).ConfigureAwait(false);
             await this.Play().ConfigureAwait(false);
+        }
+
+        private object @_lockObj = new object();
+
+        /// <summary>
+        /// <see cref="CancellationTokenSource"/>を発行する。
+        /// </summary>
+        /// <returns></returns>
+        private CancellationTokenSource IssueCancellationTokenSource()
+        {
+            lock (this.@_lockObj)
+            {
+                var oldCancellationTokenSource = this._cancellationTokenSource;
+                var cancellationTokenSource = new CancellationTokenSource();
+
+                this._cancellationTokenSource = cancellationTokenSource;
+                if (oldCancellationTokenSource != null && !oldCancellationTokenSource.IsCancellationRequested)
+                {
+                    oldCancellationTokenSource.Cancel();
+                }
+
+                return cancellationTokenSource;
+            }
+        }
+
+        private void CleanupCancellationTokenSource()
+        {
+            lock (this._lockObj)
+            {
+                this._cancellationTokenSource = null;
+            }
         }
 
         /// <summary>

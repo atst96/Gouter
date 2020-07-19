@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Gouter.ViewModels;
 
@@ -23,7 +25,14 @@ namespace Gouter.Commands.MainWindow
 
         public override async void Execute(object parameter)
         {
-            await this._viewModel.Player.PlayPrevious();
+            try
+            {
+                await this._viewModel.Player.PlayPrevious();
+            }
+            catch (Exception ex) when (ex is TaskCanceledException || ex is OperationCanceledException)
+            {
+                // pass
+            }
         }
     }
 }

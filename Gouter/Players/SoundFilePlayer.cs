@@ -100,14 +100,14 @@ namespace Gouter.Players
         /// <param name="path">音声ファイルのフルパス</param>
         public void ChangeSoundSource(string path)
         {
-            if (this.State != PlayState.Stop)
+            if (this._soundDevice.PlaybackState != PlaybackState.Stopped || this.State != PlayState.Stop)
             {
                 throw new InvalidOperationException();
             }
 
             this.ReleaseAudioSources();
 
-            this._isSoundSourceInitialized = true;
+            this._isSoundSourceInitialized = false;
             this._inputSource = GetSoundSource(path).ToSampleSource();
             this._equalizer = Equalizer.Create10BandEqualizer(this._inputSource);
             this._fadeInOut = new FadeInOut(this._equalizer)
@@ -172,7 +172,7 @@ namespace Gouter.Players
         /// 再生を開始する
         /// </summary>
         /// <param name="enableFadeIn">フェ＝ドインを行うかどうかのフラグ</param>
-        public async ValueTask Play(bool enableFadeIn = true)
+        public async ValueTask Play(bool enableFadeIn = true, CancellationToken? cancellationToken = default)
         {
             if (this.State == PlayState.Play)
             {
@@ -200,7 +200,7 @@ namespace Gouter.Players
             // デバイスの再生停止処理が終了していない場合は待機する。
             if (this._isStopRequested)
             {
-                await this.WaitForStopped().ConfigureAwait(false);
+                await this.WaitForStopped(cancellationToken).ConfigureAwait(false);
             }
 
             // 再生処理を開始する。
@@ -213,20 +213,23 @@ namespace Gouter.Players
         /// 出力デバイスの再生停止が完了するまで待機する。
         /// </summary>
         /// <returns></returns>
-        public async ValueTask WaitForStopped()
+        public Task WaitForStopped(CancellationToken? cancellationToken = default)
         {
+            cancellationToken?.ThrowIfCancellationRequested();
+
             var device = this._soundDevice;
             if (device == null || (device.PlaybackState == PlaybackState.Stopped && this.State == PlayState.Stop))
             {
-                return;
+                return Task.CompletedTask;
             }
 
             // StateがStopになるまで待機
 
-            await Task.Run(() =>
+            return Task.Run(() =>
             {
                 while (device.PlaybackState != PlaybackState.Stopped || this.State != PlayState.Stop)
                 {
+                    cancellationToken?.ThrowIfCancellationRequested();
                     Thread.Sleep(20);
                 }
             });
@@ -291,17 +294,19 @@ namespace Gouter.Players
         /// 再生を停止し、デバイスの再生処理終了を待機する
         /// </summary>
         /// <returns></returns>
-        public ValueTask StopAndWait()
+        public Task StopAndWait(CancellationToken? cancellationToken = default)
         {
+            cancellationToken?.ThrowIfCancellationRequested();
+
             var device = this._soundDevice;
             if (device == null || (device.PlaybackState == PlaybackState.Stopped && this.State == PlayState.Stop))
             {
-                return new ValueTask();
+                return Task.CompletedTask;
             }
 
             this.Stop();
 
-            return this.WaitForStopped();
+            return this.WaitForStopped(cancellationToken);
         }
 
         /// <summary>

@@ -140,10 +140,18 @@ namespace Gouter.ViewModels
 
         public bool IsPlayRequired { get; set; }
 
-        public void Play()
+        public async void Play()
         {
             this.IsPlayRequired = true;
-            this.Player.Play();
+
+            try
+            {
+                await this.Player.Play();
+            }
+            catch (Exception ex) when (ex is TaskCanceledException || ex is OperationCanceledException)
+            {
+                // pass
+            }
         }
 
         public async void Play(TrackInfo track, IPlaylist playlist)

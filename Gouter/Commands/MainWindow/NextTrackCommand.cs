@@ -23,7 +23,14 @@ namespace Gouter.Commands.MainWindow
 
         public override async void Execute(object parameter)
         {
-            await this._viewModel.Player.PlayNext();
+            try
+            {
+                await this._viewModel.Player.PlayNext();
+            }
+            catch (Exception ex) when (ex is TaskCanceledException || ex is OperationCanceledException)
+            {
+                // pass
+            }
         }
     }
 }
