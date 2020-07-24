@@ -11,16 +11,26 @@ using ATL;
 
 namespace Gouter.Utils
 {
-    internal static class ImageUtility
+    /// <summary>
+    /// 画像処理に関するユーティリティクラス
+    /// </summary>
+    internal static class ImageUtil
     {
-        public static MemoryStream ShrinkImageData(byte[] data, int iamgeSize)
+        /// <summary>
+        /// 指定サイズ以上の画像をアスペクト比を維持して最大サイズまで縮小する。
+        /// </summary>
+        /// <param name="data">画像データ</param>
+        /// <param name="maxSize">最大サイズ</param>
+        /// <returns></returns>
+        public static MemoryStream ShrinkImageData(byte[] data, int maxSize)
         {
             var srcStream = new MemoryStream(data);
 
             using (var srcImage = new Bitmap(srcStream))
             {
-                if (srcImage.Width <= iamgeSize && srcImage.Height <= iamgeSize)
+                if (srcImage.Width <= maxSize && srcImage.Height <= maxSize)
                 {
+                    // 幅／高さともに最大サイズ以下であれば縮小処理を省く
                     srcStream.Position = 0;
                     return srcStream;
                 }
@@ -29,31 +39,42 @@ namespace Gouter.Utils
 
                 if (srcImage.Width > srcImage.Height)
                 {
-                    resizeHeight = (int)(iamgeSize * (srcImage.Height / (double)srcImage.Width));
-                    resizeWidth = iamgeSize;
+                    resizeHeight = (int)(maxSize * (srcImage.Height / (double)srcImage.Width));
+                    resizeWidth = maxSize;
                 }
                 else if (srcImage.Width < srcImage.Height)
                 {
-                    resizeWidth = (int)(iamgeSize * (srcImage.Width / (double)srcImage.Height));
-                    resizeHeight = iamgeSize;
+                    resizeWidth = (int)(maxSize * (srcImage.Width / (double)srcImage.Height));
+                    resizeHeight = maxSize;
                 }
                 else
                 {
-                    resizeWidth = iamgeSize;
-                    resizeHeight = iamgeSize;
+                    resizeWidth = maxSize;
+                    resizeHeight = maxSize;
                 }
 
-                using (srcStream)
-                using (var destImage = ResizeImage(srcImage, resizeWidth, resizeHeight))
+                using var destImage = ResizeImage(srcImage, resizeWidth, resizeHeight);
+                try
                 {
                     var imageStream = new MemoryStream();
-                    destImage.Save(imageStream, ImageFormat.Bmp);
+                    destImage.Save(imageStream, ImageFormat.Tiff);
 
                     return imageStream;
+                }
+                finally
+                {
+                    srcStream.Dispose();
                 }
             }
         }
 
+        /// <summary>
+        /// 画像をリサイズする。
+        /// </summary>
+        /// <param name="srcBitmap">対象画像</param>
+        /// <param name="width">出力画像の幅</param>
+        /// <param name="height">出力画像の高さ</param>
+        /// <returns></returns>
         public static Bitmap ResizeImage(Bitmap srcBitmap, int width, int height)
         {
             var destImage = new Bitmap(width, height);
@@ -67,6 +88,11 @@ namespace Gouter.Utils
             return destImage;
         }
 
+        /// <summary>
+        /// ストリームから<see cref="BitmapImage"/>を生成する。
+        /// </summary>
+        /// <param name="stream">ストリーム</param>
+        /// <returns><see cref="BitmapImage"/></returns>
         public static BitmapImage BitmapImageFromStream(Stream stream)
         {
             var image = new BitmapImage();
@@ -85,28 +111,33 @@ namespace Gouter.Utils
         }
 
         private static BitmapImage _missingAlbumImage;
-        public static BitmapImage GetMissingAlbumImage()
-        {
-            return _missingAlbumImage ??= GetImage("pack://application:,,,/Resources/missing_album.png");
-        }
-
-        internal static object ShrinkImageData(byte[] artworkData, object albumArtworkMaxSize)
-        {
-            throw new NotImplementedException();
-        }
-
         private static BitmapImage _missingMusicImage;
+
+        /// <summary>
+        /// アートワーク未設定時の画像（アルバム用）を取得する。
+        /// </summary>
+        /// <returns></returns>
+        public static BitmapImage GetMissingAlbumImage()
+            => _missingAlbumImage ??= GetImage(PathUtil.GetEmbeddedResourcePath("missing_album.png"));
+
+        /// <summary>
+        /// アートワーク未設定時の画像（トラック用）を取得する。
+        /// </summary>
+        /// <returns></returns>
+        public static BitmapImage GetMissingMusicImage()
+            => _missingMusicImage ??= GetImage(PathUtil.GetEmbeddedResourcePath("missing_music.png"));
+
 
         /// <summary>
         /// アートワークの最大サイズ
         /// </summary>
         public const int AlbumArtworkMaxSize = 120;
 
-        public static BitmapImage GetMissingMusicImage()
-        {
-            return _missingMusicImage ??= GetImage("pack://application:,,,/Resources/missing_music.png");
-        }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <returns></returns>
         private static BitmapImage GetImage(string uri)
         {
             var image = new BitmapImage();

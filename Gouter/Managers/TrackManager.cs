@@ -105,16 +105,16 @@ namespace Gouter.Managers
         {
             var registeredFiles = this.Tracks.Select(t => t.Path).ToImmutableHashSet();
 
-            var findDirs = FilePathUtils.NormalizeDirectories(musicDirectories);
-            var excludeDirs = FilePathUtils.NormalizeDirectories(excludeDirectories);
+            var findDirs = PathUtil.NormalizeDirectories(musicDirectories);
+            var excludeDirs = PathUtil.NormalizeDirectories(excludeDirectories);
 
             var foundFiles = findDirs
-                .SelectMany(path => FilePathUtils.GetFiles(path, true))
+                .SelectMany(path => PathUtil.GetFiles(path, true))
                 .AsParallel()
                 .Where(path =>
-                    FilePathUtils.IsSupportedMediaExtension(path)
+                    PathUtil.IsSupportedMediaExtension(path)
                         && !registeredFiles.Contains(path)
-                        && !FilePathUtils.IsContainsDirectory(path, excludeDirs));
+                        && !PathUtil.IsContainsDirectory(path, excludeDirs));
 
             var tracks = new List<Track>(foundFiles.Count());
 

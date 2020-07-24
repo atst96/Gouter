@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace Gouter.Utils
 {
     /// <summary>
     /// ファイルパス関連のユーティリティクラス
     /// </summary>
-    internal static class FilePathUtils
+    internal static class PathUtil
     {
         /// <summary>ディレクトリセパレータ</summary>
         private static readonly string DirectorySeparator = Path.DirectorySeparatorChar.ToString();
@@ -28,7 +26,7 @@ namespace Gouter.Utils
 
             for (int i = directories.Count - 1; i >= 0; --i)
             {
-                if (FilePathUtils.IsContainsDirectory(directories[i], directories))
+                if (PathUtil.IsContainsDirectory(directories[i], directories))
                 {
                     directories.RemoveAt(i);
                 }
@@ -76,7 +74,15 @@ namespace Gouter.Utils
         {
             var extension = Path.GetExtension(path);
 
-            return FilePathUtils.SupportedMediaExtensions.Contains(extension);
+            return PathUtil.SupportedMediaExtensions.Contains(extension);
         }
+
+        /// <summary>
+        /// 埋め込みリソースのパスを取得する。
+        /// </summary>
+        /// <param name="path">ファイルパス</param>
+        /// <returns>埋め込みリソースのパス</returns>
+        internal static string GetEmbeddedResourcePath(string path)
+            => $"pack://application:,,,/Resources/${path}";
     }
 }

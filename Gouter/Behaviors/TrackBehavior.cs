@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media.Imaging;
-using Gouter.Utilities;
+using Gouter.Utils;
 
 namespace Gouter.Behaviors
 {
@@ -51,7 +47,7 @@ namespace Gouter.Behaviors
                             var imageSource = new BitmapImage();
                             imageSource.BeginInit();
                             imageSource.CacheOption = BitmapCacheOption.None;
-                            imageSource.StreamSource = ImageUtility.ShrinkImageData(albumArtData.PictureData, 128);
+                            imageSource.StreamSource = ImageUtil.ShrinkImageData(albumArtData.PictureData, 128);
                             imageSource.EndInit();
                             imageSource.Freeze();
 
@@ -64,7 +60,7 @@ namespace Gouter.Behaviors
                 }
             }
 
-            d.SetValue(Image.SourceProperty, ImageUtility.GetMissingMusicImage());
+            d.SetValue(Image.SourceProperty, ImageUtil.GetMissingMusicImage());
         }
     }
 }

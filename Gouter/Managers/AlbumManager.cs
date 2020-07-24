@@ -3,14 +3,17 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using ATL;
+using Commons;
 using Gouter.DataModels;
 using Gouter.Extensions;
+using Gouter.Utils;
 
 namespace Gouter.Managers
 {
@@ -66,11 +69,21 @@ namespace Gouter.Managers
             this._observers.NotifyAll(obsr => obsr.OnRegistered(albumInfo));
         }
 
-        /// <summary>アルバム情報を登録する</summary>
-        /// <param name="albumInfo"></param>
-        public void Add(AlbumInfo albumInfo)
+        /// <summary>
+        /// アルバム情報を登録する。
+        /// </summary>
+        /// <param name="albumInfo">アルバム情報</param>
+        /// <param name="artworkData">アートワーク</param>
+        public void Add(AlbumInfo albumInfo, byte[] artworkData)
         {
             // データベースに登録する
+
+            byte[]? artwork = null;
+            if (artworkData?.Length > 0)
+            {
+                using var image = Utils.ImageUtil.ShrinkImageData(artworkData, Utils.ImageUtil.AlbumArtworkMaxSize);
+                artwork = image.ToArray();
+            }
 
             var dataModel = new AlbumDataModel
             {
@@ -79,7 +92,7 @@ namespace Gouter.Managers
                 Name = albumInfo.Name,
                 Artist = albumInfo.Artist,
                 IsCompilation = albumInfo.IsCompilation,
-                Artwork = albumInfo.ArtworkStream?.ToArray(),
+                Artwork = artwork,
                 CreatedAt = albumInfo.RegisteredAt,
                 UpdatedAt = albumInfo.UpdatedAt,
             };
@@ -101,9 +114,11 @@ namespace Gouter.Managers
                 return albumInfo;
             }
 
-            albumInfo = new AlbumInfo(this.GenerateId(), albumKey, track);
+            var artwork = track.GetArtworkData();
 
-            this.Add(albumInfo);
+            albumInfo = new AlbumInfo(this.GenerateId(), albumKey, track, artwork);
+
+            this.Add(albumInfo, artwork);
 
             return albumInfo;
         }

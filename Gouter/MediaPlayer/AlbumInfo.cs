@@ -123,12 +123,12 @@ namespace Gouter
                     {
                         if (!this._isArtworkFound)
                         {
-                            this._artwork = ImageUtility.GetMissingAlbumImage();
+                            this._artwork = ImageUtil.GetMissingAlbumImage();
                         }
                         else
                         {
-                            var imageStream = ImageUtility.ShrinkImageData(this._tempArtworkData, MaxImageSize);
-                            this._artwork = ImageUtility.BitmapImageFromStream(imageStream);
+                            var imageStream = ImageUtil.ShrinkImageData(this._tempArtworkData, MaxImageSize);
+                            this._artwork = ImageUtil.BitmapImageFromStream(imageStream);
 
                             this._tempArtworkData = null;
                         }

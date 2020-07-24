@@ -3,15 +3,13 @@ using Gouter.Components.TypeHandlers;
 using Gouter.Extensions;
 using Gouter.Managers;
 using Gouter.Players;
-using Gouter.Utilities;
+using Gouter.Utils;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Media.Animation;
 
 namespace Gouter
 {
@@ -120,7 +118,7 @@ namespace Gouter
         {
             var settingFilePath = this.GetLocalFilePath(Config.SettingFileName);
 
-            this.Setting = await MessagePackUtility.DeserializeFile<ApplicationSetting>(settingFilePath).ConfigureAwait(false);
+            this.Setting = await MessagePackUtil.DeserializeFile<ApplicationSetting>(settingFilePath).ConfigureAwait(false);
 
             if (this.Setting == null)
             {
@@ -136,7 +134,7 @@ namespace Gouter
         {
             var settingFilePath = this.GetLocalFilePath(Config.SettingFileName);
 
-            return MessagePackUtility.SerializeFile(this.Setting, settingFilePath);
+            return MessagePackUtil.SerializeFile(this.Setting, settingFilePath);
         }
 
         /// <summary>
