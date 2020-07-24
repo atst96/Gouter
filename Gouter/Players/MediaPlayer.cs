@@ -124,7 +124,7 @@ namespace Gouter.Players
         /// </summary>
         /// <returns></returns>
         private static ISoundOut GetTempAudioRenderer()
-            => new WasapiOut(false, AudioClientShareMode.Shared, 1)
+            => new WasapiOut(false, AudioClientShareMode.Shared, 100)
             {
                 Device = App.Instance.SoundDeviceListener.SystemDefault.GetDevice(),
             };
