@@ -83,6 +83,6 @@ namespace Gouter.Utils
         /// <param name="path">ファイルパス</param>
         /// <returns>埋め込みリソースのパス</returns>
         internal static string GetEmbeddedResourcePath(string path)
-            => $"pack://application:,,,/Resources/${path}";
+            => $"pack://application:,,,/Resources/{path}";
     }
 }
