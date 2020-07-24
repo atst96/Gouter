@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Gouter.Utilities
+namespace Gouter.Utils
 {
     internal static class FileContentUtility
     {

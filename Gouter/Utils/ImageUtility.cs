@@ -7,8 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
+using ATL;
 
-namespace Gouter.Utilities
+namespace Gouter.Utils
 {
     internal static class ImageUtility
     {
@@ -86,13 +87,24 @@ namespace Gouter.Utilities
         private static BitmapImage _missingAlbumImage;
         public static BitmapImage GetMissingAlbumImage()
         {
-            return _missingAlbumImage ?? (_missingAlbumImage = GetImage("pack://application:,,,/Resources/missing_album.png"));
+            return _missingAlbumImage ??= GetImage("pack://application:,,,/Resources/missing_album.png");
+        }
+
+        internal static object ShrinkImageData(byte[] artworkData, object albumArtworkMaxSize)
+        {
+            throw new NotImplementedException();
         }
 
         private static BitmapImage _missingMusicImage;
+
+        /// <summary>
+        /// アートワークの最大サイズ
+        /// </summary>
+        public const int AlbumArtworkMaxSize = 120;
+
         public static BitmapImage GetMissingMusicImage()
         {
-            return _missingMusicImage ?? (_missingMusicImage = GetImage("pack://application:,,,/Resources/missing_music.png"));
+            return _missingMusicImage ??= GetImage("pack://application:,,,/Resources/missing_music.png");
         }
 
         private static BitmapImage GetImage(string uri)
@@ -105,6 +117,12 @@ namespace Gouter.Utilities
             image.Freeze();
 
             return image;
+        }
+
+        public static byte[] GetArtworkData(this Track track)
+        {
+            var picture = track.EmbeddedPictures.FirstOrDefault();
+            return picture?.PictureData;
         }
     }
 }
