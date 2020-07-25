@@ -37,7 +37,6 @@
     <PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.4" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="3.1.6" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.19" />
-    <PackageReference Include="SqlKata.Execution" Version="2.2.0" />
     <PackageReference Include="System.Drawing.Common" Version="4.7.0" />
     <PackageReference Include="z440.atl.core" Version="3.6.0" />
   </ItemGroup>
