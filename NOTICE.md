@@ -11,6 +11,7 @@ Released under the Ms-PL license
 https://github.com/filoe/cscore/blob/master/license.md
 
 - [Dapper](https://github.com/StackExchange/Dapper)  
+2019 Stack Exchange, Inc.  
 Released under the Apache License, Version 2.0  
 http://www.apache.org/licenses/LICENSE-2.0  
 
@@ -24,6 +25,7 @@ Released under the MIT License
 https://github.com/neuecc/MessagePack-CSharp/blob/master/LICENSE  
 
 - [Microsoft.Data.Sqlite](https://www.nuget.org/packages/Microsoft.Data.Sqlite/)  
+© Microsoft Corporation. All rights reserved.  
 Released under the Apache License, Version 2.0    
 https://licenses.nuget.org/Apache-2.0
 
@@ -32,16 +34,17 @@ Copyright (c) 2017 SqlKata
 Released under the MIT License  
 https://github.com/sqlkata/querybuilder/blob/master/LICENSE  
 
-- [System.Threading.Tasks.Extensions](https://www.nuget.org/packages/System.Threading.Tasks.Extensions/)  
-Copyright (c) .NET Foundation and Contributors  
+- [System.Drawing.Common](https://www.nuget.org/packages/System.Drawing.Common)  
+© Microsoft Corporation. All rights reserved.  
 Released under the MIT License  
-https://github.com/dotnet/corefx/blob/master/LICENSE.TXT  
+https://licenses.nuget.org/MIT
 
 - [XamlBehaviors for WPF](https://github.com/microsoft/XamlBehaviorsWpf)  
-Released under the MIT License  
 Copyright (c) 2015 Microsoft  
+Released under the MIT License  
 https://github.com/microsoft/XamlBehaviorsWpf/blob/master/LICENSE
 
 - [Windows-API-Code-Pack-1.1.4](https://github.com/contre/Windows-API-Code-Pack-1.1)  
+Copyright © 2020  
 Released under the custom license  
 https://github.com/contre/Windows-API-Code-Pack-1.1/blob/master/LICENSE  
