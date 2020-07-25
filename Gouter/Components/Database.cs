@@ -1,13 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.Common;
-using System.Data.SQLite;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Dapper;
-using Gouter.Components.TypeHandlers;
+using Microsoft.Data.Sqlite;
 using SqlKata.Compilers;
 using SqlKata.Execution;
 
@@ -15,7 +9,7 @@ namespace Gouter
 {
     internal class Database : IDisposable
     {
-        private SQLiteConnection _connection;
+        private SqliteConnection _connection;
         private QueryFactory _queryFactory;
 
         public bool IsConnected { get; private set; } = false;
@@ -35,13 +29,12 @@ namespace Gouter
                 throw new InvalidOperationException();
             }
 
-            var sqlConfig = new SQLiteConnectionStringBuilder
+            var sqlConfig = new SqliteConnectionStringBuilder
             {
-                Version = 3,
                 DataSource = filePath,
             };
 
-            this._connection = new SQLiteConnection(sqlConfig.ToString());
+            this._connection = new SqliteConnection(sqlConfig.ToString());
             this._connection.Open();
 
             this.InitializeSQLite();
