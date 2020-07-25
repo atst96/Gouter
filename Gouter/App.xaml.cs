@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Dapper.FastCrud;
 using Gouter.Components.TypeHandlers;
 using Gouter.Extensions;
 using Gouter.Managers;
@@ -157,6 +158,7 @@ namespace Gouter
         /// </summary>
         private void InitializeDapper()
         {
+            OrmConfiguration.DefaultDialect = SqlDialect.SqLite;
             DefaultTypeMap.MatchNamesWithUnderscores = true;
             SqlMapper.AddTypeHandler(new MemoryStreamTypeHandler());
             SqlMapper.AddTypeHandler(new DateTimeOffsetTypeHandler());

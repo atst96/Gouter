@@ -71,7 +71,8 @@ namespace Gouter.Managers
         /// <returns>トラック情報</returns>
         public TrackInfo Add(TrackInfo trackInfo)
         {
-            var dataModel = new TrackDataModel
+            var dbContext = this._database.Context;
+            dbContext.Tracks.Insert(new TrackDataModel
             {
                 Id = trackInfo.Id,
                 AlbumId = trackInfo.AlbumInfo.Id,
@@ -86,8 +87,7 @@ namespace Gouter.Managers
                 Genre = trackInfo.Genre,
                 CreatedAt = trackInfo.RegisteredAt,
                 UpdatedAt = trackInfo.UpdatedAt,
-            };
-            dataModel.Insert(this._database);
+            });
 
             this.AddImpl(trackInfo);
 
@@ -142,7 +142,8 @@ namespace Gouter.Managers
                 throw new InvalidOperationException();
             }
 
-            var results = TrackDataModel.GetAll(this._database);
+            var dbContext = this._database.Context;
+            var results = dbContext.Tracks;
 
             foreach (var result in results)
             {

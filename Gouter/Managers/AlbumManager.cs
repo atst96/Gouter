@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Data;
 using ATL;
 using Commons;
+using Dapper.FastCrud;
 using Gouter.DataModels;
 using Gouter.Extensions;
 using Gouter.Utils;
@@ -84,7 +85,8 @@ namespace Gouter.Managers
                 artwork = image.ToArray();
             }
 
-            var dataModel = new AlbumDataModel
+            var dbContext = this._database.Context;
+            dbContext.Albums.Insert(new AlbumDataModel
             {
                 Id = albumInfo.Id,
                 Key = albumInfo.Key,
@@ -94,9 +96,18 @@ namespace Gouter.Managers
                 Artwork = artwork,
                 CreatedAt = albumInfo.RegisteredAt,
                 UpdatedAt = albumInfo.UpdatedAt,
-            };
+            });
 
-            dataModel.Insert(this._database);
+            if (artwork?.Length > 0)
+            {
+                dbContext.AlbumArtworks.Insert(new AlbumArtworksDataModel
+                {
+                    AlbumId = albumInfo.Id,
+                    Artwork = artwork,
+                    CreatedAt = albumInfo.RegisteredAt,
+                    UpdatedAt = albumInfo.UpdatedAt,
+                });
+            }
 
             this.AddImpl(albumInfo);
         }
@@ -141,11 +152,15 @@ namespace Gouter.Managers
                 throw new InvalidOperationException();
             }
 
-            var results = AlbumDataModel.GetAll(this._database);
+            var dbContext = this._database.Context;
+            var albums = dbContext.Albums;
+            var artworksByAlbumId = dbContext.AlbumArtworks.ToDictionary(aw => aw.AlbumId);
 
-            foreach (var result in results)
+            foreach (var album in albums)
             {
-                var albumInfo = new AlbumInfo(result);
+                var artwork = artworksByAlbumId.TryGetValue(album.Id, out var aw) ? aw : default;
+
+                var albumInfo = new AlbumInfo(album, artwork);
                 this.AddImpl(albumInfo);
             }
 

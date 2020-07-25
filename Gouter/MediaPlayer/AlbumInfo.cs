@@ -74,22 +74,22 @@ namespace Gouter
         /// <summary>
         /// DBのモデルデータからアルバム情報を生成する
         /// </summary>
-        /// <param name="dataModel">DBモデル</param>
-        public AlbumInfo(AlbumDataModel dataModel)
+        /// <param name="album">アルバム情報</param>
+        /// <param name="artwork">アートワーク情報</param>
+        public AlbumInfo(AlbumDataModel album, AlbumArtworksDataModel artwork)
         {
-            this.Key = dataModel.Key;
-            this.Id = dataModel.Id;
-            this.Name = dataModel.Name;
-            this.Artist = dataModel.Artist;
-            this.IsCompilation = dataModel.IsCompilation ?? false;
-            this.RegisteredAt = dataModel.CreatedAt;
-            this.UpdatedAt = dataModel.UpdatedAt;
+            this.Key = album.Key;
+            this.Id = album.Id;
+            this.Name = album.Name;
+            this.Artist = album.Artist;
+            this.IsCompilation = album.IsCompilation ?? false;
+            this.RegisteredAt = album.CreatedAt;
+            this.UpdatedAt = album.UpdatedAt;
 
-            var artwork = dataModel.Artwork;
-
-            if (artwork?.Length > 0)
+            var artworkData = artwork?.Artwork;
+            if (artworkData?.Length > 0)
             {
-                this.SetArtworkData(artwork);
+                this.SetArtworkData(artworkData);
             }
 
             this.Playlist = new AlbumPlaylist(this);

@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using Gouter.Components;
 using Microsoft.Data.Sqlite;
-using SqlKata.Compilers;
-using SqlKata.Execution;
 
 namespace Gouter
 {
     internal class Database : IDisposable
     {
         private SqliteConnection _connection;
-        private QueryFactory _queryFactory;
+
+        public DbContext Context { get; private set; }
 
         public bool IsConnected { get; private set; } = false;
 
@@ -35,11 +35,10 @@ namespace Gouter
             };
 
             this._connection = new SqliteConnection(sqlConfig.ToString());
+            this.Context = new DbContext(this._connection);
             this._connection.Open();
 
             this.InitializeSQLite();
-
-            this._queryFactory = new QueryFactory(this._connection, new SqliteCompiler());
 
             this.IsConnected = this._connection.State == ConnectionState.Open;
         }
@@ -126,25 +125,19 @@ namespace Gouter
         }
 
         /// <summary>
-        /// クエリビルダを取得する。
-        /// </summary>
-        /// <returns>クエリビルダ</returns>
-        public QueryFactory GetQueryBuilder()
-        {
-            return this._queryFactory;
-        }
-
-        /// <summary>
         /// テーブル名を列挙する。
         /// </summary>
         /// <returns>テーブル名一覧</returns>
         public IEnumerable<string> EnumerateTableNames()
         {
-            return this.GetQueryBuilder()
-                .Query("sqlite_master")
-                .Select("name")
-                .Where("type", "table")
-                .Get<string>();
+            using var command = this.CreateCommand("SELECT name from sqlite_master WHERE type = 'table'");
+            using var reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                var tableName = reader.GetString(0);
+                yield return tableName;
+            }
         }
 
         /// <summary>
