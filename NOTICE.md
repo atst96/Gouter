@@ -15,6 +15,11 @@ https://github.com/filoe/cscore/blob/master/license.md
 Released under the Apache License, Version 2.0  
 http://www.apache.org/licenses/LICENSE-2.0  
 
+- [Dapper.FastCRUD](https://github.com/MoonStorm/Dapper.FastCRUD)  
+Copyright (c) 2015 Dan Cristiu  
+Released under the MIT license  
+https://github.com/MoonStorm/Dapper.FastCRUD/blob/master/LICENSE
+
 - [Material design icons](https://material.io/resources/icons)  
 Released under the Apache License, Version 2.0  
 https://www.apache.org/licenses/LICENSE-2.0.html  
