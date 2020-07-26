@@ -1,7 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Windows.Input;
+using Dapper;
 using Gouter.Components;
+using Gouter.DataModels;
+using Gouter.Utils;
 using Microsoft.Data.Sqlite;
 
 namespace Gouter
@@ -49,12 +55,11 @@ namespace Gouter
         private void InitializeSQLite()
         {
             // foreign_keysを有効にする
-            using var getForeignKeysCommand = this.CreateCommand("PRAGMA foreign_keys");
-            bool isForeginKeysEnabled = getForeignKeysCommand.ExecuteScalar().ToString() == "1";
+            bool isForeginKeysEnabled = this._connection.ExecuteScalar("PRAGMA foreign_keys").ToString() == "1";
 
-            if (isForeginKeysEnabled)
+            if (!isForeginKeysEnabled)
             {
-                this.ExecuteNonQuery("PRAGMA foreign_keys = ON");
+                this._connection.Execute("PRAGMA foreign_keys = ON");
             }
         }
 
@@ -83,12 +88,14 @@ namespace Gouter
 
             var tables = new HashSet<string>(this.EnumerateTableNames());
 
-            foreach (var (tableName, query) in queryList)
+            var queries = queryList.Keys
+                .Where(tbl => !tables.Contains(tbl))
+                .Select(tbl => queryList[tbl]);
+
+            if (queries.Any())
             {
-                if (!tables.Contains(tableName))
-                {
-                    this.ExecuteNonQuery(query);
-                }
+                var sql = string.Join(";\n", queries);
+                this._connection.Execute(sql);
             }
         }
 
@@ -130,8 +137,7 @@ namespace Gouter
         /// <returns>テーブル名一覧</returns>
         public IEnumerable<string> EnumerateTableNames()
         {
-            using var command = this.CreateCommand("SELECT name from sqlite_master WHERE type = 'table'");
-            using var reader = command.ExecuteReader();
+            using var reader = this._connection.ExecuteReader("SELECT name from sqlite_master WHERE type = 'table'");
 
             while (reader.Read())
             {
@@ -153,9 +159,20 @@ namespace Gouter
         /// </summary>
         public static class TableNames
         {
-            public const string Albums = "albums";
-            public const string Tracks = "tracks";
-            public const string AlbumArtworks = "album_artworks";
+            /// <summary>
+            /// アルバムのテーブル名
+            /// </summary>
+            public static readonly string Albums = DbUtil.GetTableName<AlbumDataModel>();
+
+            /// <summary>
+            /// トラックのテーブル名
+            /// </summary>
+            public static readonly string Tracks = DbUtil.GetTableName<TrackDataModel>();
+
+            /// <summary>
+            /// アート枠のテーブル名
+            /// </summary>
+            public static readonly string AlbumArtworks = DbUtil.GetTableName<AlbumArtworksDataModel>();
         }
 
         /// <summary>

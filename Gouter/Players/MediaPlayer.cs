@@ -209,8 +209,6 @@ namespace Gouter.Players
             }
         }
 
-        private object @lockObj = new object();
-
         /// <summary>
         /// 再生を行う
         /// </summary>
@@ -229,7 +227,6 @@ namespace Gouter.Players
                 finally
                 {
                     this._semaphore.Release();
-
                 }
             }
             finally

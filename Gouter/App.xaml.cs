@@ -101,7 +101,7 @@ namespace Gouter
         /// <param name="e"></param>
         protected override void OnExit(ExitEventArgs e)
         {
-            // this.MediaManager.Close();
+            this.MediaPlayer.Stop();
 
             if (this.IsRequireSaveSettings)
             {

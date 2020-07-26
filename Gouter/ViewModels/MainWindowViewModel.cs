@@ -157,8 +157,15 @@ namespace Gouter.ViewModels
         public async void Play(TrackInfo track, IPlaylist playlist)
         {
             this.IsPlayRequired = true;
-            await this.Player.SwitchTrack(track, playlist).ConfigureAwait(false);
-            await this.Player.Play().ConfigureAwait(false);
+            try
+            {
+                await this.Player.SwitchTrack(track, playlist).ConfigureAwait(false);
+                await this.Player.Play().ConfigureAwait(false);
+            }
+            catch (Exception ez) when (ez is TaskCanceledException || ez is OperationCanceledException)
+            {
+                // pass
+            }
         }
 
         private bool _isOpenAlbumPlaylistTrackList = false;
