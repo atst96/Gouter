@@ -140,13 +140,13 @@ namespace Gouter.ViewModels
 
         public bool IsPlayRequired { get; set; }
 
-        public async void Play()
+        public void Play()
         {
             this.IsPlayRequired = true;
 
             try
             {
-                await this.Player.Play();
+                this.Player.Play();
             }
             catch (Exception ex) when (ex is TaskCanceledException || ex is OperationCanceledException)
             {
@@ -154,15 +154,14 @@ namespace Gouter.ViewModels
             }
         }
 
-        public async void Play(TrackInfo track, IPlaylist playlist)
+        public void Play(TrackInfo track, IPlaylist playlist)
         {
             this.IsPlayRequired = true;
             try
             {
-                await this.Player.SwitchTrack(track, playlist).ConfigureAwait(false);
-                await this.Player.Play().ConfigureAwait(false);
+                this.Player.Play(track, playlist);
             }
-            catch (Exception ez) when (ez is TaskCanceledException || ez is OperationCanceledException)
+            catch (Exception ex) when (ex is TaskCanceledException || ex is OperationCanceledException)
             {
                 // pass
             }
