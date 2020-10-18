@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms.VisualStyles;
+using ATL;
 using CSCore;
 using CSCore.Codecs;
 using CSCore.CoreAudioAPI;
@@ -20,10 +21,10 @@ namespace Gouter.Players
     /// </summary>
     internal class MediaPlayer : NotificationObject, IDisposable, ISubscribable<IMediaPlayerObserver>, ISoundPlayerObserver
     {
-        private volatile bool _isTrackChanging = false;
-        private static Random _rand = new Random();
+        private static readonly Random random = new Random();
         private CancellationTokenSource _cancellationTokenSource;
-        private SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+        private volatile bool _isTrackChangeRequired = false;
+        private volatile bool _isStopRequired = false;
 
         /// <summary>
         /// メディア管理クラス
@@ -135,8 +136,8 @@ namespace Gouter.Players
         /// <param name="track"></param>
         /// <param name="isClearHistory"></param>
         /// <returns></returns>
-        public ValueTask SwitchTrack(TrackInfo track, bool isClearHistory = true, bool isUpdateHistory = true)
-            => this.SwitchTrack(track, null, isClearHistory, isUpdateHistory);
+        public void SwitchTrack(TrackInfo track, bool isClearHistory = true, bool isUpdateHistory = true)
+            => this.ChangeTrack(track, null, isClearHistory, isUpdateHistory);
 
         /// <summary>
         /// トラックを切り替える。
@@ -145,102 +146,61 @@ namespace Gouter.Players
         /// <param name="nextPlaylist"></param>
         /// <param name="isClearHistory"></param>
         /// <returns></returns>
-        public async ValueTask SwitchTrack(TrackInfo track, IPlaylist nextPlaylist, bool isClearHistory = true, bool isUpdateHistory = true)
+        public void ChangeTrack(TrackInfo track, IPlaylist nextPlaylist, bool isClearHistory = true, bool isUpdateHistory = true)
         {
-            var cancellationTokenSource = this.IssueCancellationTokenSource();
-            try
+            bool isTrackChanged = this.Track != track;
+            if (!isTrackChanged)
             {
-                await this._semaphore.WaitAsync(cancellationTokenSource.Token).ConfigureAwait(false);
-
-                try
+                this._player.SetPosition(TimeSpan.Zero);
+            }
+            else
+            {
+                this.Track = track;
+                if (isClearHistory)
                 {
-                    if (isClearHistory)
-                    {
-                        this._playHistory.Clear();
-                    }
-
-                    if (isUpdateHistory)
-                    {
-                        this.AddPlayHistory(track);
-                    }
-
-                    if (this.State != PlayState.Stop)
-                    {
-                        // 再生中であれば停止する
-                        this._isTrackChanging = true;
-
-                        await this._player.StopAndWait(cancellationTokenSource.Token).ConfigureAwait(false);
-
-                        this._isTrackChanging = false;
-
-                        if (this.Track == track)
-                        {
-                            this._player.SetPosition(TimeSpan.Zero);
-                        }
-                    }
-
-                    cancellationTokenSource.Token.ThrowIfCancellationRequested();
-                    if (nextPlaylist != null && this.Playlist != nextPlaylist)
-                    {
-                        this.Playlist = nextPlaylist;
-                    }
-
-                    var playlist = this.Playlist;
-                    if (playlist == null || !playlist.Tracks.Contains(track))
-                    {
-                        throw new InvalidOperationException();
-                    }
-
-                    if (this.Track != track)
-                    {
-                        this.Track = track;
-                        this._player.ChangeSoundSource(track.Path);
-                    }
+                    this._playHistory.Clear();
                 }
-                finally
+
+                if (isUpdateHistory)
                 {
-                    this._semaphore.Release();
+                    this.AddPlayHistory(track);
                 }
             }
-            finally
+
+            if (nextPlaylist != null && this.Playlist != nextPlaylist)
             {
-                cancellationTokenSource.Dispose();
-                this.CleanupCancellationTokenSource();
+                this.Playlist = nextPlaylist;
+            }
+
+            var playlist = this.Playlist;
+            if (playlist == null || !playlist.Tracks.Contains(track))
+            {
+                throw new InvalidOperationException();
+            }
+
+            if (isTrackChanged)
+            {
+                this._isTrackChangeRequired = true;
+                this._player.ChangeSource(track);
             }
         }
 
         /// <summary>
         /// 再生を行う
         /// </summary>
-        public async ValueTask Play()
+        public void Play() => this._player.Play();
+
+        public void Play(TrackInfo track, IPlaylist nextPlaylist = null, bool isClearHistory = true, bool isUpdateHistory = true)
         {
-            var cancellationTokenSource = this.IssueCancellationTokenSource();
-
-            try
-            {
-                await this._semaphore.WaitAsync(cancellationTokenSource.Token).ConfigureAwait(false);
-
-                try
-                {
-                    await this._player.Play(cancellationToken: cancellationTokenSource.Token).ConfigureAwait(false);
-                }
-                finally
-                {
-                    this._semaphore.Release();
-                }
-            }
-            finally
-            {
-                cancellationTokenSource.Dispose();
-                this.CleanupCancellationTokenSource();
-            }
+            this.ChangeTrack(track, nextPlaylist, isClearHistory, isUpdateHistory);
+            this.Play();
         }
 
         /// <summary>
         /// 前のトラックを再生する。
         /// </summary>
         /// <returns></returns>
-        public async ValueTask PlayPrevious()
+        public void PlayPrevious()
         {
             var playlist = this._playlist;
             if (playlist == null)
@@ -256,21 +216,22 @@ namespace Gouter.Players
             {
                 // 再生履歴なし or 再生位置が指定時間以上
                 this.SetPosition(TimeSpan.Zero);
+                this.Play();
             }
             else
             {
-                await this.SwitchTrack(previousNode.Value, false, false).ConfigureAwait(false);
                 this._currentHistoryNode = previousNode;
+                this.Play(previousNode.Value, isClearHistory: false, isUpdateHistory: false);
             }
 
-            await this.Play().ConfigureAwait(false);
+            this.Play();
         }
 
         /// <summary>
         /// 次のトラックを再生する。
         /// </summary>
         /// <returns></returns>
-        public async ValueTask PlayNext()
+        public void PlayNext()
         {
             var playlist = this._playlist;
             if (playlist == null)
@@ -291,39 +252,7 @@ namespace Gouter.Players
                 nextTrack = this.GetNextTrack(this._currentHistoryNode.Value, playlist);
             }
 
-            await this.SwitchTrack(nextTrack, false).ConfigureAwait(false);
-            await this.Play().ConfigureAwait(false);
-        }
-
-        private object @_lockObj = new object();
-
-        /// <summary>
-        /// <see cref="CancellationTokenSource"/>を発行する。
-        /// </summary>
-        /// <returns></returns>
-        private CancellationTokenSource IssueCancellationTokenSource()
-        {
-            lock (this.@_lockObj)
-            {
-                var oldCancellationTokenSource = this._cancellationTokenSource;
-                var cancellationTokenSource = new CancellationTokenSource();
-
-                this._cancellationTokenSource = cancellationTokenSource;
-                if (oldCancellationTokenSource != null && !oldCancellationTokenSource.IsCancellationRequested)
-                {
-                    oldCancellationTokenSource.Cancel();
-                }
-
-                return cancellationTokenSource;
-            }
-        }
-
-        private void CleanupCancellationTokenSource()
-        {
-            lock (this._lockObj)
-            {
-                this._cancellationTokenSource = null;
-            }
+            this.Play(nextTrack, isClearHistory: false);
         }
 
         /// <summary>
@@ -350,7 +279,7 @@ namespace Gouter.Players
             }
             else if (this.ShuffleMode == ShuffleMode.Random)
             {
-                int index = _rand.Next(0, tracks.Count - 1);
+                int index = random.Next(0, tracks.Count - 1);
 
                 return tracks[index];
             }
@@ -510,10 +439,13 @@ namespace Gouter.Players
                 }
 
                 // スキップ処理を見直す
-                if (!this._isTrackChanging)
+                if (!this._isTrackChangeRequired && !this._isStopRequired)
                 {
-                    await this.PlayNext();
+                    this.PlayNext();
                 }
+
+                this._isTrackChangeRequired = false;
+                this._isStopRequired = false;
             }
 
             this._observers.NotifyAll(o => o.OnPlayStateChanged(state));
