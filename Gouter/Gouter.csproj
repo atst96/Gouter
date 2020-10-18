@@ -33,11 +33,11 @@
     <PackageReference Include="CSCore" Version="1.2.1.2" />
     <PackageReference Include="Dapper" Version="2.0.35" />
     <PackageReference Include="Dapper.FastCrud" Version="2.5.0.39" />
-    <PackageReference Include="MessagePack" Version="2.1.152" />
+    <PackageReference Include="MessagePack" Version="2.2.60" />
     <PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.4" />
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="3.1.6" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="3.1.9" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.19" />
     <PackageReference Include="System.Drawing.Common" Version="4.7.0" />
-    <PackageReference Include="z440.atl.core" Version="3.6.0" />
+    <PackageReference Include="z440.atl.core" Version="3.11.0" />
   </ItemGroup>
 </Project>
