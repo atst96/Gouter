@@ -290,8 +290,6 @@ namespace Gouter.Players
         /// </summary>
         private void ReleaseAudioSources()
         {
-            this.Log("Start");
-
             if (this._outputSource == null)
             {
                 return;
@@ -302,8 +300,6 @@ namespace Gouter.Players
             this._fadeInOut.Dispose();
             this._equalizer.Dispose();
             this._inputSource.Dispose();
-
-            this.Log("End");
         }
 
         /// <summary>
@@ -321,11 +317,6 @@ namespace Gouter.Players
             this.ReleaseAudioSources();
             this._observers.DescribeAll(this);
             this._inputSource?.Dispose();
-        }
-
-        private void Log(string content, [CallerMemberName] string callerMemberName = "")
-        {
-            Debug.WriteLine($"[{ nameof(SoundFilePlayer) } {callerMemberName}] { content }");
         }
 
         /// <summary>
