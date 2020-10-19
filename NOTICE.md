@@ -34,11 +34,6 @@ https://github.com/neuecc/MessagePack-CSharp/blob/master/LICENSE
 Released under the Apache License, Version 2.0    
 https://licenses.nuget.org/Apache-2.0
 
-- [SqlKata Query Builder](https://sqlkata.com/)  
-Copyright (c) 2017 SqlKata  
-Released under the MIT License  
-https://github.com/sqlkata/querybuilder/blob/master/LICENSE  
-
 - [System.Drawing.Common](https://www.nuget.org/packages/System.Drawing.Common)  
 © Microsoft Corporation. All rights reserved.  
 Released under the MIT License  
