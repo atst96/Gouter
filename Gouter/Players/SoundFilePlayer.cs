@@ -1,12 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.Diagnostics;
-using System.Globalization;
-using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Threading;
 using CSCore;
 using CSCore.Codecs;
@@ -21,40 +15,79 @@ namespace Gouter.Players
     /// </summary>
     internal class SoundFilePlayer : IDisposable, ISubscribable<ISoundPlayerObserver>
     {
-        // フェード終了後の再生状態
+        /// <summary>
+        /// フェード後に遷移する状態
+        /// </summary>
         private PlayState? _afterFadeState = null;
+
+        /// <summary>
+        /// 破棄済みかどうかのフラグ
+        /// </summary>
+        private bool _isDisposed = false;
 
         private readonly object @_lockObject = new object();
         private SemaphoreSlim _semaphore = new SemaphoreSlim(1);
         public readonly IList<CancellationTokenSource> _cancellationTokenSources = new List<CancellationTokenSource>();
 
-        // 音源
+        /// <summary>
+        /// 音声ソースが初夏済みかどうかのフラグ
+        /// </summary>
         private volatile bool _isSoundSourceInitialized;
+
+        /// <summary>
+        /// 音声入力ソース
+        /// </summary>
         private ISampleSource _inputSource;
+
+        /// <summary>
+        /// フェード制御
+        /// </summary>
         private FadeInOut _fadeInOut;
+
+        /// <summary>
+        /// イコライザ
+        /// </summary>
         private Equalizer _equalizer;
+
+        /// <summary>
+        /// 音声出力ソース
+        /// </summary>
         private IWaveSource _outputSource;
+
+        /// <summary>
+        /// ボリューム
+        /// </summary>
         private float _volume = 0.5f;
 
-        // サウンドデバイス
+        /// <summary>
+        /// 音声出力デバイス
+        /// </summary>
         private ISoundOut _soundDevice;
 
-        // フェードの最大／最小ボリューム
+        /// <summary>
+        /// フェード時の最大ボリューム
+        /// </summary>
         private const float FadeMaxVolume = 1.0f;
+
+        /// <summary>
+        /// フェード時の最小ボリューム
+        /// </summary>
         private const float FadeMinVolume = 0.0f;
 
-        // 再生処理停止要求フラグ
+        /// <summary>
+        /// 再生処理停止要求フラグ
+        /// </summary>
         private volatile bool _isStopRequested = false;
 
-        // 再生スレッドのディスパッチャ
+        /// <summary>
+        /// 再生スレッドのディスパッチャ
+        /// </summary>
         private readonly Dispatcher _dispatcher = Dispatcher.CurrentDispatcher;
 
         /// <summary>
         /// フェードイン／アウトにかける時間を取得または設定する。
         /// </summary>
         public TimeSpan? FadeInOutDuration { get; set; } = TimeSpan.FromMilliseconds(200);
-
-        internal PlaybackState? _playerState => this._soundDevice?.PlaybackState;
 
         /// <summary>
         /// 再生状態を取得する。
@@ -75,6 +108,21 @@ namespace Gouter.Players
         /// 停止後に次のファイルを再生するかどうかのフラグ
         /// </summary>
         private bool _isStopToNextSource = false;
+
+        /// <summary>
+        /// 内部プレーヤが再生中かどうかのフラグ
+        /// </summary>
+        private bool _isPlaying = false;
+
+        /// <summary>
+        /// 次のオーディオソースが指定されているかどうかのフラグ
+        /// </summary>
+        private bool _hasNextAudioSource = false;
+
+        /// <summary>
+        /// Observers
+        /// </summary>
+        private readonly List<ISoundPlayerObserver> _observers = new List<ISoundPlayerObserver>();
 
         /// <summary>
         /// ボリュームを取得または設定する。
@@ -109,13 +157,19 @@ namespace Gouter.Players
         /// <param name="e"></param>
         private void OnSoundDevicePlayStopped(object sender, PlaybackStoppedEventArgs e)
         {
+            bool isStopRequested = this._isStopRequested;
             this._isStopRequested = false;
             this._isPlaying = false;
             this.OnStateChanged(PlayState.Stop);
 
-            if (this._isSourceChanging)
+            if (!isStopRequested)
             {
+                // 現在トラックの再生終了
+                this._observers.NotifyAll(o => o.OnTrackFinished());
+            }
 
+            if (this._hasNextAudioSource)
+            {
                 this.LoadSoundSource(this._nextAudioSource);
             }
 
@@ -137,48 +191,55 @@ namespace Gouter.Players
                 throw new InvalidOperationException();
             }
 
-            // 再生音源のリソースを解放する。
-            if (this._inputSource != null)
+            // デバイスに変更がなければ処理を行わない
+            if (object.ReferenceEquals(this._soundDevice, soundDevice))
             {
-                this._inputSource.Dispose();
+                return;
             }
 
-            // サウンドデバイスのイベント購読を解除する。
-            if (this._soundDevice != null)
-            {
-                this._soundDevice.Stopped -= this.OnSoundDevicePlayStopped;
-            }
+            // 旧デバイス
+            var oldDevice = this._soundDevice;
 
             // 新規サウンドデバイスを設定する。
+            soundDevice.Stopped += this.OnSoundDevicePlayStopped;
             this._soundDevice = soundDevice;
-            this._soundDevice.Stopped += this.OnSoundDevicePlayStopped;
+
+            // 旧デバイスのイベント購読を解除する。
+            if (oldDevice != null)
+            {
+                oldDevice.Stopped -= this.OnSoundDevicePlayStopped;
+            }
         }
 
-        private void ChangeSourceImpl(string path)
+        /// <summary>
+        /// オーディオソースを変更する。
+        /// </summary>
+        /// <param name="path"></param>
+        private void ChangeAudioSource(string path)
         {
             var device = this._soundDevice;
-            var state = this.State;
-
             if (device.PlaybackState != PlaybackState.Stopped)
             {
                 // 再生中の場合
+
                 if (!this._isStopRequested)
                 {
+                    // 再生中の場合、再生を停止する
                     this.StopInternal();
                 }
 
-                this.ChangeSoundSource(path);
+                // 内部プレーヤの停止完了時にソースを切り替える
+                this.SetNextAudioSource(path);
             }
             else
             {
                 // 停止中の場合
-                this.ChangeSoundSource(path);
+                this.SetNextAudioSource(path);
+
+                // オーディオソースを読み込む
                 this.LoadSoundSource(path);
             }
         }
-
-        private bool _isPlaying = false;
-        private bool _isSourceChanging = false;
 
         /// <summary>
         /// 再生処理を停止ルル。
@@ -216,7 +277,7 @@ namespace Gouter.Players
             }
             else
             {
-                this._soundDevice?.Stop();
+                this.StopInternalPlayer();
             }
         }
 
@@ -225,14 +286,18 @@ namespace Gouter.Players
         /// </summary>
         /// <returns></returns>
         private bool GetIsFadeOutEnable()
-            => this.FadeInOutDuration > TimeSpan.Zero;
+        {
+            return this.FadeInOutDuration > TimeSpan.Zero;
+        }
 
         /// <summary>
         /// フェードアウト処理が可能かどうかを取得する。
         /// </summary>
-        /// <returns></returns>
+        /// <returns></returns> 
         private bool GetIsFadeInEnable()
-            => this.FadeInOutDuration > TimeSpan.Zero;
+        {
+            return this.FadeInOutDuration > TimeSpan.Zero;
+        }
 
         /// <summary>
         /// 再生位置を取得する
@@ -262,8 +327,6 @@ namespace Gouter.Players
         public void SetPosition(TimeSpan position)
             => this._inputSource?.SetPosition(position);
 
-        private readonly List<ISoundPlayerObserver> _observers = new List<ISoundPlayerObserver>();
-
         /// <summary>
         /// 通知オブジェクトを登録する
         /// </summary>
@@ -290,16 +353,17 @@ namespace Gouter.Players
         /// </summary>
         private void ReleaseAudioSources()
         {
-            if (this._outputSource == null)
+            this.ReleaseInstance(ref this._outputSource);
+
+            if (this._fadeInOut != null)
             {
-                return;
+                this._fadeInOut.FadeStrategy.FadingFinished -= this.OnFadeInOutFinished;
+                this._fadeInOut.Dispose();
+                this._fadeInOut = null;
             }
 
-            this._outputSource.Dispose();
-            this._fadeInOut.FadeStrategy.FadingFinished -= this.OnFadeInOutFinished;
-            this._fadeInOut.Dispose();
-            this._equalizer.Dispose();
-            this._inputSource.Dispose();
+            this.ReleaseInstance(ref this._equalizer);
+            this.ReleaseInstance(ref this._inputSource);
         }
 
         /// <summary>
@@ -307,16 +371,8 @@ namespace Gouter.Players
         /// </summary>
         /// <returns></returns>
         public TimeSpan GetDuration()
-            => this._isSoundSourceInitialized ? this._inputSource.GetLength() : TimeSpan.Zero;
-
-        /// <summary>
-        /// リソース解放を行う
-        /// </summary>
-        public void Dispose()
         {
-            this.ReleaseAudioSources();
-            this._observers.DescribeAll(this);
-            this._inputSource?.Dispose();
+            return this._isSoundSourceInitialized ? this._inputSource.GetLength() : TimeSpan.Zero;
         }
 
         /// <summary>
@@ -333,22 +389,23 @@ namespace Gouter.Players
         });
 
         /// <summary>
-        /// 音源の初期化処理を行う
+        /// 切り替え先の音源を設定する。
         /// </summary>
         /// <param name="path">音声ファイルのフルパス</param>
-        private void ChangeSoundSource(string path)
+        private void SetNextAudioSource(string path)
         {
-            lock (this._lockObject)
-            {
-                this._isSourceChanging = true;
-                this._nextAudioSource = path;
-            }
+            this._hasNextAudioSource = true;
+            this._nextAudioSource = path;
         }
 
         /// <summary>
         /// 再生処理を開始する。
         /// </summary>
-        public void Play() => this.PlayInternal();
+        public void Play()
+        {
+            this.AssertDisposed();
+            this.PlayInternal();
+        }
 
         /// <summary>
         /// 再生を開始する
@@ -362,7 +419,7 @@ namespace Gouter.Players
                 return;
             }
 
-            if (this._isStopRequested && this._isSourceChanging)
+            if (this._isStopRequested && this._hasNextAudioSource)
             {
                 // トラック変更中(再生停止要求中&トラック変更済み)の場合
                 // 次トラックの再生を有効にする
@@ -379,7 +436,7 @@ namespace Gouter.Players
                     this.FadeIn();
                 }
 
-                this._soundDevice.Play();
+                this.PlayInternalPlayer();
                 this.OnStateChanged(PlayState.Play);
                 return;
             }
@@ -392,7 +449,7 @@ namespace Gouter.Players
 
             // 再生処理を開始する
             this._isPlaying = true;
-            this._soundDevice.Play();
+            this.PlayInternalPlayer();
             this.OnStateChanged(PlayState.Play);
         }
 
@@ -402,16 +459,18 @@ namespace Gouter.Players
         /// <param name="track"></param>
         public void ChangeSource(TrackInfo track)
         {
+            this.AssertDisposed();
+
             bool isPlaying = this._isPlaying && !this._isStopRequested;
             this._isStopToNextSource = isPlaying || this._isStopToNextSource;
 
             if (isPlaying)
             {
-                this.ChangeSourceImpl(track.Path);
+                this.ChangeAudioSource(track.Path);
                 return;
             }
 
-            this.ChangeSourceImpl(track.Path);
+            this.ChangeAudioSource(track.Path);
 
             if (this.State == PlayState.Stop)
             {
@@ -429,18 +488,23 @@ namespace Gouter.Players
         /// <param name="track"></param>
         public void Play(TrackInfo track)
         {
+            this.AssertDisposed();
+
             if (this._isPlaying && !this._isStopRequested)
             {
                 // 再生中の場合
                 this._isStopToNextSource = true;
-                this.ChangeSourceImpl(track.Path);
+                this.ChangeAudioSource(track.Path);
                 return;
             }
 
-            this.ChangeSourceImpl(track.Path);
+            this.ChangeAudioSource(track.Path);
             this.PlayInternal();
         }
 
+        /// <summary>
+        /// 再生を停止する。
+        /// </summary>
         public void Pause() => this.Pause(true);
 
         /// <summary>
@@ -448,6 +512,8 @@ namespace Gouter.Players
         /// </summary>
         public void Pause(bool isFadeOutEnable)
         {
+            this.AssertDisposed();
+
             this._isStopToNextSource = false;
             var state = this.State;
 
@@ -470,7 +536,7 @@ namespace Gouter.Players
             }
             else
             {
-                this._soundDevice.Pause();
+                this.PauseInternalPlayer();
             }
         }
 
@@ -484,13 +550,21 @@ namespace Gouter.Players
         /// </summary>
         /// <param name="isFadeOutEnable"></param>
         public void Stop(bool isFadeOutEnable)
-            => this.StopInternal(isFadeOutEnable, true);
+        {
+            this.AssertDisposed();
+            this.StopInternal(isFadeOutEnable, true);
+        }
 
         /// <summary>
         /// フェードインする。
         /// </summary>
         private void FadeIn(PlayState? afterState = null)
         {
+            if (this._isDisposed)
+            {
+                return;
+            }
+
             this._afterFadeState = afterState;
             var fadeInDuration = this.FadeInOutDuration ?? TimeSpan.Zero;
             var fadeStrategy = this._fadeInOut.FadeStrategy;
@@ -503,6 +577,11 @@ namespace Gouter.Players
         /// </summary>
         private void FadeOut(PlayState? afterState = null)
         {
+            if (this._isDisposed)
+            {
+                return;
+            }
+
             this._afterFadeState = afterState;
             var fadeOutDuration = this.FadeInOutDuration ?? TimeSpan.Zero;
             var fadeStrategy = this._fadeInOut.FadeStrategy;
@@ -520,11 +599,11 @@ namespace Gouter.Players
             switch (this._afterFadeState)
             {
                 case PlayState.Pause:
-                    this._soundDevice?.Pause();
+                    this.PauseInternalPlayer();
                     break;
 
                 case PlayState.Stop:
-                    this._soundDevice?.Stop();
+                    this.StopInternalPlayer();
                     break;
             }
         });
@@ -536,20 +615,31 @@ namespace Gouter.Players
         private void LoadSoundSource(string path)
         {
             this._isSoundSourceInitialized = false;
-            this._isSourceChanging = false;
+            this._currentAudioSource = null;
+            this._nextAudioSource = null;
+            this._hasNextAudioSource = false;
 
             this.ReleaseAudioSources();
 
-            var fadeStrategy = new LinearFadeStrategy();
-            fadeStrategy.FadingFinished += this.OnFadeInOutFinished;
-
-            this._inputSource = CodecFactory.Instance.GetCodec(path).ToSampleSource();
-            this._equalizer = Equalizer.Create10BandEqualizer(this._inputSource);
-            this._fadeInOut = new FadeInOut(this._equalizer)
+            try
             {
-                FadeStrategy = fadeStrategy,
-            };
-            this._outputSource = this._fadeInOut.ToWaveSource();
+                var fadeStrategy = new LinearFadeStrategy();
+                fadeStrategy.FadingFinished += this.OnFadeInOutFinished;
+
+                this._inputSource = CodecFactory.Instance.GetCodec(path).ToSampleSource();
+                this._equalizer = Equalizer.Create10BandEqualizer(this._inputSource);
+                this._fadeInOut = new FadeInOut(this._equalizer)
+                {
+                    FadeStrategy = fadeStrategy,
+                };
+                this._outputSource = this._fadeInOut.ToWaveSource();
+            }
+            catch (Exception ex)
+            {
+                this.ReleaseAudioSources();
+                this._observers.NotifyAll(s => s.OnPlayerFailed(ex));
+                throw;
+            }
 
             var device = this._soundDevice;
             device.Initialize(this._outputSource);
@@ -559,6 +649,94 @@ namespace Gouter.Players
             this._nextAudioSource = null;
 
             this._isSoundSourceInitialized = true;
+        }
+
+        /// <summary>
+        /// 内部プレーヤの再生を開始する。
+        /// </summary>
+        private void PlayInternalPlayer()
+        {
+            var device = this._soundDevice;
+            if (device == null)
+            {
+                return;
+            }
+
+            device.Play();
+        }
+
+        /// <summary>
+        /// 内部プレーヤの再生を一時停止する。
+        /// </summary>
+        private void PauseInternalPlayer()
+        {
+            var device = this._soundDevice;
+            if (device == null)
+            {
+                return;
+            }
+
+            device.Pause();
+        }
+
+        /// <summary>
+        /// 内部プレーヤの再生を停止する。
+        /// </summary>
+        private void StopInternalPlayer()
+        {
+            this._soundDevice?.Stop();
+        }
+
+        /// <summary>
+        /// リソースを解放する。
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="instance"></param>
+        private void ReleaseInstance<T>(ref T instance)
+            where T : IDisposable
+        {
+            if (instance == null)
+            {
+                return;
+            }
+
+            instance.Dispose();
+            instance = default;
+        }
+
+        /// <summary>
+        /// リソース解放を行う。
+        /// </summary>
+        public void Dispose()
+        {
+            if (this._isDisposed)
+            {
+                return;
+            }
+
+            this._isDisposed = true;
+
+            var device = this._soundDevice;
+            if (device != null && device.PlaybackState != PlaybackState.Stopped)
+            {
+                device.Stopped -= this.OnSoundDevicePlayStopped;
+                device.Stop();
+            }
+
+            this.ReleaseAudioSources();
+            this._observers.DescribeAll(this);
+        }
+
+        /// <summary>
+        /// インスタンスが破棄済みでないか検査する。
+        /// </summary>
+        /// <exception cref="InvalidOperationException" />
+        private void AssertDisposed()
+        {
+            if (this._isDisposed)
+            {
+                throw new InvalidOperationException();
+            }
         }
     }
 }

@@ -431,24 +431,35 @@ namespace Gouter.Players
             this.RaisePropertyChanged(nameof(this.IsPausing));
             this.RaisePropertyChanged(nameof(this.IsStopping));
 
-            if (state == PlayState.Stop)
+            this._observers.NotifyAll(o => o.OnPlayStateChanged(state));
+            this._isStopRequired = false;
+        }
+
+        /// <summary>
+        /// 再生失敗時
+        /// </summary>
+        /// <param name="ex"></param>
+        void ISoundPlayerObserver.OnPlayerFailed(Exception ex)
+        {
+        }
+
+        /// <summary>
+        /// 現在トラックの再生完了時
+        /// </summary>
+        void ISoundPlayerObserver.OnTrackFinished()
+        {
+            if (this.LoopMode == LoopMode.None)
             {
-                if (this.LoopMode == LoopMode.None)
-                {
-                    return;
-                }
-
-                // スキップ処理を見直す
-                if (!this._isTrackChangeRequired && !this._isStopRequired)
-                {
-                    this.PlayNext();
-                }
-
-                this._isTrackChangeRequired = false;
-                this._isStopRequired = false;
+                return;
             }
 
-            this._observers.NotifyAll(o => o.OnPlayStateChanged(state));
+            // スキップ処理を見直す
+            if (!this._isTrackChangeRequired)
+            {
+                this.PlayNext();
+            }
+
+            this._isTrackChangeRequired = false;
         }
     }
 }
