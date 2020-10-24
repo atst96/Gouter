@@ -7,6 +7,7 @@ using CSCore.Codecs;
 using CSCore.SoundOut;
 using CSCore.Streams;
 using CSCore.Streams.Effects;
+using Gouter.AudioFilters;
 
 namespace Gouter.Players
 {
@@ -623,7 +624,7 @@ namespace Gouter.Players
 
             try
             {
-                var fadeStrategy = new LinearFadeStrategy();
+                var fadeStrategy = new FadeStrategy();
                 fadeStrategy.FadingFinished += this.OnFadeInOutFinished;
 
                 this._inputSource = CodecFactory.Instance.GetCodec(path).ToSampleSource();
@@ -735,7 +736,7 @@ namespace Gouter.Players
         {
             if (this._isDisposed)
             {
-                throw new InvalidOperationException();
+                // throw new InvalidOperationException();
             }
         }
     }
