@@ -736,7 +736,7 @@ namespace Gouter.Players
         {
             if (this._isDisposed)
             {
-                // throw new InvalidOperationException();
+                throw new InvalidOperationException();
             }
         }
     }

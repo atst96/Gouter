@@ -453,7 +453,7 @@ namespace Gouter.Players
                 return;
             }
 
-            // スキップ処理を見直す
+            // HACK: スキップ処理を見直す
             if (!this._isTrackChangeRequired)
             {
                 this.PlayNext();
