@@ -1,18 +1,9 @@
-﻿#nullable enable
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Data;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Data;
 using ATL;
-using Commons;
-using Dapper.FastCrud;
 using Gouter.DataModels;
-using Gouter.Extensions;
 using Gouter.Utils;
 
 namespace Gouter.Managers
@@ -20,27 +11,51 @@ namespace Gouter.Managers
     /// <summary>
     /// アルバム管理を行うクラス
     /// </summary>
-    internal class AlbumManager : ISubscribable<IAlbumObserver>, IDisposable
+    internal class AlbumManager : IDisposable
     {
-        /// <summary>データベース</summary>
+        /// <summary>
+        /// データベース
+        /// </summary>
         private readonly Database _database;
 
-        /// <summary>アルバム名の比較を行うComparer</summary>
+        /// <summary>
+        /// アルバム名の比較を行うComparer
+        /// </summary>
         public static readonly StringComparer AlbumNameComparer = StringComparer.CurrentCultureIgnoreCase;
 
-        /// <summary>アルバムの最終ID</summary>
+        /// <summary>
+        /// アルバムの最終ID
+        /// </summary>
         private volatile int _albumLatestIdx = -1;
 
-        /// <summary>アルバムIDとアルバム情報が対応したマップ</summary>
+        /// <summary>
+        /// アルバムIDとアルバム情報が対応したマップ
+        /// </summary>
         private readonly Dictionary<int, AlbumInfo> _albumIdMap = new Dictionary<int, AlbumInfo>();
 
-        /// <summary>アルバムキーとアルバム情報が対応したマップ</summary>
+        /// <summary>
+        /// アルバムキーとアルバム情報が対応したマップ
+        /// </summary>
         private readonly Dictionary<string, AlbumInfo> _albumKeyMap = new Dictionary<string, AlbumInfo>();
 
-        /// <summary>アルバム一覧</summary>
+        /// <summary>
+        /// アルバム一覧
+        /// </summary>
         public ConcurrentNotifiableCollection<AlbumInfo> Albums { get; } = new ConcurrentNotifiableCollection<AlbumInfo>();
 
-        /// <summary>AlbumMangaerを生成する</summary>
+        /// <summary>
+        /// アルバム登録時のイベント
+        /// </summary>
+        public event EventHandler<AlbumInfo> Registered;
+
+        /// <summary>
+        /// アルバム削除時のイベント
+        /// </summary>
+        public event EventHandler<AlbumInfo> Removed;
+
+        /// <summary>
+        /// AlbumMangaerを生成する。
+        /// </summary>
         /// <param name="database">DB情報</param>
         public AlbumManager(Database database)
         {
@@ -51,14 +66,18 @@ namespace Gouter.Managers
             BindingOperations.EnableCollectionSynchronization(this.Albums, new object());
         }
 
-        /// <summary>アルバムIDを生成する</summary>
+        /// <summary>
+        /// アルバムIDを生成する。
+        /// </summary>
         /// <returns>新規アルバムID</returns>
         public int GenerateId()
         {
             return ++this._albumLatestIdx;
         }
 
-        /// <summary>アルバム情報を追加する</summary>
+        /// <summary>
+        /// アルバム情報を追加する。
+        /// </summary>
         /// <param name="albumInfo">アルバム情報</param>
         private void AddImpl(AlbumInfo albumInfo)
         {
@@ -66,7 +85,8 @@ namespace Gouter.Managers
             this._albumKeyMap.Add(albumInfo.Key, albumInfo);
 
             this.Albums.Add(albumInfo);
-            this._observers.NotifyAll(obsr => obsr.OnRegistered(albumInfo));
+
+            this.Registered?.Invoke(this, albumInfo);
         }
 
         /// <summary>
@@ -112,7 +132,9 @@ namespace Gouter.Managers
             this.AddImpl(albumInfo);
         }
 
-        /// <summary>トラック情報からアルバム情報を取得する。アルバム情報が存在しない場合はトラック情報から抽出して登録する。</summary>
+        /// <summary>
+        /// トラック情報からアルバム情報を取得する。アルバム情報が存在しない場合はトラック情報から抽出して登録する。
+        /// </summary>
         /// <param name="track">トラック情報</param>
         /// <returns>アルバム情報</returns>
         public AlbumInfo GetOrAddAlbum(Track track)
@@ -133,7 +155,9 @@ namespace Gouter.Managers
             return albumInfo;
         }
 
-        /// <summary>アルバムIDからアルバム情報を取得する</summary>
+        /// <summary>
+        /// アルバムIDからアルバム情報を取得する。
+        /// </summary>
         /// <param name="albumId">アルバムID</param>
         /// <returns>アルバム情報</returns>
         public AlbumInfo FromId(int albumId)
@@ -142,7 +166,7 @@ namespace Gouter.Managers
         }
 
         /// <summary>
-        /// データベースからアルバム情報をロードする
+        /// データベースからアルバム情報をロードする。
         /// </summary>
         public void LoadLibrary()
         {
@@ -170,30 +194,11 @@ namespace Gouter.Managers
             }
         }
 
-        /// <summary>Observer一覧</summary>
-        private readonly List<IAlbumObserver> _observers = new List<IAlbumObserver>();
-
-        /// <summary>変更の購読を登録する</summary>
-        /// <param name="observer">Observer</param>
-        public void Subscribe(IAlbumObserver observer)
-        {
-            if (!this._observers.Contains(observer))
-            {
-                this._observers.Add(observer);
-            }
-        }
-
-        /// <summary>変更の購読を解除する</summary>
-        /// <param name="observer">Observer</param>
-        public void Describe(IAlbumObserver observer)
-        {
-            this._observers.Remove(observer);
-        }
-
-        /// <summary>リソースを破棄する</summary>
+        /// <summary>
+        /// リソースを破棄する。
+        /// </summary>
         public void Dispose()
         {
-            this._observers.Clear();
         }
     }
 }

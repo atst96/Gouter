@@ -10,7 +10,7 @@ namespace Gouter.Players
     /// <summary>
     /// メディア再生管理を行うクラス
     /// </summary>
-    internal class MediaPlayer : NotificationObject, IDisposable, ISubscribable<IMediaPlayerObserver>, ISoundPlayerObserver
+    internal class MediaPlayer : NotificationObject, IDisposable
     {
         private static readonly Random random = new Random();
         private volatile bool _isTrackChangeRequired = false;
@@ -59,12 +59,14 @@ namespace Gouter.Players
         // 再生履歴リスト
         private LinkedList<TrackInfo> _playHistory = new LinkedList<TrackInfo>();
 
-        // オブザーバ
-        private readonly IList<IMediaPlayerObserver> _observers = new List<IMediaPlayerObserver>();
-
         private bool _isDisposed;
 
         private TrackInfo _track;
+
+        /// <summary>
+        /// 再生状態の変更時に呼び出されるイベントハンドラ
+        /// </summary>
+        public event EventHandler<PlayState> PlayStateChanged;
 
         /// <summary>
         /// 再生中のトラック情報
@@ -100,13 +102,18 @@ namespace Gouter.Players
         /// コンストラクタ
         /// </summary>
         /// <param name="mediaManager">メディア管理クラス</param>
-        public MediaPlayer(MediaManager mediaManager) : base()
+        public MediaPlayer(MediaManager mediaManager)
+            : base()
         {
-            this._player.Subscribe(this);
+            var player = this._player;
+            player.PlayStateChanged += this.OnPlayStateChanged;
+            player.TrackFinished += this.OnTrackFinished;
+            player.PlayFailed += this.OnPlayerFailed;
+
             this.MediaManager = mediaManager;
 
             this._audioRenderer = GetTempAudioRenderer();
-            this._player.SetSoundDevice(this._audioRenderer);
+            player.SetSoundDevice(this._audioRenderer);
         }
 
         /// <summary>
@@ -126,7 +133,7 @@ namespace Gouter.Players
         /// <param name="isClearHistory"></param>
         /// <returns></returns>
         public void SwitchTrack(TrackInfo track, bool isClearHistory = true, bool isUpdateHistory = true)
-            => this.SwirxhTrack(track, null, isClearHistory, isUpdateHistory);
+            => this.SwitchTrack(track, null, isClearHistory, isUpdateHistory);
 
         /// <summary>
         /// 再生トラックを切り替える。
@@ -135,7 +142,7 @@ namespace Gouter.Players
         /// <param name="nextPlaylist"></param>
         /// <param name="isClearHistory"></param>
         /// <returns></returns>
-        public void SwirxhTrack(TrackInfo track, IPlaylist nextPlaylist, bool isClearHistory = true, bool isUpdateHistory = true)
+        public void SwitchTrack(TrackInfo track, IPlaylist nextPlaylist, bool isClearHistory = true, bool isUpdateHistory = true)
         {
             bool isTrackChanged = this.Track != track;
             if (!isTrackChanged)
@@ -181,7 +188,7 @@ namespace Gouter.Players
 
         public void Play(TrackInfo track, IPlaylist nextPlaylist = null, bool isClearHistory = true, bool isUpdateHistory = true)
         {
-            this.SwirxhTrack(track, nextPlaylist, isClearHistory, isUpdateHistory);
+            this.SwitchTrack(track, nextPlaylist, isClearHistory, isUpdateHistory);
             this.Play();
         }
 
@@ -364,25 +371,6 @@ namespace Gouter.Players
             => this._player.SetPosition(position);
 
         /// <summary>
-        /// 通知オブジェクトの購読を行う。
-        /// </summary>
-        /// <param name="observer">通知オブジェクト</param>
-        public void Subscribe(IMediaPlayerObserver observer)
-        {
-            if (!this._observers.Contains(observer))
-            {
-                this._observers.Add(observer);
-            }
-        }
-
-        /// <summary>
-        /// 通知オブジェクトの購読解除を行う。
-        /// </summary>
-        /// <param name="observer">通知オブジェクト</param>
-        public void Describe(IMediaPlayerObserver observer)
-            => this._observers.Remove(observer);
-
-        /// <summary>
         /// インスタンスを破棄する。
         /// </summary>
         /// <param name="disposing"></param>
@@ -395,8 +383,11 @@ namespace Gouter.Players
 
             if (disposing)
             {
-                this._player.Dispose();
-                this._observers.DescribeAll(this);
+                var player = this._player;
+                player.PlayStateChanged += this.OnPlayStateChanged;
+                player.TrackFinished += this.OnTrackFinished;
+                player.PlayFailed += this.OnPlayerFailed;
+                player.Dispose();
             }
 
             this._isDisposed = true;
@@ -415,28 +406,28 @@ namespace Gouter.Players
         /// 内部プレーヤの状態が変化した
         /// </summary>
         /// <param name="state">状態</param>
-        async void ISoundPlayerObserver.OnPlayStateChanged(PlayState state)
+        private void OnPlayStateChanged(object sender, PlayState state)
         {
             this.State = state;
             this.RaisePropertyChanged(nameof(this.IsPlaying));
             this.RaisePropertyChanged(nameof(this.IsPausing));
             this.RaisePropertyChanged(nameof(this.IsStopping));
 
-            this._observers.NotifyAll(o => o.OnPlayStateChanged(state));
+            this.PlayStateChanged?.Invoke(this, state);
         }
 
         /// <summary>
         /// 再生失敗時
         /// </summary>
         /// <param name="ex"></param>
-        void ISoundPlayerObserver.OnPlayerFailed(Exception ex)
+        private void OnPlayerFailed(object sender, Exception ex)
         {
         }
 
         /// <summary>
         /// 現在トラックの再生完了時
         /// </summary>
-        void ISoundPlayerObserver.OnTrackFinished()
+        private void OnTrackFinished(object sender, EventArgs e)
         {
             if (this.LoopMode == LoopMode.None)
             {

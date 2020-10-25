@@ -5,7 +5,7 @@ namespace Gouter.Managers
     /// <summary>
     /// プレイリストの管理を行うクラス
     /// </summary>
-    internal class PlaylistManager : IAlbumObserver, IDisposable
+    internal class PlaylistManager : IDisposable
     {
         /// <summary>
         /// データベース
@@ -32,14 +32,15 @@ namespace Gouter.Managers
             this._database = database ?? throw new InvalidOperationException();
             this._albumManager = albumManager ?? throw new InvalidOperationException();
 
-            albumManager.Subscribe(this);
+            albumManager.Registered += this.OnRegistered;
+            albumManager.Removed += this.OnRemoved;
         }
 
         /// <summary>
         /// アルバム情報の登録通知
         /// </summary>
         /// <param name="albumInfo">アルバム情報</param>
-        void IAlbumObserver.OnRegistered(AlbumInfo albumInfo)
+        private void OnRegistered(object sender, AlbumInfo albumInfo)
         {
             this.Albums.Add(albumInfo.Playlist);
         }
@@ -48,7 +49,7 @@ namespace Gouter.Managers
         /// アルバム情報の削除通知
         /// </summary>
         /// <param name="albumInfo">アルバム情報</param>
-        void IAlbumObserver.OnRemoved(AlbumInfo albumInfo)
+        private void OnRemoved(object sender, AlbumInfo albumInfo)
         {
             this.Albums.Remove(albumInfo.Playlist);
         }
@@ -58,7 +59,9 @@ namespace Gouter.Managers
         /// </summary>
         public void Dispose()
         {
-            this._albumManager.Describe(this);
+            var albumManager = this._albumManager;
+            albumManager.Registered -= this.OnRegistered;
+            albumManager.Removed -= this.OnRemoved;
         }
     }
 }

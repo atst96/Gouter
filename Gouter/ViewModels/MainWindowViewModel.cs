@@ -1,22 +1,15 @@
-﻿using CSCore.SoundOut;
-using Gouter.Commands.MainWindow;
-using Gouter.Extensions;
+﻿using Gouter.Commands.MainWindow;
 using Gouter.Managers;
 using Gouter.Players;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Data;
 using System.Windows.Threading;
 
 namespace Gouter.ViewModels
 {
-    internal class MainWindowViewModel : ViewModelBase, IMediaPlayerObserver
+    internal class MainWindowViewModel : ViewModelBase, IDisposable
     {
         private readonly Random _rand = new Random();
 
@@ -41,7 +34,8 @@ namespace Gouter.ViewModels
         {
             this.Albums = new SortedNotifiableCollectionWrapper<AlbumPlaylist>(this.Playlists.Albums, AlbumComparer.Instance);
 
-            this.Player.Subscribe(this);
+            var player = this.Player;
+            player.PlayStateChanged += this.OnPlayStateChanged;
 
             var timerInterval = TimeSpan.FromSeconds(0.1d);
             this._timer = new DispatcherTimer(timerInterval, DispatcherPriority.Render, this.OnTimerTick, Dispatcher.CurrentDispatcher);
@@ -200,7 +194,7 @@ namespace Gouter.ViewModels
 
         private readonly DispatcherTimer _timer;
 
-        void IMediaPlayerObserver.OnPlayStateChanged(PlayState state)
+        private void OnPlayStateChanged(object sender, PlayState state)
         {
             switch (state)
             {
@@ -232,6 +226,15 @@ namespace Gouter.ViewModels
         private void OnTimerTick(object sender, EventArgs e)
         {
             this.UpdateTime();
+        }
+
+        /// <summary>
+        /// 破棄時
+        /// </summary>
+        void IDisposable.Dispose()
+        {
+            var player = this.Player;
+            player.PlayStateChanged -= this.OnPlayStateChanged;
         }
     }
 }

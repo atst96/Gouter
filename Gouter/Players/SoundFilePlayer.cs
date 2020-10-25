@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Threading;
 using System.Windows.Threading;
 using CSCore;
 using CSCore.Codecs;
@@ -14,7 +12,7 @@ namespace Gouter.Players
     /// <summary>
     /// 音声ファイルの再生処理を行うクラス
     /// </summary>
-    internal class SoundFilePlayer : IDisposable, ISubscribable<ISoundPlayerObserver>
+    internal class SoundFilePlayer : IDisposable
     {
         /// <summary>
         /// フェード後に遷移する状態
@@ -27,8 +25,6 @@ namespace Gouter.Players
         private bool _isDisposed = false;
 
         private readonly object @_lockObject = new object();
-        private SemaphoreSlim _semaphore = new SemaphoreSlim(1);
-        public readonly IList<CancellationTokenSource> _cancellationTokenSources = new List<CancellationTokenSource>();
 
         /// <summary>
         /// 音声ソースが初夏済みかどうかのフラグ
@@ -121,11 +117,6 @@ namespace Gouter.Players
         private bool _hasNextAudioSource = false;
 
         /// <summary>
-        /// Observers
-        /// </summary>
-        private readonly List<ISoundPlayerObserver> _observers = new List<ISoundPlayerObserver>();
-
-        /// <summary>
         /// ボリュームを取得または設定する。
         /// </summary>
         public float Volume
@@ -143,6 +134,21 @@ namespace Gouter.Players
                 }
             }
         }
+        /// <summary>
+        /// 再生処理に失敗した場合に呼び出されるイベントハンドラ
+        /// </summary>
+        public event EventHandler<Exception> PlayFailed;
+
+        /// <summary>
+        /// トラック変更時に呼び出されるイベントハンドラ
+        /// </summary>
+        public event EventHandler TrackFinished;
+
+        /// <summary>
+        /// 再生状態の変更時に呼び出されるイベントハンドラ
+        /// </summary>
+        public event EventHandler<PlayState> PlayStateChanged;
+
 
         /// <summary>
         /// コンストラクタ
@@ -168,7 +174,7 @@ namespace Gouter.Players
             if (!isStopRequested)
             {
                 // 現在トラックの再生終了
-                this._observers.NotifyAll(o => o.OnTrackFinished());
+                this.TrackFinished?.Invoke(this, EventArgs.Empty);
             }
 
             if (this._hasNextAudioSource)
@@ -331,27 +337,6 @@ namespace Gouter.Players
             => this._inputSource?.SetPosition(position);
 
         /// <summary>
-        /// 通知オブジェクトを登録する
-        /// </summary>
-        /// <param name="observer">通知オブジェクト</param>
-        public void Subscribe(ISoundPlayerObserver observer)
-        {
-            if (!this._observers.Contains(observer))
-            {
-                this._observers.Add(observer);
-            }
-        }
-
-        /// <summary>
-        /// 通知オブジェクトを登録解除する
-        /// </summary>
-        /// <param name="observer">通知オブジェクト</param>
-        public void Describe(ISoundPlayerObserver observer)
-        {
-            this._observers.Remove(observer);
-        }
-
-        /// <summary>
         /// 音源等リソースを解放する。
         /// </summary>
         private void ReleaseAudioSources()
@@ -387,7 +372,7 @@ namespace Gouter.Players
             lock (this.@_lockObject)
             {
                 this.State = state;
-                this._observers.NotifyAll(observer => observer.OnPlayStateChanged(state));
+                this.PlayStateChanged?.Invoke(this, state);
             }
         });
 
@@ -635,7 +620,7 @@ namespace Gouter.Players
             catch (Exception ex)
             {
                 this.ReleaseAudioSources();
-                this._observers.NotifyAll(s => s.OnPlayerFailed(ex));
+                this.PlayFailed?.Invoke(this, ex);
                 throw;
             }
 
@@ -655,7 +640,7 @@ namespace Gouter.Players
         private void PlayInternalPlayer()
         {
             this._soundDevice?.Play();
-            
+
             // 再生状態を更新
             this.OnStateChanged(PlayState.Play);
         }
@@ -719,7 +704,6 @@ namespace Gouter.Players
             }
 
             this.ReleaseAudioSources();
-            this._observers.DescribeAll(this);
         }
 
         /// <summary>
@@ -730,7 +714,7 @@ namespace Gouter.Players
         {
             if (this._isDisposed)
             {
-                // throw new InvalidOperationException();
+                throw new InvalidOperationException();
             }
         }
     }
