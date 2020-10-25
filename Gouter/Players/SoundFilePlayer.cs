@@ -161,6 +161,8 @@ namespace Gouter.Players
             bool isStopRequested = this._isStopRequested;
             this._isStopRequested = false;
             this._isPlaying = false;
+
+            // 再生停止時
             this.OnStateChanged(PlayState.Stop);
 
             if (!isStopRequested)
@@ -400,12 +402,32 @@ namespace Gouter.Players
         }
 
         /// <summary>
-        /// 再生処理を開始する。
+        /// 再生トラックを変更する。
         /// </summary>
-        public void Play()
+        /// <param name="track"></param>
+        public void ChangeSource(TrackInfo track)
         {
             this.AssertDisposed();
-            this.PlayInternal();
+
+            bool isPlaying = this._isPlaying && !this._isStopRequested;
+            this._isStopToNextSource = isPlaying || this._isStopToNextSource;
+
+            if (isPlaying)
+            {
+                this.ChangeAudioSource(track.Path);
+                return;
+            }
+
+            this.ChangeAudioSource(track.Path);
+
+            if (this.State == PlayState.Stop)
+            {
+                this.PlayInternal();
+            }
+            else
+            {
+                this.StopInternal();
+            }
         }
 
         /// <summary>
@@ -438,7 +460,6 @@ namespace Gouter.Players
                 }
 
                 this.PlayInternalPlayer();
-                this.OnStateChanged(PlayState.Play);
                 return;
             }
 
@@ -451,36 +472,15 @@ namespace Gouter.Players
             // 再生処理を開始する
             this._isPlaying = true;
             this.PlayInternalPlayer();
-            this.OnStateChanged(PlayState.Play);
         }
 
         /// <summary>
-        /// 再生トラックを変更する。
+        /// 再生処理を開始する。
         /// </summary>
-        /// <param name="track"></param>
-        public void ChangeSource(TrackInfo track)
+        public void Play()
         {
             this.AssertDisposed();
-
-            bool isPlaying = this._isPlaying && !this._isStopRequested;
-            this._isStopToNextSource = isPlaying || this._isStopToNextSource;
-
-            if (isPlaying)
-            {
-                this.ChangeAudioSource(track.Path);
-                return;
-            }
-
-            this.ChangeAudioSource(track.Path);
-
-            if (this.State == PlayState.Stop)
-            {
-                this.PlayInternal();
-            }
-            else
-            {
-                this.StopInternal();
-            }
+            this.PlayInternal();
         }
 
         /// <summary>
@@ -522,9 +522,6 @@ namespace Gouter.Players
             {
                 return;
             }
-
-            // 再生状態を更新
-            this.OnStateChanged(PlayState.Pause);
 
             if (this._inputSource == null)
             {
@@ -657,13 +654,10 @@ namespace Gouter.Players
         /// </summary>
         private void PlayInternalPlayer()
         {
-            var device = this._soundDevice;
-            if (device == null)
-            {
-                return;
-            }
-
-            device.Play();
+            this._soundDevice?.Play();
+            
+            // 再生状態を更新
+            this.OnStateChanged(PlayState.Play);
         }
 
         /// <summary>
@@ -671,13 +665,10 @@ namespace Gouter.Players
         /// </summary>
         private void PauseInternalPlayer()
         {
-            var device = this._soundDevice;
-            if (device == null)
-            {
-                return;
-            }
+            this._soundDevice?.Pause();
 
-            device.Pause();
+            // 再生状態を更新
+            this.OnStateChanged(PlayState.Pause);
         }
 
         /// <summary>
@@ -686,6 +677,9 @@ namespace Gouter.Players
         private void StopInternalPlayer()
         {
             this._soundDevice?.Stop();
+
+            // MEMO: 停止時の状態通知はイベント内で行う
+            // @see: 
         }
 
         /// <summary>
@@ -736,7 +730,7 @@ namespace Gouter.Players
         {
             if (this._isDisposed)
             {
-                throw new InvalidOperationException();
+                // throw new InvalidOperationException();
             }
         }
     }

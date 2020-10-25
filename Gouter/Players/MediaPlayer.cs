@@ -1,15 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Forms.VisualStyles;
-using ATL;
-using CSCore;
-using CSCore.Codecs;
 using CSCore.CoreAudioAPI;
-using CSCore.DSP;
 using CSCore.SoundOut;
 using Gouter.Extensions;
 using Gouter.Managers;
@@ -22,9 +13,7 @@ namespace Gouter.Players
     internal class MediaPlayer : NotificationObject, IDisposable, ISubscribable<IMediaPlayerObserver>, ISoundPlayerObserver
     {
         private static readonly Random random = new Random();
-        private CancellationTokenSource _cancellationTokenSource;
         private volatile bool _isTrackChangeRequired = false;
-        private volatile bool _isStopRequired = false;
 
         /// <summary>
         /// メディア管理クラス
@@ -137,16 +126,16 @@ namespace Gouter.Players
         /// <param name="isClearHistory"></param>
         /// <returns></returns>
         public void SwitchTrack(TrackInfo track, bool isClearHistory = true, bool isUpdateHistory = true)
-            => this.ChangeTrack(track, null, isClearHistory, isUpdateHistory);
+            => this.SwirxhTrack(track, null, isClearHistory, isUpdateHistory);
 
         /// <summary>
-        /// トラックを切り替える。
+        /// 再生トラックを切り替える。
         /// </summary>
         /// <param name="track"></param>
         /// <param name="nextPlaylist"></param>
         /// <param name="isClearHistory"></param>
         /// <returns></returns>
-        public void ChangeTrack(TrackInfo track, IPlaylist nextPlaylist, bool isClearHistory = true, bool isUpdateHistory = true)
+        public void SwirxhTrack(TrackInfo track, IPlaylist nextPlaylist, bool isClearHistory = true, bool isUpdateHistory = true)
         {
             bool isTrackChanged = this.Track != track;
             if (!isTrackChanged)
@@ -192,7 +181,7 @@ namespace Gouter.Players
 
         public void Play(TrackInfo track, IPlaylist nextPlaylist = null, bool isClearHistory = true, bool isUpdateHistory = true)
         {
-            this.ChangeTrack(track, nextPlaylist, isClearHistory, isUpdateHistory);
+            this.SwirxhTrack(track, nextPlaylist, isClearHistory, isUpdateHistory);
             this.Play();
         }
 
@@ -272,6 +261,7 @@ namespace Gouter.Players
 
             if (this.ShuffleMode == ShuffleMode.None)
             {
+                // シャッフルモードでない場合
                 int trackIndex = tracks.IndexOf(currentTrack);
                 int index = trackIndex < tracks.Count - 1 ? trackIndex + 1 : 0;
 
@@ -279,7 +269,8 @@ namespace Gouter.Players
             }
             else if (this.ShuffleMode == ShuffleMode.Random)
             {
-                int index = random.Next(0, tracks.Count - 1);
+                // ランダムシャッフルの場合
+                int index = random.Next(0, tracks.Count);
 
                 return tracks[index];
             }
@@ -432,7 +423,6 @@ namespace Gouter.Players
             this.RaisePropertyChanged(nameof(this.IsStopping));
 
             this._observers.NotifyAll(o => o.OnPlayStateChanged(state));
-            this._isStopRequired = false;
         }
 
         /// <summary>
