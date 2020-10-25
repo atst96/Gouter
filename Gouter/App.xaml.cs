@@ -101,11 +101,14 @@ namespace Gouter
         /// <param name="e"></param>
         protected override void OnExit(ExitEventArgs e)
         {
-            this.MediaPlayer.Stop();
-
             if (this.IsRequireSaveSettings)
             {
                 this.SaveSettings().Wait();
+            }
+
+            using (var player = this.MediaPlayer)
+            {
+                player.Stop();
             }
 
             base.OnExit(e);

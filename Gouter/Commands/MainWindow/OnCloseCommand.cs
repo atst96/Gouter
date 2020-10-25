@@ -23,7 +23,6 @@ namespace Gouter.Commands.MainWindow
 
         public override void Execute(object parameter)
         {
-            this._viewModel.Player.Dispose();
         }
     }
 }
