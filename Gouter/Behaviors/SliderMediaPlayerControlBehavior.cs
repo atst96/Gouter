@@ -18,14 +18,14 @@ namespace Gouter.Behaviors
     /// </summary>
     internal class SliderMediaPlayerControlBehavior : Behavior<Slider>
     {
-        public MediaPlayer Player
+        public PlaylistPlayer Player
         {
-            get => (MediaPlayer)this.GetValue(PlayerProperty);
+            get => (PlaylistPlayer)this.GetValue(PlayerProperty);
             set => this.SetValue(PlayerProperty, value);
         }
 
         public static readonly DependencyProperty PlayerProperty
-            = DependencyProperty.Register(nameof(Player), typeof(MediaPlayer), typeof(SliderMediaPlayerControlBehavior), new PropertyMetadata(null));
+            = DependencyProperty.Register(nameof(Player), typeof(PlaylistPlayer), typeof(SliderMediaPlayerControlBehavior), new PropertyMetadata(null));
 
         public double Position
         {
@@ -101,7 +101,7 @@ namespace Gouter.Behaviors
                 double value = slider.Value;
                 if (this._tempPlayState == PlayState.Play)
                 {
-                    player.SetPosition(TimeSpan.FromMilliseconds(value));
+                    player.Seek(TimeSpan.FromMilliseconds(value));
                     player.Play();
                 }
 

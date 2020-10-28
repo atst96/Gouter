@@ -17,7 +17,7 @@ namespace Gouter.ViewModels
 
         public MediaManager MediaManager { get; } = _app.MediaManager;
 
-        public MediaPlayer Player { get; } = _app.MediaPlayer;
+        public PlaylistPlayer Player { get; } = _app.MediaPlayer;
 
         public PlaylistManager Playlists => this.MediaManager.Playlists;
 
@@ -210,7 +210,6 @@ namespace Gouter.ViewModels
                     this.UpdateTime();
                     break;
             }
-
         }
 
         public bool IsSeeking { get; set; }

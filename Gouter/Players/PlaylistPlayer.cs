@@ -10,10 +10,10 @@ namespace Gouter.Players
     /// <summary>
     /// メディア再生管理を行うクラス
     /// </summary>
-    internal class MediaPlayer : NotificationObject, IDisposable
+    internal class PlaylistPlayer : NotificationObject, IDisposable
     {
         private static readonly Random random = new Random();
-        private volatile bool _isTrackChangeRequired = false;
+        private volatile bool _isTrackSwitching = false;
 
         /// <summary>
         /// メディア管理クラス
@@ -26,14 +26,26 @@ namespace Gouter.Players
         private ISoundOut _audioRenderer;
 
         /// <summary>
-        /// ループモード
+        /// プレーや設定の内部変数
         /// </summary>
-        public LoopMode LoopMode { get; set; } = LoopMode.Playlist;
+        private IPlayerOptions _options;
 
         /// <summary>
-        /// シャッフルモード
+        /// プレーヤ設定
         /// </summary>
-        public ShuffleMode ShuffleMode { get; set; } = ShuffleMode.Random;
+        public IPlayerOptions Options
+        {
+            get => this._options;
+            set
+            {
+                this._options = value ?? throw new ArgumentNullException(nameof(this.Options));
+
+                if (this._player != null)
+                {
+                    this._player.Options = value;
+                }
+            }
+        }
 
         /// <summary>
         /// 再生時のボリューム
@@ -91,7 +103,7 @@ namespace Gouter.Players
         /// <summary>
         /// サウンドプレーヤ
         /// </summary>
-        private readonly SoundFilePlayer _player = new SoundFilePlayer();
+        private readonly SoundFilePlayer _player;
 
         /// <summary>
         /// 再生状態
@@ -102,13 +114,17 @@ namespace Gouter.Players
         /// コンストラクタ
         /// </summary>
         /// <param name="mediaManager">メディア管理クラス</param>
-        public MediaPlayer(MediaManager mediaManager)
+        public PlaylistPlayer(MediaManager mediaManager, IPlayerOptions options)
             : base()
         {
-            var player = this._player;
+            this.Options = options ?? throw new ArgumentNullException(nameof(options));
+
+            var player = new SoundFilePlayer(options);
             player.PlayStateChanged += this.OnPlayStateChanged;
             player.TrackFinished += this.OnTrackFinished;
             player.PlayFailed += this.OnPlayerFailed;
+
+            this._player = player;
 
             this.MediaManager = mediaManager;
 
@@ -147,7 +163,7 @@ namespace Gouter.Players
             bool isTrackChanged = this.Track != track;
             if (!isTrackChanged)
             {
-                this._player.SetPosition(TimeSpan.Zero);
+                this._player.Seek(TimeSpan.Zero);
             }
             else
             {
@@ -176,7 +192,7 @@ namespace Gouter.Players
 
             if (isTrackChanged)
             {
-                this._isTrackChangeRequired = true;
+                this._isTrackSwitching = true;
                 this._player.ChangeSource(track);
             }
         }
@@ -184,7 +200,10 @@ namespace Gouter.Players
         /// <summary>
         /// 再生を行う
         /// </summary>
-        public void Play() => this._player.Play();
+        public void Play()
+        {
+            this._player.Play();
+        }
 
         public void Play(TrackInfo track, IPlaylist nextPlaylist = null, bool isClearHistory = true, bool isUpdateHistory = true)
         {
@@ -206,12 +225,13 @@ namespace Gouter.Players
 
             var previousNode = this._currentHistoryNode?.Previous;
 
-            var temp = TimeSpan.FromSeconds(3.0);
+            // TODO: 巻き戻し時間の閾値を設定データに持てるようにする
+            var rewindDuration = TimeSpan.FromSeconds(3.0);
 
-            if (this.GetPosition() > temp || previousNode?.Value == default)
+            if (this.GetPosition() > rewindDuration || previousNode?.Value == default)
             {
                 // 再生履歴なし or 再生位置が指定時間以上
-                this.SetPosition(TimeSpan.Zero);
+                this.Seek(TimeSpan.Zero);
                 this.Play();
             }
             else
@@ -259,30 +279,64 @@ namespace Gouter.Players
         /// <returns></returns>
         public TrackInfo GetNextTrack(TrackInfo currentTrack, IPlaylist playlist)
         {
-            if (this.LoopMode == LoopMode.SingleTrack)
+            var options = this.Options;
+            if (options == null || this.Options.LoopMode == LoopMode.SingleTrack)
             {
                 return currentTrack;
             }
 
             var tracks = playlist.Tracks;
+            var shuffleMode = options.ShuffleMode;
 
-            if (this.ShuffleMode == ShuffleMode.None)
+            int currentTrackIndex = tracks.IndexOf(currentTrack);
+
+            switch (shuffleMode)
             {
-                // シャッフルモードでない場合
-                int trackIndex = tracks.IndexOf(currentTrack);
-                int index = trackIndex < tracks.Count - 1 ? trackIndex + 1 : 0;
+                case ShuffleMode.None:
+                    {
+                        // シャッフルモードでない場合
+                        // 次のトラックを選択する
+                        int nextTrackIndex = currentTrackIndex + 1;
+                        if (nextTrackIndex >= tracks.Count)
+                        {
+                            // トラックのインデックスが範囲外であれば最初のトラックに戻る
+                            nextTrackIndex = 0;
+                        }
 
-                return tracks[index];
+                        return tracks[nextTrackIndex];
+                    }
+
+                case ShuffleMode.Random:
+                    {
+                        // ランダムシャッフルの場合
+
+                        int tracksCount = tracks.Count;
+
+                        if (tracksCount <= 1)
+                        {
+                            // 1トラック登録されている場合
+                            return currentTrack;
+                        }
+
+                        if (tracksCount == 2 && options.IsShuffleAvoidCurrentTrack)
+                        {
+                            // 2トラック登録されている & 同一トラック回避の場合
+                            return tracks[1 - currentTrackIndex];
+                        }
+
+                        int nextTrackIndex;
+                        do
+                        {
+                            nextTrackIndex = random.Next(0, tracks.Count);
+                        }
+                        while (nextTrackIndex == currentTrackIndex && options.IsShuffleAvoidCurrentTrack);
+
+                        return tracks[nextTrackIndex];
+                    }
+
+                default:
+                    throw new NotImplementedException();
             }
-            else if (this.ShuffleMode == ShuffleMode.Random)
-            {
-                // ランダムシャッフルの場合
-                int index = random.Next(0, tracks.Count);
-
-                return tracks[index];
-            }
-
-            throw new NotSupportedException();
         }
 
         /// <summary>
@@ -311,7 +365,7 @@ namespace Gouter.Players
         }
 
         /// <summary>
-        /// 再生履歴を整理する
+        /// 再生履歴を整理する。
         /// </summary>
         private void OrganizeHistory()
         {
@@ -330,7 +384,7 @@ namespace Gouter.Players
         public bool IsPlaying => this.State == PlayState.Play;
 
         /// <summary>
-        /// 再生を一時停止する
+        /// 再生を一時停止する。
         /// </summary>
         public void Pause() => this._player.Pause();
 
@@ -340,10 +394,12 @@ namespace Gouter.Players
         public bool IsPausing => this.State == PlayState.Pause;
 
         /// <summary>
-        /// 再生を停止する。デバイスの再生処理終了の待機は行わない
+        /// 再生を停止する。
         /// </summary>
         public void Stop()
-            => this._player.Stop();
+        {
+            this._player.Stop();
+        }
 
         /// <summary>
         /// 停止中かどうかを取得する。
@@ -355,20 +411,27 @@ namespace Gouter.Players
         /// </summary>
         /// <returns>再生位置</returns>
         public TimeSpan GetPosition()
-            => this._player.GetPosition();
+        {
+            return this._player.GetPosition();
+        }
 
         /// <summary>
         /// 楽曲の長さ(尺)を取得する。
         /// </summary>
         /// <returns></returns>
-        public TimeSpan GetDuration() => this._player.GetDuration();
+        public TimeSpan GetDuration()
+        {
+            return this._player.GetDuration();
+        }
 
         /// <summary>
         /// 再生位置を設定する
         /// </summary>
         /// <param name="position">再生位置</param>
-        public void SetPosition(TimeSpan position)
-            => this._player.SetPosition(position);
+        public void Seek(TimeSpan position)
+        {
+            this._player.Seek(position);
+        }
 
         /// <summary>
         /// インスタンスを破棄する。
@@ -408,6 +471,7 @@ namespace Gouter.Players
         /// <param name="state">状態</param>
         private void OnPlayStateChanged(object sender, PlayState state)
         {
+            // トラック変更中はステータスを変更しない
             this.State = state;
             this.RaisePropertyChanged(nameof(this.IsPlaying));
             this.RaisePropertyChanged(nameof(this.IsPausing));
@@ -429,18 +493,18 @@ namespace Gouter.Players
         /// </summary>
         private void OnTrackFinished(object sender, EventArgs e)
         {
-            if (this.LoopMode == LoopMode.None)
+            var options = this.Options;
+            if (options.LoopMode == LoopMode.None)
             {
+                // ループしない場合
                 return;
             }
 
-            // HACK: スキップ処理を見直す
-            if (!this._isTrackChangeRequired)
+            if (!this._isTrackSwitching)
             {
+                this._isTrackSwitching = false;
                 this.PlayNext();
             }
-
-            this._isTrackChangeRequired = false;
         }
     }
 }

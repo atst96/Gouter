@@ -82,14 +82,23 @@ namespace Gouter.Players
         private readonly Dispatcher _dispatcher = Dispatcher.CurrentDispatcher;
 
         /// <summary>
-        /// フェードイン／アウトにかける時間を取得または設定する。
-        /// </summary>
-        public TimeSpan? FadeInOutDuration { get; set; } = TimeSpan.FromMilliseconds(200);
-
-        /// <summary>
         /// 再生状態を取得する。
         /// </summary>
         public PlayState State { get; private set; } = PlayState.Stop;
+
+        /// <summary>
+        /// プレーヤ設定(内部変数)
+        /// </summary>
+        private IPlayerOptions _options;
+
+        /// <summary>
+        /// プレーヤ設定
+        /// </summary>
+        public IPlayerOptions Options
+        {
+            get => this._options;
+            set => this._options = value ?? throw new ArgumentNullException(nameof(this.Options));
+        }
 
         /// <summary>
         /// 現在再生中のファイルパス
@@ -153,8 +162,9 @@ namespace Gouter.Players
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public SoundFilePlayer()
+        public SoundFilePlayer(IPlayerOptions options)
         {
+            this.Options = options ?? throw new ArgumentNullException(nameof(options));
         }
 
         /// <summary>
@@ -296,7 +306,8 @@ namespace Gouter.Players
         /// <returns></returns>
         private bool GetIsFadeOutEnable()
         {
-            return this.FadeInOutDuration > TimeSpan.Zero;
+            var options = this.Options;
+            return options.IsEnableFadeInOut && options.FadeInOutDuration > TimeSpan.Zero;
         }
 
         /// <summary>
@@ -305,7 +316,8 @@ namespace Gouter.Players
         /// <returns></returns> 
         private bool GetIsFadeInEnable()
         {
-            return this.FadeInOutDuration > TimeSpan.Zero;
+            var options = this.Options;
+            return options.IsEnableFadeInOut && options.FadeInOutDuration > TimeSpan.Zero;
         }
 
         /// <summary>
@@ -333,7 +345,7 @@ namespace Gouter.Players
         /// 再生位置を設定する
         /// </summary>
         /// <param name="position">再生位置</param>
-        public void SetPosition(TimeSpan position)
+        public void Seek(TimeSpan position)
             => this._inputSource?.SetPosition(position);
 
         /// <summary>
@@ -549,7 +561,7 @@ namespace Gouter.Players
             }
 
             this._afterFadeState = afterState;
-            var fadeInDuration = this.FadeInOutDuration ?? TimeSpan.Zero;
+            var fadeInDuration = this.Options.FadeInOutDuration;
             var fadeStrategy = this._fadeInOut.FadeStrategy;
 
             fadeStrategy.StartFading(null, FadeMaxVolume, fadeInDuration);
@@ -566,7 +578,7 @@ namespace Gouter.Players
             }
 
             this._afterFadeState = afterState;
-            var fadeOutDuration = this.FadeInOutDuration ?? TimeSpan.Zero;
+            var fadeOutDuration = this.Options.FadeInOutDuration;
             var fadeStrategy = this._fadeInOut.FadeStrategy;
 
             fadeStrategy.StartFading(null, FadeMinVolume, fadeOutDuration);

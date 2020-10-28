@@ -15,7 +15,7 @@ namespace Gouter.ViewModels
         private static readonly App AppInstance = App.Instance;
 
         private readonly MediaManager _mediaManager = AppInstance.MediaManager;
-        private readonly MediaPlayer _mediaPlayer = AppInstance.MediaPlayer;
+        private readonly PlaylistPlayer _mediaPlayer = AppInstance.MediaPlayer;
         private readonly SoundDeviceListener _soundDeviceListener = AppInstance.SoundDeviceListener;
 
         public SettingWindowViewModel()

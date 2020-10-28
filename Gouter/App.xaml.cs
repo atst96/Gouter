@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using Dapper.FastCrud;
 using Gouter.Components.TypeHandlers;
+using Gouter.Data;
 using Gouter.Extensions;
 using Gouter.Managers;
 using Gouter.Players;
@@ -29,9 +30,14 @@ namespace Gouter
         internal MediaManager MediaManager { get; private set; }
 
         /// <summary>
-        /// メディア再生
+        /// プレイリスト再生クラス
         /// </summary>
-        internal MediaPlayer MediaPlayer { get; private set; }
+        internal PlaylistPlayer MediaPlayer { get; private set; }
+
+        /// <summary>
+        /// プレーヤ設定
+        /// </summary>
+        internal PlayerOptions PlayerOptions { get; private set; }
 
         /// <summary>
         /// サウンドデバイスのリスナー
@@ -92,7 +98,20 @@ namespace Gouter
 
             var libraryPath = this.GetLocalFilePath(Config.LibraryFileName);
             this.MediaManager = MediaManager.CreateMediaManager(libraryPath);
-            this.MediaPlayer = new MediaPlayer(this.MediaManager);
+
+            // TODO: プレーヤ設定を設定データから生成できるようにする
+            var options = new PlayerOptions
+            {
+                LoopMode = LoopMode.Playlist,
+                ShuffleMode = ShuffleMode.None,
+                IsShuffleAvoidCurrentTrack = true,
+                IsEnableFadeInOut = true,
+                FadeInOutDuration = TimeSpan.FromMilliseconds(200d),
+            };
+
+            this.PlayerOptions = options;
+
+            this.MediaPlayer = new PlaylistPlayer(this.MediaManager, options);
         }
 
         /// <summary>
