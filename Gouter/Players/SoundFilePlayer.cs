@@ -29,7 +29,7 @@ namespace Gouter.Players
         /// <summary>
         /// 音声ソースが初夏済みかどうかのフラグ
         /// </summary>
-        private volatile bool _isSoundSourceInitialized;
+        private volatile bool _isSoundSourceInitialized = false;
 
         /// <summary>
         /// 音声入力ソース
@@ -137,7 +137,7 @@ namespace Gouter.Players
 
                 // 出力デバイスのボリュームを変更
                 var device = this._soundDevice;
-                if (device != null)
+                if (device != null && this._isSoundSourceInitialized)
                 {
                     device.Volume = value;
                 }
@@ -434,11 +434,6 @@ namespace Gouter.Players
         {
             var state = this.State;
 
-            if (state == PlayState.Play)
-            {
-                return;
-            }
-
             if (this._isStopRequested && this._hasNextAudioSource)
             {
                 // トラック変更中(再生停止要求中&トラック変更済み)の場合
@@ -447,7 +442,7 @@ namespace Gouter.Players
                 return;
             }
 
-            if (state == PlayState.Pause)
+            if (this._afterFadeState != PlayState.Play || state == PlayState.Pause)
             {
                 // 一時停止中の場合
                 // フェードインで再生を開始する
@@ -601,6 +596,8 @@ namespace Gouter.Players
                     this.StopInternalPlayer();
                     break;
             }
+
+            this._afterFadeState = null;
         });
 
         /// <summary>
@@ -654,6 +651,7 @@ namespace Gouter.Players
             this._soundDevice?.Play();
 
             // 再生状態を更新
+            this._afterFadeState = null;
             this.OnStateChanged(PlayState.Play);
         }
 
