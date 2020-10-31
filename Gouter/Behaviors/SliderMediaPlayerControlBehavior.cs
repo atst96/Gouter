@@ -76,6 +76,7 @@ namespace Gouter.Behaviors
             {
                 return;
             }
+
             ++this._tempCount;
 
             var player = this.Player;
@@ -99,9 +100,10 @@ namespace Gouter.Behaviors
             if (player != null && player.Track != null)
             {
                 double value = slider.Value;
+                player.Seek(TimeSpan.FromMilliseconds(value));
+
                 if (this._tempPlayState == PlayState.Play)
                 {
-                    player.Seek(TimeSpan.FromMilliseconds(value));
                     player.Play();
                 }
 

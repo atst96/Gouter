@@ -447,9 +447,9 @@ namespace Gouter.Players
             if (disposing)
             {
                 var player = this._player;
-                player.PlayStateChanged += this.OnPlayStateChanged;
-                player.TrackFinished += this.OnTrackFinished;
-                player.PlayFailed += this.OnPlayerFailed;
+                player.PlayStateChanged -= this.OnPlayStateChanged;
+                player.TrackFinished -= this.OnTrackFinished;
+                player.PlayFailed -= this.OnPlayerFailed;
                 player.Dispose();
             }
 
