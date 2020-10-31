@@ -2377,4 +2377,139 @@
 
     <!--#endregion TabControl styles -->
 
+    <!--#region Slider style-->
+
+    <SolidColorBrush x:Key="TrackSeekBarThumb.Static.Foreground" Color="#FFEEEEEE"/>
+    <SolidColorBrush x:Key="TrackSeekBarThumb.Static.Background" Color="#FFA0A0A0"/>
+    <SolidColorBrush x:Key="TrackSeekBarThumb.MouseOver.Background" Color="#FF727272"/>
+    <SolidColorBrush x:Key="TrackSeekBarThumb.Pressed.Background" Color="#FFBEBEBE"/>
+    <SolidColorBrush x:Key="TrackSeekBarThumb.Disabled.Background" Color="#FFD9D9D9"/>
+    <SolidColorBrush x:Key="TrackSeekBarThumb.Track.Background" Color="#FFE1E1E1"/>
+    <SolidColorBrush x:Key="TrackSeekBarThumb.Track.Passed.Background" Color="#FFD1D1D1"/>
+
+    <ControlTemplate x:Key="TrackSeekBarThumbDefault" TargetType="{x:Type Thumb}">
+        <Grid
+            UseLayoutRounding="True"
+            VerticalAlignment="Center"
+            HorizontalAlignment="Center">
+            <Rectangle
+                x:Name="grip"
+                Width="14" Height="8" RadiusX="1" RadiusY="1"
+                Fill="{StaticResource TrackSeekBarThumb.Static.Background}" />
+        </Grid>
+        <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Fill" TargetName="grip" Value="{StaticResource TrackSeekBarThumb.MouseOver.Background}"/>
+            </Trigger>
+            <Trigger Property="IsDragging" Value="True">
+                <Setter Property="Fill" TargetName="grip" Value="{StaticResource TrackSeekBarThumb.Pressed.Background}"/>
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Fill" TargetName="grip" Value="{StaticResource TrackSeekBarThumb.Disabled.Background}"/>
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+    <ControlTemplate x:Key="TraskSeekBarHorizontal" TargetType="{x:Type Slider}">
+        <Border
+            x:Name="border"
+            BorderBrush="{TemplateBinding BorderBrush}"
+            BorderThickness="{TemplateBinding BorderThickness}"
+            Background="{TemplateBinding Background}"
+            SnapsToDevicePixels="True">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto" MinHeight="{TemplateBinding MinHeight}"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TickBar
+                    x:Name="TopTick"
+                    Grid.Row="0"
+                    Margin="0,0,0,2"
+                    Height="6"
+                    Placement="Top"
+                    Visibility="Collapsed"
+                    Fill="{TemplateBinding Foreground}" />
+                <TickBar
+                    x:Name="BottomTick"
+                    Grid.Row="2"
+                    Margin="0,2,0,0"
+                    Height="6"
+                    Placement="Bottom"
+                    Visibility="Collapsed"
+                    Fill="{TemplateBinding Foreground}" />
+                <Border
+                    x:Name="TrackBackground"
+                    Grid.Row="1"
+                    Margin="0"
+                    Height="6" 
+                    VerticalAlignment="center"
+                    CornerRadius="2"
+                    Background="{StaticResource TrackSeekBarThumb.Track.Background}">
+                    <Canvas Margin="-6 -1">
+                        <Rectangle
+                            x:Name="PART_SelectionRange"
+                            Height="3"
+                            Visibility="Hidden"
+                            Fill="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
+                    </Canvas>
+                </Border>
+                <Track x:Name="PART_Track" Grid.Row="1" Height="6">
+                    <Track.DecreaseRepeatButton>
+                        <RepeatButton
+                            Command="{x:Static Slider.DecreaseLarge}"
+                            Background="{DynamicResource TrackSeekBarThumb.Track.Passed.Background}"
+                            Style="{StaticResource RepeatButtonTransparent}"/>
+                    </Track.DecreaseRepeatButton>
+                    <Track.IncreaseRepeatButton>
+                        <RepeatButton
+                            Command="{x:Static Slider.IncreaseLarge}"
+                            Style="{StaticResource RepeatButtonTransparent}"/>
+                    </Track.IncreaseRepeatButton>
+                    <Track.Thumb>
+                        <Thumb
+                            x:Name="Thumb"
+                            Focusable="False"
+                            Width="14" Height="6"
+                            OverridesDefaultStyle="True"
+                            VerticalAlignment="Center"
+                            Template="{StaticResource TrackSeekBarThumbDefault}" />
+                    </Track.Thumb>
+                </Track>
+            </Grid>
+        </Border>
+        <ControlTemplate.Triggers>
+            <Trigger Property="TickPlacement" Value="TopLeft">
+                <Setter Property="Visibility" TargetName="TopTick" Value="Visible"/>
+                <Setter Property="Margin" TargetName="TrackBackground" Value="5 2 5 0"/>
+            </Trigger>
+            <Trigger Property="TickPlacement" Value="BottomRight">
+                <Setter Property="Visibility" TargetName="BottomTick" Value="Visible"/>
+                <Setter Property="Margin" TargetName="TrackBackground" Value="5 0 5 2"/>
+            </Trigger>
+            <Trigger Property="TickPlacement" Value="Both">
+                <Setter Property="Visibility" TargetName="TopTick" Value="Visible"/>
+                <Setter Property="Visibility" TargetName="BottomTick" Value="Visible"/>
+            </Trigger>
+            <Trigger Property="IsSelectionRangeEnabled" Value="True">
+                <Setter Property="Visibility" TargetName="PART_SelectionRange" Value="Visible"/>
+            </Trigger>
+            <Trigger Property="IsKeyboardFocused" Value="True">
+                <Setter Property="Foreground" TargetName="Thumb" Value="Blue"/>
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+    <Style x:Key="TrackSeekBarStyle" TargetType="{x:Type Slider}">
+        <Setter Property="Stylus.IsPressAndHoldEnabled" Value="False"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{StaticResource TrackSeekBarThumb.Static.Foreground}"/>
+        <Setter Property="Template" Value="{StaticResource TraskSeekBarHorizontal}"/>
+    </Style>
+
+    <!--#endregion Slider style -->
+
+
 </ResourceDictionary>

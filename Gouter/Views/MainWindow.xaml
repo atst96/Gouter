@@ -164,7 +164,7 @@
                         Maximum="{Binding Duration, Mode=OneWay}"
                         ToolTip="{Binding CurrentTime, Mode=OneWay, Converter={StaticResource MillisecondsToTimeStringConverter}}"
                         DockPanel.Dock="Bottom"
-                        Style="{StaticResource {x:Type Slider}}">
+                        Style="{DynamicResource TrackSeekBarStyle}">
                         <i:Interaction.Behaviors>
                             <b:SliderMediaPlayerControlBehavior
                                 IsSeeking="{Binding IsSeeking, Mode=OneWayToSource}"
