@@ -3,9 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Threading.Tasks;
-using Dapper.FastCrud;
-using Dapper.FastCrud.Configuration.StatementOptions.Builders;
+using System.Linq.Expressions;
+using Gouter.Utils;
+using LiteDB;
 
 namespace Gouter.Components
 {
@@ -13,154 +13,344 @@ namespace Gouter.Components
     /// データセット
     /// </summary>
     /// <typeparam name="TEntity"></typeparam>
-    internal class DbSet<TEntity> : IEnumerable<TEntity>
+    internal class DbSet<TEntity> : ILiteCollection<TEntity>, IEnumerable<TEntity>
     {
-        private readonly IDbConnection _dbConnection;
+        private readonly ILiteDatabase _connection;
 
-        public DbSet(IDbConnection dbConnection)
+        private readonly string _collectionName = string.Empty;
+
+        private readonly ILiteCollection<TEntity> _collection;
+
+        public DbSet(ILiteDatabase connection)
         {
-            this._dbConnection = dbConnection;
+            this._connection = connection;
+            this._collectionName = DbUtil.GetTableName<TEntity>();
+            this._collection = connection.GetCollection<TEntity>(this._collectionName);
+            this.Initialize();
         }
 
         /// <summary>
-        /// すべてまたは指定条件のレコードを削除する。
+        /// 初期化時
         /// </summary>
-        /// <param name="statementOptions">オプション</param>
-        /// <returns>削除されたレコードの件数</returns>
-        public int BulkDelete(Action<IConditionalBulkSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
-            => this._dbConnection.BulkDelete(statementOptions);
-
-        /// <summary>
-        /// すべてまたは指定条件のレコードを削除する。
-        /// </summary>
-        /// <param name="statementOptions">オプション</param>
-        /// <returns>削除されたレコードの件数</returns>
-        public Task<int> BulkDeleteAsync(Action<IConditionalBulkSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
-            => this._dbConnection.BulkDeleteAsync(statementOptions);
-
-        /// <summary>
-        /// 複数のレコードを更新する。
-        /// </summary>
-        /// <param name="updateData">主キーを除く更新内容</param>
-        /// <param name="statementOptions">オプション</param>
-        /// <returns>更新されたレコードの件数</returns>
-        public int BulkUpdate(TEntity updateData, Action<IConditionalBulkSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
-            => this._dbConnection.BulkUpdate(updateData, statementOptions);
-
-        /// <summary>
-        /// 複数のレコードを更新する。
-        /// </summary>
-        /// <param name="updateData">主キーを除く更新内容</param>
-        /// <param name="statementOptions">オプション</param>
-        /// <returns>更新されたレコードの件数</returns>
-        public Task<int> BulkUpdateAsync(TEntity updateData, Action<IConditionalBulkSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
-            => this._dbConnection.BulkUpdateAsync(updateData, statementOptions);
-
-        /// <summary>
-        /// すべてまたは指定条件のレコード数を取得する。
-        /// </summary>
-        /// <param name="statementOptions">オプション</param>
-        /// <returns>レコードの件数</returns>
-        public int Count(Action<IConditionalSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
-            => this._dbConnection.Count(statementOptions);
-
-        /// <summary>
-        /// すべてまたは指定条件のレコード数を取得する。
-        /// </summary>
-        /// <param name="statementOptions">オプション</param>
-        /// <returns>レコードの件数</returns>
-        public Task<int> CountAsync(Action<IConditionalSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
-            => this._dbConnection.CountAsync(statementOptions);
-
-        /// <summary>
-        /// 指定のレコードを削除する。
-        /// </summary>
-        /// <param name="entityToDelete">削除するレコード</param>
-        /// <param name="statementOptions">オプション</param>
-        /// <returns>削除結果</returns>
-        public bool Delete(TEntity entityToDelete, Action<IStandardSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
-            => this._dbConnection.Delete(entityToDelete, statementOptions);
-
-        /// <summary>
-        /// 指定のレコードを削除する。
-        /// </summary>
-        /// <param name="entityToDelete">削除するレコード</param>
-        /// <param name="statementOptions">オプション</param>
-        /// <returns>削除結果</returns>
-        public Task<bool> DeleteAsync(TEntity entityToDelete, Action<IStandardSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
-            => this._dbConnection.DeleteAsync(entityToDelete, statementOptions);
-
-        /// <summary>
-        /// すべてまたは指定条件のレコードを取得する。
-        /// </summary>
-        /// <param name="statementOptions">オプション</param>
-        /// <returns>取得結果</returns>
-        public IEnumerable<TEntity> Find(Action<IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>> statementOptions = null)
-            => this._dbConnection.Find(statementOptions);
-
-        /// <summary>
-        /// すべてまたは指定条件のレコードを取得する。
-        /// </summary>
-        /// <param name="statementOptions">オプション</param>
-        /// <returns>取得結果</returns>
-        public Task<IEnumerable<TEntity>> FindAsync(Action<IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>> statementOptions = null)
-            => this._dbConnection.FindAsync(statementOptions);
-
-        /// <summary>
-        /// 指定のレコードを取得する。
-        /// </summary>
-        /// <param name="entityKeys">取得するレコード（主キー）</param>
-        /// <param name="statementOptions">オプション</param>
-        /// <returns>取得結果。一致するレコードがなければnull</returns>
-        public TEntity Get(TEntity entityKeys, Action<ISelectSqlSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
-            => this._dbConnection.Get(entityKeys, statementOptions);
-
-        /// <summary>
-        /// 指定のレコードを取得する。
-        /// </summary>
-        /// <param name="entityKeys">取得するレコード（主キー）</param>
-        /// <param name="statementOptions">オプション</param>
-        /// <returns>取得結果。一致するレコードがなければnull</returns>
-        public Task<TEntity> GetAsync(TEntity entityKeys, Action<ISelectSqlSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
-            => this._dbConnection.GetAsync(entityKeys, statementOptions);
+        protected virtual void Initialize()
+        {
+        }
 
         public IEnumerator<TEntity> GetEnumerator()
-            => this.Find().GetEnumerator();
+        {
+            return this.FindAll().GetEnumerator();
+        }
 
-        /// <summary>
-        /// レコードを挿入する。
-        /// </summary>
-        /// <param name="entityToInsert">レコード内容</param>
-        /// <param name="statementOptions">オプション</param>
-        public void Insert(TEntity entityToInsert, Action<IStandardSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
-            => this._dbConnection.Insert(entityToInsert, statementOptions);
+        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable<TEntity>)this).GetEnumerator();
 
-        /// <summary>
-        /// レコードを挿入する。
-        /// </summary>
-        /// <param name="entityToInsert">レコード内容</param>
-        /// <param name="statementOptions">オプション</param>
-        public Task InsertAsync(TEntity entityToInsert, Action<IStandardSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
-            => this._dbConnection.InsertAsync(entityToInsert, statementOptions);
+        IEnumerator<TEntity> IEnumerable<TEntity>.GetEnumerator()
+        {
+            return this._collection.FindAll().GetEnumerator();
+        }
 
-        /// <summary>
-        /// 単一レコードを更新する。
-        /// </summary>
-        /// <param name="entityToUpdate">更新するレコード内容</param>
-        /// <param name="statementOptions">オプション</param>
-        /// <returns>更新結果</returns>
-        public bool Update(TEntity entityToUpdate, Action<IStandardSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
-            => this._dbConnection.Update(entityToUpdate, statementOptions);
+        #region IDataCollection<T>の実装
 
-        /// <summary>
-        /// 単一レコードを更新する。
-        /// </summary>
-        /// <param name="entityToUpdate">更新するレコード内容</param>
-        /// <param name="statementOptions">オプション</param>
-        /// <returns>更新結果</returns>
-        public Task<bool> UpdateAsync(TEntity entityToUpdate, Action<IStandardSqlStatementOptionsBuilder<TEntity>> statementOptions = null)
-            => this.UpdateAsync(entityToUpdate, statementOptions);
+        public string Name => this._collection.Name;
 
-        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
+        public BsonAutoId AutoId => this._collection.AutoId;
+
+        public EntityMapper EntityMapper => this._collection.EntityMapper;
+
+        public ILiteCollection<TEntity> Include<K>(Expression<Func<TEntity, K>> keySelector)
+        {
+            return this._collection.Include(keySelector);
+        }
+
+        public ILiteCollection<TEntity> Include(BsonExpression keySelector)
+        {
+            return this._collection.Include(keySelector);
+        }
+
+        public bool Upsert(TEntity entity)
+        {
+            return this._collection.Upsert(entity);
+        }
+
+        public int Upsert(IEnumerable<TEntity> entities)
+        {
+            return this._collection.Upsert(entities);
+        }
+
+        public bool Upsert(BsonValue id, TEntity entity)
+        {
+            return this._collection.Upsert(id, entity);
+        }
+
+        public bool Update(TEntity entity)
+        {
+            return this._collection.Update(entity);
+        }
+
+        public bool Update(BsonValue id, TEntity entity)
+        {
+            return this._collection.Update(id, entity);
+        }
+
+        public int Update(IEnumerable<TEntity> entities)
+        {
+            return this._collection.Update(entities);
+        }
+
+        public int UpdateMany(BsonExpression transform, BsonExpression predicate)
+        {
+            return this._collection.UpdateMany(transform, predicate);
+        }
+
+        public int UpdateMany(Expression<Func<TEntity, TEntity>> extend, Expression<Func<TEntity, bool>> predicate)
+        {
+            return this._collection.UpdateMany(extend, predicate);
+        }
+
+        public BsonValue Insert(TEntity entity)
+        {
+            return this._collection.Insert(entity);
+        }
+
+        public void Insert(BsonValue id, TEntity entity)
+        {
+            this._collection.Insert(id, entity);
+        }
+
+        public int Insert(IEnumerable<TEntity> entities)
+        {
+            return this._collection.Insert(entities);
+        }
+
+        public int InsertBulk(IEnumerable<TEntity> entities, int batchSize = 5000)
+        {
+            return this._collection.InsertBulk(entities, batchSize);
+        }
+
+        public bool EnsureIndex(string name, BsonExpression expression, bool unique = false)
+        {
+            return this._collection.EnsureIndex(name, expression, unique);
+        }
+
+        public bool EnsureIndex(BsonExpression expression, bool unique = false)
+        {
+            return this._collection.EnsureIndex(expression, unique);
+        }
+
+        public bool EnsureIndex<K>(Expression<Func<TEntity, K>> keySelector, bool unique = false)
+        {
+            return this._collection.EnsureIndex(keySelector, unique);
+        }
+
+        public bool EnsureIndex<K>(string name, Expression<Func<TEntity, K>> keySelector, bool unique = false)
+        {
+            return this._collection.EnsureIndex(name, keySelector, unique);
+        }
+
+        public bool DropIndex(string name)
+        {
+            return this._collection.DropIndex(name);
+        }
+
+        public ILiteQueryable<TEntity> Query()
+        {
+            return this._collection.Query();
+        }
+
+        public IEnumerable<TEntity> Find(BsonExpression predicate, int skip = 0, int limit = int.MaxValue)
+        {
+            return this._collection.Find(predicate, skip, limit);
+        }
+
+        public IEnumerable<TEntity> Find(LiteDB.Query query, int skip = 0, int limit = int.MaxValue)
+        {
+            return this._collection.Find(query, skip, limit);
+        }
+
+        public IEnumerable<TEntity> Find(Expression<Func<TEntity, bool>> predicate, int skip = 0, int limit = int.MaxValue)
+        {
+            return this._collection.Find(predicate, skip, limit);
+        }
+
+        public TEntity FindById(BsonValue id)
+        {
+            return this._collection.FindById(id);
+        }
+
+        public TEntity FindOne(BsonExpression predicate)
+        {
+            return this._collection.FindOne(predicate);
+        }
+
+        public TEntity FindOne(string predicate, BsonDocument parameters)
+        {
+            return this._collection.FindOne(predicate, parameters);
+        }
+
+        public TEntity FindOne(BsonExpression predicate, params BsonValue[] args)
+        {
+            return this._collection.FindOne(predicate, args);
+        }
+
+        public TEntity FindOne(Expression<Func<TEntity, bool>> predicate)
+        {
+            return this._collection.FindOne(predicate);
+        }
+
+        public TEntity FindOne(LiteDB.Query query)
+        {
+            return this._collection.FindOne(query);
+        }
+
+        public IEnumerable<TEntity> FindAll()
+        {
+            return this._collection.FindAll();
+        }
+
+        public bool Delete(BsonValue id)
+        {
+            return this._collection.Delete(id);
+        }
+
+        public int DeleteAll()
+        {
+            return this._collection.DeleteAll();
+        }
+
+        public int DeleteMany(BsonExpression predicate)
+        {
+            return this._collection.DeleteMany(predicate);
+        }
+
+        public int DeleteMany(string predicate, BsonDocument parameters)
+        {
+            return this._collection.DeleteMany(predicate, parameters);
+        }
+
+        public int DeleteMany(string predicate, params BsonValue[] args)
+        {
+            return this._collection.DeleteMany(predicate, args);
+        }
+
+        public int DeleteMany(Expression<Func<TEntity, bool>> predicate)
+        {
+            return this._collection.DeleteMany(predicate);
+        }
+
+        public int Count()
+        {
+            return this._collection.Count();
+        }
+
+        public int Count(BsonExpression predicate)
+        {
+            return this._collection.Count(predicate);
+        }
+
+        public int Count(string predicate, BsonDocument parameters)
+        {
+            return this._collection.Count(predicate, parameters);
+        }
+
+        public int Count(string predicate, params BsonValue[] args)
+        {
+            return this._collection.Count(predicate, args);
+        }
+
+        public int Count(Expression<Func<TEntity, bool>> predicate)
+        {
+            return this._collection.Count(predicate);
+        }
+
+        public int Count(LiteDB.Query query)
+        {
+            return this._collection.Count(query);
+        }
+
+        public long LongCount()
+        {
+            return this._collection.LongCount();
+        }
+
+        public long LongCount(BsonExpression predicate)
+        {
+            return this._collection.LongCount(predicate);
+        }
+
+        public long LongCount(string predicate, BsonDocument parameters)
+        {
+            return this._collection.LongCount(predicate, parameters);
+        }
+
+        public long LongCount(string predicate, params BsonValue[] args)
+        {
+            return this._collection.LongCount(predicate, args);
+        }
+
+        public long LongCount(Expression<Func<TEntity, bool>> predicate)
+        {
+            return this._collection.LongCount(predicate);
+        }
+
+        public long LongCount(LiteDB.Query query)
+        {
+            return this._collection.LongCount(query);
+        }
+
+        public bool Exists(BsonExpression predicate)
+        {
+            return this._collection.Exists(predicate);
+        }
+
+        public bool Exists(string predicate, BsonDocument parameters)
+        {
+            return this._collection.Exists(predicate, parameters);
+        }
+
+        public bool Exists(string predicate, params BsonValue[] args)
+        {
+            return this._collection.Exists(predicate, args);
+        }
+
+        public bool Exists(Expression<Func<TEntity, bool>> predicate)
+        {
+            return this._collection.Exists(predicate);
+        }
+
+        public bool Exists(LiteDB.Query query)
+        {
+            return this._collection.Exists(query);
+        }
+
+        public BsonValue Min(BsonExpression keySelector)
+        {
+            return this._collection.Min(keySelector);
+        }
+
+        public BsonValue Min()
+        {
+            return this._collection.Min();
+        }
+
+        public K Min<K>(Expression<Func<TEntity, K>> keySelector)
+        {
+            return this._collection.Min(keySelector);
+        }
+
+        public BsonValue Max(BsonExpression keySelector)
+        {
+            return this._collection.Max(keySelector);
+        }
+
+        public BsonValue Max()
+        {
+            return this._collection.Max();
+        }
+
+        public K Max<K>(Expression<Func<TEntity, K>> keySelector)
+        {
+            return this._collection.Max(keySelector);
+        }
+
+        #endregion
     }
 }

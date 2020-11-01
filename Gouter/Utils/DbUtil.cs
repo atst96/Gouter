@@ -16,9 +16,16 @@ namespace Gouter.Utils
         public static string GetTableName<TDataModel>()
         {
             var modelType = typeof(TDataModel);
-            var tableAttr = modelType.GetCustomAttribute<TableAttribute>();
 
-            return tableAttr == null ? modelType.Name : tableAttr.Name;
+            // Table属性を取得する
+            var tableAttr = modelType.GetCustomAttribute<TableAttribute>();
+            if (tableAttr != null)
+            {
+                // Table属性が指定されていればテーブル名を返す。
+                return tableAttr.Name;
+            }
+
+            return modelType.Name;
         }
     }
 }

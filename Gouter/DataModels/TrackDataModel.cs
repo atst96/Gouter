@@ -1,6 +1,6 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using LiteDB;
 
 namespace Gouter.DataModels
 {
@@ -13,79 +13,79 @@ namespace Gouter.DataModels
         /// <summary>
         /// トラックID
         /// </summary>
-        [Column("id"), Key, Required]
+        [BsonId(false)]
         public int Id { get; set; }
 
         /// <summary>
         /// アルバムID
         /// </summary>
-        [Column("album_id")]
+        [BsonField("album_id")]
         public int AlbumId { get; set; }
 
         /// <summary>
         /// ファイルパス
         /// </summary>
-        [Column("path")]
+        [BsonField("path")]
         public string Path { get; set; }
 
         /// <summary>
         /// 尺
         /// </summary>
-        [Column("duration")]
+        [BsonField("duration")]
         public int Duration { get; set; }
 
         /// <summary>
         /// ディスク番号
         /// </summary>
-        [Column("disk")]
+        [BsonField("disk")]
         public int? Disk { get; set; }
 
         /// <summary>
         /// トラック番号
         /// </summary>
-        [Column("track")]
+        [BsonField("track")]
         public int? Track { get; set; }
 
         /// <summary>
         /// 年
         /// </summary>
-        [Column("year")]
+        [BsonField("year")]
         public int? Year { get; set; }
 
         /// <summary>
         /// アルバムアーティスト
         /// </summary>
-        [Column("album_artist")]
+        [BsonField("album_artist")]
         public string AlbumArtist { get; set; }
 
         /// <summary>
         /// タイトル
         /// </summary>
-        [Column("title")]
+        [BsonField("title")]
         public string Title { get; set; }
 
         /// <summary>
         /// アーティスト
         /// </summary>
-        [Column("artist")]
+        [BsonField("artist")]
         public string Artist { get; set; }
 
         /// <summary>
         /// ジャンル
         /// </summary>
-        [Column("genre")]
+        [BsonField("genre")]
         public string Genre { get; set; }
 
         /// <summary>
         /// 作成日時
         /// </summary>
-        [Column("created_at")]
+        [BsonField("created_at")]
         public DateTimeOffset CreatedAt { get; set; }
 
         /// <summary>
         /// 更新日時
         /// </summary>
-        [Column("updated_at")]
+        [BsonField("updated_at")]
         public DateTimeOffset UpdatedAt { get; set; }
     }
 }

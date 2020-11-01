@@ -83,7 +83,6 @@ namespace Gouter.Managers
             // DB接続と準備処理
             var db = this._database;
             db.Connect(libraryPath);
-            db.PrepareTable();
         }
 
         /// <summary>

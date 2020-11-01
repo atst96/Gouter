@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using Gouter.DataModels;
+using LiteDB;
 
 namespace Gouter.Components
 {
@@ -9,7 +10,10 @@ namespace Gouter.Components
     /// </summary>
     internal class DbContext : IDisposable
     {
-        private readonly IDbConnection _dbConnection;
+        /// <summary>
+        /// データベース接続
+        /// </summary>
+        private readonly ILiteDatabase _dbConnection;
 
         /// <summary>
         /// トラック情報
@@ -29,14 +33,14 @@ namespace Gouter.Components
         /// <summary>
         /// コンテキストを生成する。
         /// </summary>
-        /// <param name="dbConnection">DBのコネクション</param>
-        public DbContext(IDbConnection dbConnection)
+        /// <param name="connection">DBのコネクション</param>
+        public DbContext(ILiteDatabase connection)
         {
-            this._dbConnection = dbConnection;
+            this._dbConnection = connection;
 
-            this.Tracks = new DbSet<TrackDataModel>(dbConnection);
-            this.Albums = new DbSet<AlbumDataModel>(dbConnection);
-            this.AlbumArtworks = new DbSet<AlbumArtworksDataModel>(dbConnection);
+            this.Tracks = new DbSet<TrackDataModel>(connection);
+            this.Albums = new DbSet<AlbumDataModel>(connection);
+            this.AlbumArtworks = new DbSet<AlbumArtworksDataModel>(connection);
         }
 
         /// <summary>

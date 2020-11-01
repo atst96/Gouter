@@ -1,6 +1,6 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using LiteDB;
 
 namespace Gouter.DataModels
 {
@@ -13,49 +13,49 @@ namespace Gouter.DataModels
         /// <summary>
         /// アルバムID
         /// </summary>
-        [Column("id"), Key]
+        [BsonId(false)]
         public int Id { get; set; }
 
         /// <summary>
         /// アルバムキー
         /// </summary>
-        [Column("key")]
+        [BsonField("key")]
         public string Key { get; set; }
 
         /// <summary>
         /// アーティスト名
         /// </summary>
-        [Column("artist")]
+        [BsonField("artist")]
         public string Artist { get; set; }
 
         /// <summary>
         /// アルバム名
         /// </summary>
-        [Column("name")]
+        [BsonField("name")]
         public string Name { get; set; }
 
         /// <summary>
         /// コンピレーションアルバムかどうかのフラグ
         /// </summary>
-        [Column("is_compilation")]
+        [BsonField("is_compilation")]
         public bool? IsCompilation { get; set; }
 
         /// <summary>
         /// アートワーク
         /// </summary>
-        [NotMapped]
+        [BsonIgnore, Obsolete]
         public byte[] Artwork { get; set; }
 
         /// <summary>
         /// 作成日時
         /// </summary>
-        [Column("created_at")]
+        [BsonField("created_at")]
         public DateTimeOffset CreatedAt { get; set; }
 
         /// <summary>
         /// 更新日時
         /// </summary>
-        [Column("updated_at")]
+        [BsonField("updated_at")]
         public DateTimeOffset UpdatedAt { get; set; }
     }
 }

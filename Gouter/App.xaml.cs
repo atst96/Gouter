@@ -1,7 +1,4 @@
-﻿using Dapper;
-using Dapper.FastCrud;
-using Gouter.Components.TypeHandlers;
-using Gouter.Data;
+﻿using Gouter.Data;
 using Gouter.Extensions;
 using Gouter.Managers;
 using Gouter.Players;
@@ -94,8 +91,6 @@ namespace Gouter
 
             this.ShutdownMode = ShutdownMode.OnMainWindowClose;
 
-            this.InitializeDapper();
-
             var libraryPath = this.GetLocalFilePath(Config.LibraryFileName);
             this.MediaManager = MediaManager.CreateMediaManager(libraryPath);
 
@@ -174,17 +169,6 @@ namespace Gouter
         /// <returns>ファイルの絶対パス</returns>
         public string GetLocalFilePath(string relativePath)
             => Path.Combine(this.GetAssemlyDirectory(), relativePath);
-
-        /// <summary>
-        /// Dapperを初期化する。
-        /// </summary>
-        private void InitializeDapper()
-        {
-            OrmConfiguration.DefaultDialect = SqlDialect.SqLite;
-            DefaultTypeMap.MatchNamesWithUnderscores = true;
-            SqlMapper.AddTypeHandler(new MemoryStreamTypeHandler());
-            SqlMapper.AddTypeHandler(new DateTimeOffsetTypeHandler());
-        }
 
         /// <summary>
         /// アプリケーションを強制終了する。
