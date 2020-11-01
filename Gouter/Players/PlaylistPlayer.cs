@@ -13,7 +13,6 @@ namespace Gouter.Players
     internal class PlaylistPlayer : NotificationObject, IDisposable
     {
         private static readonly Random random = new Random();
-        private volatile bool _isTrackSwitching = false;
 
         /// <summary>
         /// メディア管理クラス
@@ -192,7 +191,6 @@ namespace Gouter.Players
 
             if (isTrackChanged)
             {
-                this._isTrackSwitching = true;
                 this._player.ChangeSource(track);
             }
         }
@@ -500,11 +498,7 @@ namespace Gouter.Players
                 return;
             }
 
-            if (!this._isTrackSwitching)
-            {
-                this._isTrackSwitching = false;
-                this.PlayNext();
-            }
+            this.PlayNext();
         }
     }
 }
