@@ -2418,30 +2418,8 @@
             Background="{TemplateBinding Background}"
             SnapsToDevicePixels="True">
             <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto" MinHeight="{TemplateBinding MinHeight}"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                <TickBar
-                    x:Name="TopTick"
-                    Grid.Row="0"
-                    Margin="0,0,0,2"
-                    Height="6"
-                    Placement="Top"
-                    Visibility="Collapsed"
-                    Fill="{TemplateBinding Foreground}" />
-                <TickBar
-                    x:Name="BottomTick"
-                    Grid.Row="2"
-                    Margin="0,2,0,0"
-                    Height="6"
-                    Placement="Bottom"
-                    Visibility="Collapsed"
-                    Fill="{TemplateBinding Foreground}" />
                 <Border
                     x:Name="TrackBackground"
-                    Grid.Row="1"
                     Margin="0"
                     Height="6" 
                     VerticalAlignment="center"
@@ -2455,7 +2433,7 @@
                             Fill="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
                     </Canvas>
                 </Border>
-                <Track x:Name="PART_Track" Grid.Row="1" Height="6">
+                <Track x:Name="PART_Track" Grid.Row="1" Height="6" Cursor="Hand">
                     <Track.DecreaseRepeatButton>
                         <RepeatButton
                             Command="{x:Static Slider.DecreaseLarge}"
@@ -2480,18 +2458,6 @@
             </Grid>
         </Border>
         <ControlTemplate.Triggers>
-            <Trigger Property="TickPlacement" Value="TopLeft">
-                <Setter Property="Visibility" TargetName="TopTick" Value="Visible"/>
-                <Setter Property="Margin" TargetName="TrackBackground" Value="5 2 5 0"/>
-            </Trigger>
-            <Trigger Property="TickPlacement" Value="BottomRight">
-                <Setter Property="Visibility" TargetName="BottomTick" Value="Visible"/>
-                <Setter Property="Margin" TargetName="TrackBackground" Value="5 0 5 2"/>
-            </Trigger>
-            <Trigger Property="TickPlacement" Value="Both">
-                <Setter Property="Visibility" TargetName="TopTick" Value="Visible"/>
-                <Setter Property="Visibility" TargetName="BottomTick" Value="Visible"/>
-            </Trigger>
             <Trigger Property="IsSelectionRangeEnabled" Value="True">
                 <Setter Property="Visibility" TargetName="PART_SelectionRange" Value="Visible"/>
             </Trigger>
