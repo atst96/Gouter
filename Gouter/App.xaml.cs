@@ -6,6 +6,7 @@ using Gouter.Utils;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
@@ -158,7 +159,24 @@ namespace Gouter
         /// <returns></returns>
         private Task SaveSettings()
         {
+            var setting = this.Setting;
+
+            var player = this.MediaPlayer;
+            var manager = player.MediaManager;
+
             var settingFilePath = this.GetLocalFilePath(Config.SettingFileName);
+
+            var lastTrack = player.Track;
+            if (lastTrack != null)
+            {
+                setting.LastTrackId = lastTrack.Id;
+            }
+
+            var lastPlaylist = player.Playlist as AlbumPlaylist;
+            if (lastPlaylist != null)
+            {
+                setting.LastPlaylistId = lastPlaylist.Album.Id;
+            }
 
             return MessagePackUtil.SerializeFile(this.Setting, settingFilePath);
         }

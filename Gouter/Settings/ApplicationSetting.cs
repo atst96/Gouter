@@ -37,5 +37,11 @@ namespace Gouter
 
         [Key("device.output_id")]
         public string SoundOutDeviceId { get; set; } = null;
+
+        [Key("player.last_track")]
+        public int? LastTrackId { get; set; } = null;
+
+        [Key("player.last_playlist")]
+        public int? LastPlaylistId { get; set; } = null;
     }
 }

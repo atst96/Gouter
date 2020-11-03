@@ -269,7 +269,7 @@
                     IsEnabled="False">
                     <ComboBoxItem Content="アルバム" />
                 </ComboBox>
-                
+
                 <ListBox
                     Grid.Row="1"
                     SelectionMode="Single"

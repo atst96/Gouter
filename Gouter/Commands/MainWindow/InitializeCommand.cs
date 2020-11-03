@@ -54,6 +54,38 @@ namespace Gouter.Commands.MainWindow
 
                 this._viewModel.Status = $"{newTracks.Count}件の楽曲が追加されました";
             });
+
+            // プレーヤ状態を復元する（暫定）
+            var player = this._viewModel.Player;
+            var settings = App.Instance.Setting;
+
+            IPlaylist lastPlaylist = null;
+            if (settings.LastPlaylistId != null)
+            {
+                int lastPlaylistId = (int)settings.LastPlaylistId;
+                lastPlaylist = player.MediaManager.Playlists.Albums
+                    .FirstOrDefault(a => a.Album.Id == lastPlaylistId);
+            }
+
+            if (settings.LastTrackId != null)
+            {
+                int lastTrackId = (int)settings.LastTrackId;
+
+                var track = player.MediaManager.Tracks.Tracks
+                    .FirstOrDefault(t => t.Id == lastTrackId);
+                if (track != null)
+                {
+                    if (lastPlaylist != null)
+                    {
+                        player.SwitchTrack(track, lastPlaylist);
+                        this._viewModel.SelectedAlbumPlaylist = player.Playlist as AlbumPlaylist;
+                    }
+                    else
+                    {
+                        player.SwitchTrack(track);
+                    }
+                }
+            }
         }
     }
 }

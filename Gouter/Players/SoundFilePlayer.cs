@@ -419,7 +419,7 @@ namespace Gouter.Players
 
             if (this.State == PlayState.Stop)
             {
-                this.PlayInternal();
+                // this.PlayInternal();
             }
             else
             {
