@@ -53,7 +53,7 @@
     </i:Interaction.Triggers>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="55" />
             <RowDefinition />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
@@ -64,10 +64,18 @@
             BorderThickness="0,0,0,1"
             BorderBrush="{StaticResource ToolBar.Static.BorderBrush}"
             Background="{StaticResource ToolBar.Static.Background}">
-            <DockPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
                 <StackPanel
                     Margin="18,0"
-                    DockPanel.Dock="Left"
+                    Grid.Column="0"
                     Orientation="Horizontal">
                     <Button
                         Margin="3" Padding="6"
@@ -110,7 +118,7 @@
                 </StackPanel>
 
                 <StackPanel
-                    DockPanel.Dock="Left"
+                    Grid.Column="1"
                     Orientation="Horizontal">
                     <Button
                         Padding="6"
@@ -130,18 +138,9 @@
                         VerticalAlignment="Center" />
                 </StackPanel>
 
-                <Button
-                    Style="{DynamicResource {x:Static ToolBar.ButtonStyleKey}}"
-                    DockPanel.Dock="Right"
-                    Command="{Binding OpenSettingWindowCommand, Mode=OneTime}"
-                    >
-                    <app:GeometryIcon
-                        Data="{StaticResource MaterialIcons.Settings}" />
-                </Button>
-
                 <StackPanel
-                    Margin="12,0"
-                    DockPanel.Dock="Right"
+                    Margin="6,0,12,0"
+                    Grid.Column="3"
                     Orientation="Vertical"
                     VerticalAlignment="Center">
                     <CheckBox
@@ -153,13 +152,22 @@
                         IsChecked="{Binding IsShuffle, Mode=TwoWay}" />
                 </StackPanel>
 
+                <Button
+                    Grid.Column="4"
+                    Style="{DynamicResource {x:Static ToolBar.ButtonStyleKey}}"
+                    Command="{Binding OpenSettingWindowCommand, Mode=OneTime}">
+                    <app:GeometryIcon
+                        Data="{StaticResource MaterialIcons.Settings}" />
+                </Button>
+
                 <Border
-                    Margin="18,0,12,0"
+                    Margin="12,0,6,0"
+                    Grid.Column="2"
                     BorderBrush="{StaticResource ToolBar.Static.BorderBrush}"
                     BorderThickness="1,0">
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="56" />
                             <ColumnDefinition />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
@@ -173,6 +181,7 @@
                             Grid.RowSpan="2"
                             Grid.Column="0"
                             Height="54" Width="54"
+                            HorizontalAlignment="Left"
                             b:TrackBehavior.AlbumArt="{Binding Player.Track, Mode=OneWay}"
                             RenderOptions.BitmapScalingMode="HighQuality" />
 
@@ -216,7 +225,7 @@
                             TextTrimming="CharacterEllipsis" />
                     </Grid>
                 </Border>
-            </DockPanel>
+            </Grid>
         </Border>
 
         <StatusBar
@@ -262,7 +271,6 @@
                 </ComboBox>
                 
                 <ListBox
-                    DockPanel.Dock="Left"
                     Grid.Row="1"
                     SelectionMode="Single"
                     AlternationCount="2"
