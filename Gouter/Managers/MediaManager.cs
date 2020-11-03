@@ -9,7 +9,7 @@ namespace Gouter.Managers
     /// <summary>
     /// メディアの管理を行うクラス
     /// </summary>
-    internal class MediaManager
+    internal class MediaManager : IDisposable
     {
         /// <summary>
         /// データベース情報

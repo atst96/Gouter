@@ -29,6 +29,12 @@ namespace Gouter.DataModels
         public string Artist { get; set; }
 
         /// <summary>
+        /// データID
+        /// </summary>
+        [BsonField("artwork_id")]
+        public string ArtworkId { get; set; }
+
+        /// <summary>
         /// アルバム名
         /// </summary>
         [BsonField("name")]
@@ -39,12 +45,6 @@ namespace Gouter.DataModels
         /// </summary>
         [BsonField("is_compilation")]
         public bool? IsCompilation { get; set; }
-
-        /// <summary>
-        /// アートワーク
-        /// </summary>
-        [BsonIgnore, Obsolete]
-        public byte[] Artwork { get; set; }
 
         /// <summary>
         /// 作成日時

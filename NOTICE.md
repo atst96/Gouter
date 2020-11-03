@@ -8,17 +8,12 @@ https://github.com/Zeugma440/atldotnet/blob/master/LICENSE
 
 - [CSCore](https://github.com/filoe/cscore)  
 Released under the Ms-PL license  
-https://github.com/filoe/cscore/blob/master/license.md
+https://github.com/filoe/cscore/blob/master/license.md  
 
-- [Dapper](https://github.com/StackExchange/Dapper)  
-2019 Stack Exchange, Inc.  
-Released under the Apache License, Version 2.0  
-http://www.apache.org/licenses/LICENSE-2.0  
-
-- [Dapper.FastCRUD](https://github.com/MoonStorm/Dapper.FastCRUD)  
-Copyright (c) 2015 Dan Cristiu  
+- [LiteDB](https://github.com/mbdavid/LiteDB)  
+Copyright (c) 2014-2020 Mauricio David  
 Released under the MIT license  
-https://github.com/MoonStorm/Dapper.FastCRUD/blob/master/LICENSE
+https://github.com/mbdavid/LiteDB/blob/master/LICENSE  
 
 - [Material design icons](https://material.io/resources/icons)  
 Released under the Apache License, Version 2.0  
@@ -27,12 +22,7 @@ https://www.apache.org/licenses/LICENSE-2.0.html
 - [MessagePack for C#](https://github.com/neuecc/MessagePack-CSharp)  
 Copyright (c) 2017 Yoshifumi Kawai and contributors  
 Released under the MIT License  
-https://github.com/neuecc/MessagePack-CSharp/blob/master/LICENSE  
-
-- [Microsoft.Data.Sqlite](https://www.nuget.org/packages/Microsoft.Data.Sqlite/)  
-© Microsoft Corporation. All rights reserved.  
-Released under the Apache License, Version 2.0    
-https://licenses.nuget.org/Apache-2.0
+https://github.com/neuecc/MessagePack-CSharp/blob/master/LICENSE
 
 - [System.Drawing.Common](https://www.nuget.org/packages/System.Drawing.Common)  
 © Microsoft Corporation. All rights reserved.  

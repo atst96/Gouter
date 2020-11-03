@@ -1,8 +1,10 @@
 ﻿using ATL;
 using Gouter.DataModels;
 using Gouter.Utils;
+using Microsoft.VisualBasic;
 using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows.Media;
 
 namespace Gouter
@@ -33,6 +35,11 @@ namespace Gouter
         public string Artist { get; private set; }
 
         /// <summary>
+        /// アートワークID
+        /// </summary>
+        public string ArtworkId { get; private set; }
+
+        /// <summary>
         /// アルバム情報登録日時
         /// </summary>
         public DateTimeOffset RegisteredAt { get; }
@@ -53,20 +60,17 @@ namespace Gouter
         /// <param name="id">アルバムID</param>
         /// <param name="key">アルバムキー</param>
         /// <param name="track">トラック情報</param>
-        public AlbumInfo(int id, string key, Track track, byte[] artwork)
+        public AlbumInfo(int id, string key, Track track, string artworkId)
         {
             this.Id = id;
             this.Key = key;
             this.Name = track.Album;
             this.Artist = track.GetAlbumArtist();
             this.IsCompilation = track.GetIsCompiatilnAlbum();
+            this.ArtworkId = artworkId;
             this.RegisteredAt = DateTimeOffset.Now;
             this.UpdatedAt = this.RegisteredAt;
-
-            if (artwork?.Length > 0)
-            {
-                this.SetArtworkData(artwork);
-            }
+            this._isArtworkFound = artworkId != null;
 
             this.Playlist = new AlbumPlaylist(this);
         }
@@ -82,34 +86,21 @@ namespace Gouter
             this.Id = album.Id;
             this.Name = album.Name;
             this.Artist = album.Artist;
+            this.ArtworkId = album.ArtworkId;
             this.IsCompilation = album.IsCompilation ?? false;
             this.RegisteredAt = album.CreatedAt;
             this.UpdatedAt = album.UpdatedAt;
-
-            var artworkData = artwork?.Artwork;
-            if (artworkData?.Length > 0)
-            {
-                this.SetArtworkData(artworkData);
-            }
+            this._isArtworkFound = album.ArtworkId != null;
 
             this.Playlist = new AlbumPlaylist(this);
         }
 
         private bool _isArtworkFound = false;
-        private byte[] _tempArtworkData = null;
 
         private object @_lockObj = new object();
 
-        private void SetArtworkData(byte[] imageData)
-        {
-            lock (this.@_lockObj)
-            {
-                this._tempArtworkData = imageData;
-                this._isArtworkFound = true;
-            }
-        }
+        private WeakReference<ImageSource> _weakArtwork;
 
-        private ImageSource _artwork;
         /// <summary>
         /// アートワーク
         /// </summary>
@@ -119,22 +110,37 @@ namespace Gouter
             {
                 lock (this._lockObj)
                 {
-                    if (this._artwork == null)
+                    if (this._weakArtwork != null && this._weakArtwork.TryGetTarget(out var target))
                     {
-                        if (!this._isArtworkFound)
-                        {
-                            this._artwork = ImageUtil.GetMissingAlbumImage();
-                        }
-                        else
-                        {
-                            var imageStream = ImageUtil.ShrinkImageData(this._tempArtworkData, MaxImageSize);
-                            this._artwork = ImageUtil.BitmapImageFromStream(imageStream);
-
-                            this._tempArtworkData = null;
-                        }
+                        return target;
                     }
 
-                    return this._artwork;
+                    ImageSource artwork;
+
+                    if (!this._isArtworkFound)
+                    {
+                        artwork = ImageUtil.GetMissingAlbumImage();
+                    }
+                    else
+                    {
+                        var awk = App.Instance.ArtworkManager;
+                        var stream = awk.GetStream(this);
+
+                        artwork = stream == null
+                            ? ImageUtil.GetMissingAlbumImage()
+                            : ImageUtil.BitmapImageFromStream(stream);
+                    }
+
+                    if (this._weakArtwork == null)
+                    {
+                        this._weakArtwork = new WeakReference<ImageSource>(artwork);
+                    }
+                    else
+                    {
+                        this._weakArtwork.SetTarget(artwork);
+                    }
+
+                    return artwork;
                 }
             }
         }

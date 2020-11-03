@@ -110,23 +110,18 @@ namespace Gouter.Managers
             {
                 Id = albumInfo.Id,
                 Key = albumInfo.Key,
+                ArtworkId = albumInfo.ArtworkId,
                 Name = albumInfo.Name,
                 Artist = albumInfo.Artist,
                 IsCompilation = albumInfo.IsCompilation,
-                Artwork = artwork,
                 CreatedAt = albumInfo.RegisteredAt,
                 UpdatedAt = albumInfo.UpdatedAt,
             });
 
             if (artwork?.Length > 0)
             {
-                dbContext.AlbumArtworks.Insert(new AlbumArtworksDataModel
-                {
-                    AlbumId = albumInfo.Id,
-                    Artwork = artwork,
-                    CreatedAt = albumInfo.RegisteredAt,
-                    UpdatedAt = albumInfo.UpdatedAt,
-                });
+                var arwkMgr = App.Instance.ArtworkManager;
+                arwkMgr.Add(albumInfo, artwork);
             }
 
             this.AddImpl(albumInfo);
@@ -147,8 +142,19 @@ namespace Gouter.Managers
             }
 
             var artwork = track.GetArtworkData();
+            string artworkId;
 
-            albumInfo = new AlbumInfo(this.GenerateId(), albumKey, track, artwork);
+            if (artwork?.Length > 0)
+            {
+                artworkId = Guid.NewGuid().ToString("D");
+            }
+            else
+            {
+                artworkId = null;
+                artwork = null;
+            }
+
+            albumInfo = new AlbumInfo(this.GenerateId(), albumKey, track, artworkId);
 
             this.Add(albumInfo, artwork);
 
