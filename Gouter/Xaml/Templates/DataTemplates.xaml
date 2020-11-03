@@ -14,7 +14,7 @@
                 Margin="0,0,8,0"
                 Width="48" Height="48"
                 Stretch="Uniform"
-                Source="{Binding Album.Artwork, Mode=OneWay}"
+                Source="{Binding Album.Artwork, Mode=OneWay, IsAsync=True}"
                 RenderOptions.BitmapScalingMode="HighQuality" />
 
             <StackPanel
