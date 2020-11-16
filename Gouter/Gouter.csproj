@@ -8,10 +8,15 @@
     <Company />
     <PackageProjectUrl>https://github.com/atst1996/Gouter</PackageProjectUrl>
     <RepositoryUrl>https://github.com/atst1996/Gouter</RepositoryUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Resources\missing_album.png" />
     <None Remove="Resources\missing_music.png" />
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\missing_album.png" />
@@ -37,5 +42,18 @@
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.19" />
     <PackageReference Include="System.Drawing.Common" Version="4.7.0" />
     <PackageReference Include="z440.atl.core" Version="3.11.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
   </ItemGroup>
 </Project>
