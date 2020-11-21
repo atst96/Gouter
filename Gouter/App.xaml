@@ -4,10 +4,13 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="clr-namespace:Gouter"
-    StartupUri="Views/MainWindow.xaml">
+    StartupUri="Views/MainWindow.xaml"
+    xmlns:conv="clr-namespace:Gouter.Converters">
     <Application.Resources>
         <ResourceDictionary>
             <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+            <conv:DurationConverter x:Key="DurationConverter" />
+            <conv:MillisecondsToTimeStringConverter x:Key="MillisecondsToTimeStringConverter" />
 
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Xaml/Icons.xaml" />

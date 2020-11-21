@@ -9,9 +9,9 @@ namespace Gouter.Commands.MainWindow
 {
     internal class TrackListDoubleClickCommand : Command<TrackInfo>
     {
-        private readonly MainWindowViewModel _viewModel;
+        private readonly AlbumTrackViewModel _viewModel;
 
-        public TrackListDoubleClickCommand(MainWindowViewModel viewModel)
+        public TrackListDoubleClickCommand(AlbumTrackViewModel viewModel)
         {
             this._viewModel = viewModel;
         }
@@ -23,7 +23,9 @@ namespace Gouter.Commands.MainWindow
 
         public override void Execute(TrackInfo parameter)
         {
-            this._viewModel.Play(parameter, this._viewModel.SelectedAlbumPlaylist);
+            var player = App.Instance.MediaPlayer;
+
+            player.Play(parameter, this._viewModel.Playlist);
         }
     }
 }

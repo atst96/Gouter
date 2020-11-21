@@ -27,7 +27,20 @@ namespace Gouter.ViewModels
         public AlbumPlaylist SelectedAlbumPlaylist
         {
             get => this._selectedAlbumPlaylist;
-            set => this.SetProperty(ref this._selectedAlbumPlaylist, value);
+            set
+            {
+                if (this.SetProperty(ref this._selectedAlbumPlaylist, value))
+                {
+                    if (value != null)
+                    {
+                        this.AlbumTracks = new AlbumTrackViewModel(value);
+                    }
+                    else
+                    {
+                        this.AlbumTracks = null;
+                    }
+                }
+            }
         }
 
         public MainWindowViewModel() : base()
@@ -42,6 +55,14 @@ namespace Gouter.ViewModels
             this._timer.Tick += this.OnTimerTick;
 
             BindingOperations.EnableCollectionSynchronization(this.Albums, new object());
+        }
+
+        private AlbumTrackViewModel _albumTracks;
+
+        public AlbumTrackViewModel AlbumTracks
+        {
+            get => this._albumTracks;
+            set => this.SetProperty(ref this._albumTracks, value);
         }
 
         private Command _initializeCommand;
@@ -75,9 +96,6 @@ namespace Gouter.ViewModels
             get => this._status;
             set => this.SetProperty(ref this._status, value);
         }
-
-        private Command<TrackInfo> _trackListDoubleClickCommand;
-        public Command<TrackInfo> TrackListDoubleClickCommand => this._trackListDoubleClickCommand ??= new TrackListDoubleClickCommand(this);
 
         private TrackInfo _selectedTrack;
         public TrackInfo SelectedTrack

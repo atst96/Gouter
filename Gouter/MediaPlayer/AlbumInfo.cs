@@ -128,7 +128,7 @@ namespace Gouter
 
                         artwork = stream == null
                             ? ImageUtil.GetMissingAlbumImage()
-                            : ImageUtil.BitmapImageFromStream(stream);
+                            : ImageUtil.BitmapSourceFromStream(stream);
                     }
 
                     if (this._weakArtwork == null)

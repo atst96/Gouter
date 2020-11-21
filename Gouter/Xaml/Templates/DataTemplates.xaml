@@ -1,7 +1,12 @@
 ﻿<ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:app="clr-namespace:Gouter">
+    xmlns:app="clr-namespace:Gouter"
+    xmlns:vm="clr-namespace:Gouter.ViewModels"
+    xmlns:cnm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+    xmlns:conv="clr-namespace:Gouter.Converters">
+
+    <conv:DurationConverter x:Key="DurationConverter" />
 
     <DataTemplate DataType="{x:Type app:AlbumPlaylist}">
         <Grid>
@@ -26,7 +31,7 @@
                     TextWrapping="NoWrap"
                     TextTrimming="CharacterEllipsis"
                     Text="{Binding Name, Mode=OneWay}" />
-                
+
                 <TextBlock
                     TextWrapping="NoWrap"
                     TextTrimming="CharacterEllipsis"
@@ -34,5 +39,173 @@
             </StackPanel>
         </Grid>
     </DataTemplate>
-    
+
+    <DataTemplate x:Key="AlbumTrackViewTemplate" DataType="{x:Type vm:AlbumTrackViewModel}">
+        <DataTemplate.Resources>
+            <ItemsPanelTemplate x:Key="ItemsPanelTemplate">
+                <VirtualizingStackPanel Orientation="Vertical" />
+            </ItemsPanelTemplate>
+        </DataTemplate.Resources>
+
+        <Grid
+            Background="White"
+            Visibility="Visible">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="79" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
+                <Border
+                    Grid.Column="0"
+                    Grid.Row="0"
+                    Grid.RowSpan="2"
+                    Margin="8,8,16,8"
+                    VerticalAlignment="Top"
+                    BorderBrush="#EEEEEE"
+                    BorderThickness="1">
+                    <Image
+                        Width="180" Height="180"
+                        RenderOptions.BitmapScalingMode="HighQuality"
+                        Source="{Binding Album.Artwork, Mode=OneWay}" />
+                </Border>
+
+                <Grid
+                    Grid.Column="1"
+                    Height="79">
+                    <StackPanel Margin="0,12,12,12">
+                        <TextBlock
+                        FontSize="16pt"
+                        Text="{Binding Album.Name, Mode=OneWay}"
+                        TextTrimming="CharacterEllipsis"
+                        ToolTip="{Binding Album.Name, Mode=OneWay}"/>
+
+                        <TextBlock
+                        Foreground="#0077CC"
+                        Text="{Binding Album.Artist, Mode=OneWay}"
+                        TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                </Grid>
+
+                <app:ListBoxEx
+                    Grid.Column="1" Grid.Row="1"
+                    SelectionMode="Extended"
+                    VirtualizingPanel.IsVirtualizing="True"
+                    VirtualizingPanel.ScrollUnit="Pixel"
+                    VirtualizingPanel.IsVirtualizingWhenGrouping="True"
+                    VirtualizingPanel.VirtualizationMode="Recycling"
+                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                    ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                    AlternationCount="2"
+                    BorderThickness="0"
+                    ItemsPanel="{StaticResource ItemsPanelTemplate}"
+                    ItemsSource="{Binding TrackViewSource.View, Mode=OneTime}"
+                    SelectedItem="{Binding SelectedTrack, Mode=TwoWay}"
+                    SetSelectingItemToCommandParameter="True"
+                    ItemDoubleClickCommand="{Binding TrackPlayCommand, Mode=OneTime}">
+                    <app:ListBoxEx.ItemTemplate>
+                        <DataTemplate DataType="{x:Type app:TrackInfo}">
+                            <Grid Grid.IsSharedSizeScope="True">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="40" />
+                                    <ColumnDefinition />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <app:GeometryIcon
+                                    Margin="0,0,4,0"
+                                    x:Name="PART_PlayingIcon"
+                                    Grid.Column="0"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Stretch"
+                                    Data="{StaticResource MaterialIcons.VolumeUp}" />
+
+                                <TextBlock
+                                    Margin="0,0,4,0"
+                                    x:Name="PART_TrackNumber"
+                                    Grid.Column="0"
+                                    HorizontalAlignment="Right"
+                                    TextWrapping="NoWrap"
+                                    Text="{Binding TrackNumber, Mode=OneWay}" />
+
+                                <TextBlock
+                                    Margin="4,0"
+                                    Grid.Column="1"
+                                    HorizontalAlignment="Left"
+                                    TextWrapping="NoWrap"
+                                    TextTrimming="CharacterEllipsis"
+                                    Text="{Binding Title, Mode=OneWay}"/>
+
+                                <TextBlock
+                                    Margin="4,0"
+                                    Grid.Column="2"
+                                    HorizontalAlignment="Right"
+                                    TextWrapping="NoWrap"
+                                    TextTrimming="CharacterEllipsis"
+                                    TextAlignment="Right"
+                                    Text="{Binding Duration, Mode=OneWay, Converter={StaticResource DurationConverter}}" />
+                            </Grid>
+
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding IsPlaying, Mode=OneWay}" Value="True">
+                                    <Setter TargetName="PART_PlayingIcon" Property="Visibility" Value="Visible" />
+                                    <Setter TargetName="PART_TrackNumber" Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+
+                                <DataTrigger Binding="{Binding IsPlaying, Mode=OneWay}" Value="False">
+                                    <Setter TargetName="PART_PlayingIcon" Property="Visibility" Value="Collapsed" />
+                                    <Setter TargetName="PART_TrackNumber" Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </app:ListBoxEx.ItemTemplate>
+                    <app:ListBoxEx.GroupStyle>
+                        <GroupStyle>
+                            <GroupStyle.ContainerStyle>
+                                <Style TargetType="{x:Type GroupItem}">
+                                    <Setter Property="Padding" Value="8,4" />
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="{x:Type GroupItem}">
+                                                <Grid>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto" />
+                                                        <RowDefinition Height="Auto" />
+                                                    </Grid.RowDefinitions>
+
+                                                    <Border
+                                                        Grid.Row="0"
+                                                        Padding="{TemplateBinding Padding}"
+                                                        TextBlock.FontWeight="Bold"
+                                                        TextBlock.Foreground="#666666">
+                                                        <ContentPresenter
+                                                            ContentStringFormat="{}ディスク #{0}" />
+                                                    </Border>
+
+                                                    <ItemsPresenter
+                                                        Grid.Row="1" />
+                                                </Grid>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </GroupStyle.ContainerStyle>
+                        </GroupStyle>
+                    </app:ListBoxEx.GroupStyle>
+                    <app:ListBoxEx.ItemContainerStyle>
+                        <Style TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                            <Setter Property="Width" Value="{Binding ViewportWidth, Mode=OneWay, RelativeSource={RelativeSource AncestorType=ScrollViewer}}" />
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        </Style>
+                    </app:ListBoxEx.ItemContainerStyle>
+                </app:ListBoxEx>
+            </Grid>
+        </Grid>
+
+    </DataTemplate>
+
 </ResourceDictionary>
