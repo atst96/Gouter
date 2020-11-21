@@ -24,11 +24,6 @@ Copyright (c) 2017 Yoshifumi Kawai and contributors
 Released under the MIT License  
 https://github.com/neuecc/MessagePack-CSharp/blob/master/LICENSE
 
-- [System.Drawing.Common](https://www.nuget.org/packages/System.Drawing.Common)  
-© Microsoft Corporation. All rights reserved.  
-Released under the MIT License  
-https://licenses.nuget.org/MIT
-
 - [XamlBehaviors for WPF](https://github.com/microsoft/XamlBehaviorsWpf)  
 Copyright (c) 2015 Microsoft  
 Released under the MIT License  

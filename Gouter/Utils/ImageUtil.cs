@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using ATL;
 
@@ -25,46 +22,31 @@ namespace Gouter.Utils
         public static MemoryStream ShrinkImageData(byte[] data, int maxSize)
         {
             var srcStream = new MemoryStream(data);
+            var srcImage = BitmapFrame.Create(srcStream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
 
-            using (var srcImage = new Bitmap(srcStream))
+            (double sourceWidth, double sourceHeight) = (srcImage.PixelWidth, srcImage.PixelHeight);
+
+            if (sourceWidth <= maxSize && sourceHeight <= maxSize)
             {
-                if (srcImage.Width <= maxSize && srcImage.Height <= maxSize)
-                {
-                    // 幅／高さともに最大サイズ以下であれば縮小処理を省く
-                    srcStream.Position = 0;
-                    return srcStream;
-                }
+                // 幅／高さともに最大サイズ以下であれば縮小処理を省く
+                srcStream.Position = 0;
+                return srcStream;
+            }
 
-                int resizeWidth, resizeHeight;
+            double scale = Math.Min(maxSize / sourceWidth, maxSize / sourceHeight);
 
-                if (srcImage.Width > srcImage.Height)
-                {
-                    resizeHeight = (int)(maxSize * (srcImage.Height / (double)srcImage.Width));
-                    resizeWidth = maxSize;
-                }
-                else if (srcImage.Width < srcImage.Height)
-                {
-                    resizeWidth = (int)(maxSize * (srcImage.Width / (double)srcImage.Height));
-                    resizeHeight = maxSize;
-                }
-                else
-                {
-                    resizeWidth = maxSize;
-                    resizeHeight = maxSize;
-                }
+            var destImage = ResizeImage(srcImage, scale);
+            try
+            {
+                var imageStream = new MemoryStream();
+                SaveTiff(destImage, imageStream);
+                imageStream.Position = 0;
 
-                using var destImage = ResizeImage(srcImage, resizeWidth, resizeHeight);
-                try
-                {
-                    var imageStream = new MemoryStream();
-                    destImage.Save(imageStream, ImageFormat.Tiff);
-
-                    return imageStream;
-                }
-                finally
-                {
-                    srcStream.Dispose();
-                }
+                return imageStream;
+            }
+            finally
+            {
+                srcStream.Dispose();
             }
         }
 
@@ -75,17 +57,28 @@ namespace Gouter.Utils
         /// <param name="width">出力画像の幅</param>
         /// <param name="height">出力画像の高さ</param>
         /// <returns></returns>
-        public static Bitmap ResizeImage(Bitmap srcBitmap, int width, int height)
+        public static BitmapSource ResizeImage(BitmapSource srcBitmap, double scale)
         {
-            var destImage = new Bitmap(width, height);
+            return new TransformedBitmap(srcBitmap, new ScaleTransform(scale, scale));
+        }
 
-            using (var g = Graphics.FromImage(destImage))
+        /// <summary>
+        /// <see cref="BitmapSource"/>をストリームに保存します。
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="destStream"></param>
+        public static void SaveTiff(BitmapSource source, Stream destStream)
+        {
+            var encoder = new TiffBitmapEncoder
             {
-                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                g.DrawImage(srcBitmap, 0, 0, width, height);
-            }
+                Compression = TiffCompressOption.Default,
+                Frames = new BitmapFrame[]
+                {
+                    BitmapFrame.Create(source)
+                },
+            };
 
-            return destImage;
+            encoder.Save(destStream);
         }
 
         /// <summary>
@@ -93,61 +86,42 @@ namespace Gouter.Utils
         /// </summary>
         /// <param name="stream">ストリーム</param>
         /// <returns><see cref="BitmapImage"/></returns>
-        public static BitmapImage BitmapImageFromStream(Stream stream)
+        public static BitmapSource BitmapSourceFromStream(Stream stream)
         {
-            var image = new BitmapImage();
-            image.BeginInit();
-            image.CacheOption = BitmapCacheOption.None;
-            image.CreateOptions = BitmapCreateOptions.None;
-            image.StreamSource = stream;
-            image.EndInit();
-
-            if (image.CanFreeze)
-            {
-                image.Freeze();
-            }
-
-            return image;
+            return BitmapFrame.Create(stream, BitmapCreateOptions.None, BitmapCacheOption.OnDemand);
         }
 
-        private static BitmapImage _missingAlbumImage;
-        private static BitmapImage _missingMusicImage;
+        private static BitmapSource _missingAlbumImage;
+        private static BitmapSource _missingMusicImage;
 
         /// <summary>
         /// アートワーク未設定時の画像（アルバム用）を取得する。
         /// </summary>
         /// <returns></returns>
-        public static BitmapImage GetMissingAlbumImage()
+        public static BitmapSource GetMissingAlbumImage()
             => _missingAlbumImage ??= GetImage(PathUtil.GetEmbeddedResourcePath("missing_album.png"));
 
         /// <summary>
         /// アートワーク未設定時の画像（トラック用）を取得する。
         /// </summary>
         /// <returns></returns>
-        public static BitmapImage GetMissingMusicImage()
+        public static BitmapSource GetMissingMusicImage()
             => _missingMusicImage ??= GetImage(PathUtil.GetEmbeddedResourcePath("missing_music.png"));
 
 
         /// <summary>
         /// アートワークの最大サイズ
         /// </summary>
-        public const int AlbumArtworkMaxSize = 120;
+        public const int AlbumArtworkMaxSize = 200;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="uri"></param>
         /// <returns></returns>
-        private static BitmapImage GetImage(string uri)
+        private static BitmapSource GetImage(string uri)
         {
-            var image = new BitmapImage();
-            image.BeginInit();
-            image.CacheOption = BitmapCacheOption.None;
-            image.UriSource = new Uri(uri);
-            image.EndInit();
-            image.Freeze();
-
-            return image;
+            return BitmapFrame.Create(new Uri(uri), BitmapCreateOptions.None, BitmapCacheOption.OnDemand);
         }
 
         public static byte[] GetArtworkData(this Track track)
