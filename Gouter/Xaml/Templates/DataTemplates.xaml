@@ -3,10 +3,11 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:app="clr-namespace:Gouter"
     xmlns:vm="clr-namespace:Gouter.ViewModels"
-    xmlns:cnm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
-    xmlns:conv="clr-namespace:Gouter.Converters">
+    xmlns:conv="clr-namespace:Gouter.Converters"
+    xmlns:selectors="clr-namespace:Gouter.Selectors">
 
     <conv:DurationConverter x:Key="DurationConverter" />
+    <selectors:TrackGroupContainerStyleSelector x:Key="TrackGroupContainerStyleSelector" />
 
     <DataTemplate DataType="{x:Type app:AlbumPlaylist}">
         <Grid>
@@ -40,6 +41,104 @@
         </Grid>
     </DataTemplate>
 
+    <DataTemplate x:Key="TrackItemTemplate" DataType="{x:Type app:TrackInfo}">
+        <Grid Grid.IsSharedSizeScope="True">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="40" />
+                <ColumnDefinition />
+                <ColumnDefinition Width="60" />
+            </Grid.ColumnDefinitions>
+
+            <app:GeometryIcon
+                Margin="0,0,4,0"
+                x:Name="PART_PlayingIcon"
+                Grid.Column="0"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Stretch"
+                Data="{StaticResource MaterialIcons.VolumeUp}" />
+
+            <TextBlock
+                Margin="0,0,4,0"
+                x:Name="PART_TrackNumber"
+                Grid.Column="0"
+                HorizontalAlignment="Right"
+                TextWrapping="NoWrap"
+                Text="{Binding TrackNumber, Mode=OneWay}" />
+
+            <TextBlock
+                Margin="4,0"
+                Grid.Column="1"
+                HorizontalAlignment="Left"
+                TextWrapping="NoWrap"
+                TextTrimming="CharacterEllipsis"
+                Text="{Binding Title, Mode=OneWay}"/>
+
+            <TextBlock
+                Margin="4,0"
+                Grid.Column="2"
+                HorizontalAlignment="Right"
+                TextWrapping="NoWrap"
+                TextTrimming="CharacterEllipsis"
+                TextAlignment="Right"
+                Text="{Binding Duration, Mode=OneWay, Converter={StaticResource DurationConverter}}" />
+        </Grid>
+
+        <DataTemplate.Triggers>
+            <DataTrigger Binding="{Binding IsPlaying, Mode=OneWay}" Value="True">
+                <Setter TargetName="PART_PlayingIcon" Property="Visibility" Value="Visible" />
+                <Setter TargetName="PART_TrackNumber" Property="Visibility" Value="Collapsed" />
+            </DataTrigger>
+
+            <DataTrigger Binding="{Binding IsPlaying, Mode=OneWay}" Value="False">
+                <Setter TargetName="PART_PlayingIcon" Property="Visibility" Value="Collapsed" />
+                <Setter TargetName="PART_TrackNumber" Property="Visibility" Value="Visible" />
+            </DataTrigger>
+        </DataTemplate.Triggers>
+    </DataTemplate>
+
+    <Style x:Key="NoHeaderGroupItemStyle" TargetType="{x:Type GroupItem}">
+        <Setter Property="Padding" Value="8,4" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type GroupItem}">
+                    <Border
+                        Padding="0,1"
+                        BorderThickness="0,1"
+                        BorderBrush="#EFEFEF">
+                        <ItemsPresenter />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="HeaderedGroupItemStyle" TargetType="{x:Type GroupItem}">
+        <Setter Property="Padding" Value="8,4" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type GroupItem}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+
+                        <ContentPresenter
+                            Grid.Row="0"
+                            Margin="{TemplateBinding Padding}" />
+
+                        <Border
+                            Padding="0,1"
+                            BorderThickness="0,1"
+                            BorderBrush="#EFEFEF">
+                            <ItemsPresenter />
+                        </Border>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <DataTemplate x:Key="AlbumTrackViewTemplate" DataType="{x:Type vm:AlbumTrackViewModel}">
         <DataTemplate.Resources>
             <ItemsPanelTemplate x:Key="ItemsPanelTemplate">
@@ -56,7 +155,7 @@
                     <RowDefinition />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="210" />
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
 
@@ -64,10 +163,11 @@
                     Grid.Column="0"
                     Grid.Row="0"
                     Grid.RowSpan="2"
-                    Margin="8,8,16,8"
-                    VerticalAlignment="Top"
+                    Margin="14,12,0,0"
                     BorderBrush="#EEEEEE"
-                    BorderThickness="1">
+                    BorderThickness="1"
+                    VerticalAlignment="Top"
+                    HorizontalAlignment="Left">
                     <Image
                         Width="180" Height="180"
                         RenderOptions.BitmapScalingMode="HighQuality"
@@ -76,23 +176,32 @@
 
                 <Grid
                     Grid.Column="1"
-                    Height="79">
-                    <StackPanel Margin="0,12,12,12">
-                        <TextBlock
+                    Margin="0,12,12,12"
+                    VerticalAlignment="Top"
+                    HorizontalAlignment="Stretch">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="36" />
+                        <RowDefinition Height="18" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock
+                        Grid.Row="0"
                         FontSize="16pt"
                         Text="{Binding Album.Name, Mode=OneWay}"
                         TextTrimming="CharacterEllipsis"
                         ToolTip="{Binding Album.Name, Mode=OneWay}"/>
 
-                        <TextBlock
+                    <TextBlock
+                        Grid.Row="1"
                         Foreground="#0077CC"
                         Text="{Binding Album.Artist, Mode=OneWay}"
                         TextTrimming="CharacterEllipsis" />
-                    </StackPanel>
                 </Grid>
 
                 <app:ListBoxEx
+                    x:Name="PART_TrackList"
                     Grid.Column="1" Grid.Row="1"
+                    Padding="0"
                     SelectionMode="Extended"
                     VirtualizingPanel.IsVirtualizing="True"
                     VirtualizingPanel.ScrollUnit="Pixel"
@@ -106,94 +215,19 @@
                     ItemsSource="{Binding TrackViewSource.View, Mode=OneTime}"
                     SelectedItem="{Binding SelectedTrack, Mode=TwoWay}"
                     SetSelectingItemToCommandParameter="True"
-                    ItemDoubleClickCommand="{Binding TrackPlayCommand, Mode=OneTime}">
-                    <app:ListBoxEx.ItemTemplate>
-                        <DataTemplate DataType="{x:Type app:TrackInfo}">
-                            <Grid Grid.IsSharedSizeScope="True">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="40" />
-                                    <ColumnDefinition />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-
-                                <app:GeometryIcon
-                                    Margin="0,0,4,0"
-                                    x:Name="PART_PlayingIcon"
-                                    Grid.Column="0"
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Stretch"
-                                    Data="{StaticResource MaterialIcons.VolumeUp}" />
-
-                                <TextBlock
-                                    Margin="0,0,4,0"
-                                    x:Name="PART_TrackNumber"
-                                    Grid.Column="0"
-                                    HorizontalAlignment="Right"
-                                    TextWrapping="NoWrap"
-                                    Text="{Binding TrackNumber, Mode=OneWay}" />
-
-                                <TextBlock
-                                    Margin="4,0"
-                                    Grid.Column="1"
-                                    HorizontalAlignment="Left"
-                                    TextWrapping="NoWrap"
-                                    TextTrimming="CharacterEllipsis"
-                                    Text="{Binding Title, Mode=OneWay}"/>
-
-                                <TextBlock
-                                    Margin="4,0"
-                                    Grid.Column="2"
-                                    HorizontalAlignment="Right"
-                                    TextWrapping="NoWrap"
-                                    TextTrimming="CharacterEllipsis"
-                                    TextAlignment="Right"
-                                    Text="{Binding Duration, Mode=OneWay, Converter={StaticResource DurationConverter}}" />
-                            </Grid>
-
-                            <DataTemplate.Triggers>
-                                <DataTrigger Binding="{Binding IsPlaying, Mode=OneWay}" Value="True">
-                                    <Setter TargetName="PART_PlayingIcon" Property="Visibility" Value="Visible" />
-                                    <Setter TargetName="PART_TrackNumber" Property="Visibility" Value="Collapsed" />
-                                </DataTrigger>
-
-                                <DataTrigger Binding="{Binding IsPlaying, Mode=OneWay}" Value="False">
-                                    <Setter TargetName="PART_PlayingIcon" Property="Visibility" Value="Collapsed" />
-                                    <Setter TargetName="PART_TrackNumber" Property="Visibility" Value="Visible" />
-                                </DataTrigger>
-                            </DataTemplate.Triggers>
-                        </DataTemplate>
-                    </app:ListBoxEx.ItemTemplate>
+                    ItemDoubleClickCommand="{Binding TrackPlayCommand, Mode=OneTime}"
+                    ItemTemplate="{StaticResource TrackItemTemplate}">
                     <app:ListBoxEx.GroupStyle>
-                        <GroupStyle>
-                            <GroupStyle.ContainerStyle>
-                                <Style TargetType="{x:Type GroupItem}">
-                                    <Setter Property="Padding" Value="8,4" />
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="{x:Type GroupItem}">
-                                                <Grid>
-                                                    <Grid.RowDefinitions>
-                                                        <RowDefinition Height="Auto" />
-                                                        <RowDefinition Height="Auto" />
-                                                    </Grid.RowDefinitions>
-
-                                                    <Border
-                                                        Grid.Row="0"
-                                                        Padding="{TemplateBinding Padding}"
-                                                        TextBlock.FontWeight="Bold"
-                                                        TextBlock.Foreground="#666666">
-                                                        <ContentPresenter
-                                                            ContentStringFormat="{}ディスク #{0}" />
-                                                    </Border>
-
-                                                    <ItemsPresenter
-                                                        Grid.Row="1" />
-                                                </Grid>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </GroupStyle.ContainerStyle>
+                        <GroupStyle
+                            ContainerStyleSelector="{StaticResource TrackGroupContainerStyleSelector}">
+                            <GroupStyle.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock
+                                        TextBlock.FontWeight="Bold"
+                                        TextBlock.Foreground="#666666"
+                                        Text="{Binding Path=Name, StringFormat='{}ディスク {0}'}" />
+                                </DataTemplate>
+                            </GroupStyle.HeaderTemplate>
                         </GroupStyle>
                     </app:ListBoxEx.GroupStyle>
                     <app:ListBoxEx.ItemContainerStyle>
@@ -205,7 +239,6 @@
                 </app:ListBoxEx>
             </Grid>
         </Grid>
-
     </DataTemplate>
 
 </ResourceDictionary>
