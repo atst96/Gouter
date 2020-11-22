@@ -42,11 +42,11 @@
     </DataTemplate>
 
     <DataTemplate x:Key="TrackItemTemplate" DataType="{x:Type app:TrackInfo}">
-        <Grid Grid.IsSharedSizeScope="True">
+        <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="40" />
                 <ColumnDefinition />
-                <ColumnDefinition Width="60" />
+                <ColumnDefinition Width="44" />
             </Grid.ColumnDefinitions>
 
             <app:GeometryIcon
@@ -70,8 +70,10 @@
                 Grid.Column="1"
                 HorizontalAlignment="Left"
                 TextWrapping="NoWrap"
-                TextTrimming="CharacterEllipsis"
-                Text="{Binding Title, Mode=OneWay}"/>
+                TextTrimming="CharacterEllipsis">
+                <Run Text="{Binding Title, Mode=OneWay}" /><!--
+             --><Run Text="{Binding Artist, Mode=OneWay, StringFormat='{} - {0}'}" Foreground="#999999" />
+            </TextBlock>
 
             <TextBlock
                 Margin="4,0"
@@ -128,6 +130,7 @@
                             Margin="{TemplateBinding Padding}" />
 
                         <Border
+                            Grid.Row="1"
                             Padding="0,1"
                             BorderThickness="0,1"
                             BorderBrush="#EFEFEF">
