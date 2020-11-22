@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace Gouter
@@ -59,7 +55,7 @@ namespace Gouter
             this._commandCanExecuteChanged.Invoke(this, EventArgs.Empty);
         }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
             this._weakHandlers.Clear();
         }

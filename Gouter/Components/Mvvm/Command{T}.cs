@@ -69,7 +69,7 @@ namespace Gouter
             this._commandCanExecuteChanged.Invoke(this, EventArgs.Empty);
         }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
             this._weakHandlers.Clear();
         }
