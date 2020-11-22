@@ -1,6 +1,8 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Windows.Data;
 using Gouter.Commands.MainWindow;
+using Gouter.Components.Mvvm;
 
 namespace Gouter.ViewModels
 {
@@ -68,6 +70,14 @@ namespace Gouter.ViewModels
         /// <summary>
         /// トラックのダブルクリック時のコマンド
         /// </summary>
-        public Command<TrackInfo> TrackPlayCommand => this._trackPlayCommand ??= new TrackListDoubleClickCommand(this);
+        public Command<TrackInfo> TrackPlayCommand => this._trackPlayCommand
+            ??= new DelegateCommand<TrackInfo>(this.OnPlayCommandExecute, track => track != null);
+
+        private void OnPlayCommandExecute(TrackInfo track)
+        {
+            var player = App.Instance.MediaPlayer;
+
+            player.Play(track, this.Playlist);
+        }
     }
 }
