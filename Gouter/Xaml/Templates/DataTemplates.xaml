@@ -162,20 +162,28 @@
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
 
-                <Border
+                <Grid
                     Grid.Column="0"
                     Grid.Row="0"
                     Grid.RowSpan="2"
                     Margin="14,12,0,0"
-                    BorderBrush="#EEEEEE"
-                    BorderThickness="1"
                     VerticalAlignment="Top"
-                    HorizontalAlignment="Left">
-                    <Image
-                        Width="180" Height="180"
-                        RenderOptions.BitmapScalingMode="HighQuality"
-                        Source="{Binding Album.Artwork, Mode=OneWay}" />
-                </Border>
+                    HorizontalAlignment="Left"
+                    Width="180"
+                    Height="180">
+                    <Border
+                        BorderBrush="#EEEEEE"
+                        BorderThickness="1"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center">
+                        <Image
+                            Stretch="Uniform"
+                            RenderOptions.BitmapScalingMode="HighQuality"
+                            Source="{Binding Album.Artwork, Mode=OneWay}"
+                            VerticalAlignment="Stretch"
+                            HorizontalAlignment="Stretch"/>
+                    </Border>
+                </Grid>
 
                 <Grid
                     Grid.Column="1"
