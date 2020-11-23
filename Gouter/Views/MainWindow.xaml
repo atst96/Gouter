@@ -248,7 +248,7 @@
             </StatusBarItem>
         </StatusBar>
 
-        <Grid Grid.Row="1">
+        <!--<Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="240" />
                 <ColumnDefinition Width="8" />
@@ -302,6 +302,122 @@
                 Style="{StaticResource GridSplitterStyle}" />
 
             <ContentPresenter
+                Grid.Column="2"
+                Content="{Binding AlbumTracks, Mode=OneWay}"
+                ContentTemplate="{StaticResource AlbumTrackViewTemplate}" />
+        </Grid>-->
+
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="186" />
+                <RowDefinition Height="8" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <ListBox
+                Grid.Row="0"
+                SelectionMode="Single"
+                AlternationCount="2"
+                VirtualizingPanel.ScrollUnit="Item"
+                VirtualizingPanel.IsVirtualizing="True"
+                VirtualizingPanel.VirtualizationMode="Recycling"
+                ItemsSource="{Binding Albums, Mode=OneTime}"
+                SelectedItem="{Binding SelectedAlbumPlaylist, Mode=TwoWay}">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="MouseDoubleClick">
+                        <i:InvokeCommandAction Command="{Binding DataContext.AlbumPlaylistSelectedCommand, Mode=OneTime, RelativeSource={RelativeSource AncestorType=view:MainWindow}}"  />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Width="{Binding ViewportWidth, RelativeSource={RelativeSource AncestorType=ScrollViewer}}" />
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource EmptyListBoxItem}">
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="Width" Value="Auto" />
+                        <Setter Property="Height" Value="Auto" />
+                        <Setter Property="Background" Value="{x:Null}" />
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="{x:Type app:AlbumPlaylist}">
+                        <Grid
+                            Margin="14,16"
+                            Width="120" Height="152">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="120"/>
+                                <RowDefinition Height="20" />
+                                <RowDefinition Height="16" />
+                            </Grid.RowDefinitions>
+
+                            <Grid
+                                Grid.Row="0"
+                                Width="120"
+                                Height="120">
+                                <Border
+                                    x:Name="PART_Border"
+                                    Cursor="Hand"
+                                    Margin="3"
+                                    BorderThickness="1"
+                                    BorderBrush="#DDDDDD"
+                                    CornerRadius="2"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Center">
+                                    <Image
+                                        Margin="1"
+                                        Stretch="Uniform"
+                                        VerticalAlignment="Stretch"
+                                        HorizontalAlignment="Stretch"
+                                        Source="{Binding Album.Artwork, Mode=OneWay, IsAsync=True}"/>
+                                </Border>
+                            </Grid>
+                            
+                            <TextBlock
+                                Grid.Row="1"
+                                TextTrimming="CharacterEllipsis"
+                                VerticalAlignment="Bottom"
+                                IsHitTestVisible="False"
+                                Text="{Binding Album.Name, Mode=OneWay}" />
+
+                            <TextBlock
+                                Grid.Row="2"
+                                TextTrimming="CharacterEllipsis"
+                                VerticalAlignment="Bottom"
+                                IsHitTestVisible="False"
+                                FontSize="8pt"
+                                Foreground="#AAAAAA"
+                                Text="{Binding Album.Artist, Mode=OneWay}" />
+                        </Grid>
+
+                        <DataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                <Setter TargetName="PART_Border" Property="Margin" Value="2" />
+                                <Setter TargetName="PART_Border" Property="BorderThickness" Value="2" />
+                                <Setter TargetName="PART_Border" Property="BorderBrush" Value="#888888" />
+                            </DataTrigger>
+
+                            <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                <Setter TargetName="PART_Border" Property="Margin" Value="0" />
+                                <Setter TargetName="PART_Border" Property="BorderThickness" Value="4" />
+                                <Setter TargetName="PART_Border" Property="BorderBrush" Value="#0077CC" />
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <GridSplitter
+                Grid.Row="1"
+                Height="6"
+                HorizontalAlignment="Stretch"
+                Background="Transparent"
+                BorderThickness="0,2,0,0"
+                Style="{StaticResource GridSplitterStyle}" />
+
+            <ContentPresenter
+                Grid.Row="2"
                 Grid.Column="2"
                 Content="{Binding AlbumTracks, Mode=OneWay}"
                 ContentTemplate="{StaticResource AlbumTrackViewTemplate}" />
