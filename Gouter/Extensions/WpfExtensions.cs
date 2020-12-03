@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
 namespace Gouter.Extensions
 {
@@ -16,7 +9,9 @@ namespace Gouter.Extensions
     /// </summary>
     internal static class WpfExtensions
     {
-        /// <summary>一致する型の親要素を探索する</summary>
+        /// <summary>
+        /// 一致する型の親要素を探索する。
+        /// </summary>
         /// <typeparam name="T">探索する型</typeparam>
         /// <param name="obj"></param>
         /// <returns>[Nullable] 見つかった親要素</returns>
@@ -35,7 +30,9 @@ namespace Gouter.Extensions
             }
         }
 
-        /// <summary>指定型の子要素を列挙する</summary>
+        /// <summary>
+        /// 指定型の子要素を列挙する
+        /// </summary>
         /// <typeparam name="T">子要素の型</typeparam>
         /// <param name="object">要素</param>
         /// <returns>子要素</returns>
@@ -58,7 +55,9 @@ namespace Gouter.Extensions
             }
         }
 
-        /// <summary>指定型の子要素を探索する</summary>
+        /// <summary>
+        /// 指定型の子要素を探索する。
+        /// </summary>
         /// <typeparam name="T">型</typeparam>
         /// <param name="obj">要素</param>
         /// <returns>子要素</returns>
@@ -89,10 +88,12 @@ namespace Gouter.Extensions
             return default;
         }
 
-        /// <summary>親要素のVisualを取得する</summary>
+        /// <summary>
+        /// 親要素のVisualを取得する。
+        /// </summary>
         /// <param name="obj">要素</param>
         /// <returns>[Nullable] </returns>
-        public static DependencyObject GetParentVisual(this DependencyObject obj)
+        public static DependencyObject GetParentVisual(this DependencyObject? obj)
         {
             if (obj == default)
             {

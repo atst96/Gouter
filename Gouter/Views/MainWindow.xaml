@@ -309,7 +309,7 @@
 
         <Grid Grid.Row="1">
             <Grid.RowDefinitions>
-                <RowDefinition Height="186" />
+                <RowDefinition Height="203" />
                 <RowDefinition Height="8" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
@@ -328,9 +328,12 @@
                         <i:InvokeCommandAction Command="{Binding DataContext.AlbumPlaylistSelectedCommand, Mode=OneTime, RelativeSource={RelativeSource AncestorType=view:MainWindow}}"  />
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
+                <i:Interaction.Behaviors>
+                    <b:HorizontalScrollBehavior />
+                </i:Interaction.Behaviors>
                 <ListBox.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <WrapPanel Width="{Binding ViewportWidth, RelativeSource={RelativeSource AncestorType=ScrollViewer}}" />
+                        <VirtualizingStackPanel Orientation="Horizontal" />
                     </ItemsPanelTemplate>
                 </ListBox.ItemsPanel>
                 <ListBox.ItemContainerStyle>
@@ -338,7 +341,8 @@
                         <Setter Property="Padding" Value="0" />
                         <Setter Property="Width" Value="Auto" />
                         <Setter Property="Height" Value="Auto" />
-                        <Setter Property="Background" Value="{x:Null}" />
+                        <Setter Property="Cursor" Value="Hand" />
+                        <Setter Property="Background" Value="Transparent" />
                     </Style>
                 </ListBox.ItemContainerStyle>
                 <ListBox.ItemTemplate>
@@ -358,9 +362,8 @@
                                 Height="120">
                                 <Border
                                     x:Name="PART_Border"
-                                    Cursor="Hand"
-                                    Margin="3"
-                                    BorderThickness="1"
+                                    Margin="2"
+                                    BorderThickness="2"
                                     BorderBrush="#DDDDDD"
                                     CornerRadius="2"
                                     VerticalAlignment="Center"
@@ -414,6 +417,7 @@
                 HorizontalAlignment="Stretch"
                 Background="Transparent"
                 BorderThickness="0,2,0,0"
+                IsEnabled="False"
                 Style="{StaticResource GridSplitterStyle}" />
 
             <ContentPresenter
