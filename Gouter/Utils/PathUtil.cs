@@ -14,19 +14,35 @@ namespace Gouter.Utils
         private static readonly string DirectorySeparator = Path.DirectorySeparatorChar.ToString();
 
         /// <summary>
-        /// ディレクトリパスを正規化する
+        /// ディレクトリンパスを<see cref="DirectorySeparator"/>終わりにする。
         /// </summary>
-        /// <param name="paths">ディレクトリパス一覧</param>
-        /// <returns>正規化済みディレクトリ一覧</returns>
-        public static IReadOnlyList<string> NormalizeDirectories(IReadOnlyCollection<string> paths)
+        /// <param name="path">ディレクトリパス</param>
+        /// <returns></returns>
+        public static string AlignDirectoryPath(string path)
         {
-            var directories = paths
-                .Select(path => path.EndsWith(DirectorySeparator) ? path : (path + DirectorySeparator))
+            if (path.EndsWith(DirectorySeparator))
+            {
+                return path;
+            }
+
+            return path + DirectorySeparator;
+        }
+
+        /// <summary>
+        /// ディレクトリ
+        /// </summary>
+        /// <param name="directoryPaths">ディレクトリパス一覧</param>
+        /// <returns>正規化済みディレクトリ一覧</returns>
+        public static IReadOnlyList<string> ExcludeSubDirectories(IReadOnlyCollection<string> directoryPaths)
+        {
+            var directories = directoryPaths
+                .Select(path => AlignDirectoryPath(path))
                 .ToList();
 
+            // サブディレクトリが含まれている場合は無視する
             for (int i = directories.Count - 1; i >= 0; --i)
             {
-                if (PathUtil.IsContainsDirectory(directories[i], directories))
+                if (PathUtil.IsContains(directories[i], directories))
                 {
                     directories.RemoveAt(i);
                 }
@@ -41,7 +57,7 @@ namespace Gouter.Utils
         /// <param name="path">検証パス</param>
         /// <param name="directories">ディレクトリ一覧</param>
         /// <returns>ディレクトリの重複有無</returns>
-        public static bool IsContainsDirectory(string path, IReadOnlyCollection<string> directories)
+        public static bool IsContains(string path, IReadOnlyCollection<string> directories)
             => directories.Any(dir => !path.Equals(dir) && path.StartsWith(dir));
 
         /// <summary>
@@ -60,7 +76,7 @@ namespace Gouter.Utils
         /// <summary>
         /// 検索するファイルの拡張子
         /// </summary>
-        public static readonly ImmutableHashSet<string> SupportedMediaExtensions = ImmutableHashSet.Create(new string[]
+        public static readonly ImmutableHashSet<string> SupportedMediaExtensions = ImmutableHashSet.Create(new []
         {
             ".wav", ".mp3", ".acc", ".m4a", ".flac", ".ogg",
         });

@@ -38,11 +38,6 @@ namespace Gouter
         internal PlayerOptions PlayerOptions { get; private set; }
 
         /// <summary>
-        /// アートワーク管理
-        /// </summary>
-        internal ArtworkManager ArtworkManager { get; private set; }
-
-        /// <summary>
         /// サウンドデバイスのリスナー
         /// </summary>
         internal SoundDeviceListener SoundDeviceListener { get; } = new SoundDeviceListener();
@@ -98,8 +93,8 @@ namespace Gouter
             this.ShutdownMode = ShutdownMode.OnMainWindowClose;
 
             var libraryPath = this.GetLocalFilePath(Config.LibraryFileName);
-            this.MediaManager = MediaManager.CreateMediaManager(libraryPath);
-            this.ArtworkManager = new ArtworkManager(this.GetLocalFilePath("Artworks"));
+            var artworkPath = this.GetLocalFilePath("Artworks");
+            this.MediaManager = MediaManager.CreateMediaManager(libraryPath, artworkPath);
 
             // TODO: プレーヤ設定を設定データから生成できるようにする
             var options = new PlayerOptions

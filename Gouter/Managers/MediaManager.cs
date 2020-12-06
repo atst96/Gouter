@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using ATL;
+using Gouter.Data;
 
 namespace Gouter.Managers
 {
@@ -32,6 +34,11 @@ namespace Gouter.Managers
         public TrackManager Tracks { get; private set; }
 
         /// <summary>
+        /// アートワーク
+        /// </summary>
+        public ArtworkManager Artwork { get; private set; }
+
+        /// <summary>
         /// アルバム情報管理
         /// </summary>
         public AlbumManager Albums { get; private set; }
@@ -45,12 +52,13 @@ namespace Gouter.Managers
         /// メディア管理クラスを生成する。
         /// </summary>
         /// <param name="libInfo"></param>
-        public MediaManager()
+        public MediaManager(string artworkPath)
         {
             this._database = new Database();
 
             this.Tracks = new TrackManager(this._database);
-            this.Albums = new AlbumManager(this._database);
+            this.Artwork = new ArtworkManager(artworkPath);
+            this.Albums = new AlbumManager(this._database, this.Artwork);
             this.Playlists = new PlaylistManager(this._database, this.Albums);
         }
 
@@ -59,9 +67,9 @@ namespace Gouter.Managers
         /// </summary>
         /// <param name="libraryPath"></param>
         /// <returns></returns>
-        public static MediaManager CreateMediaManager(string libraryPath)
+        public static MediaManager CreateMediaManager(string libraryPath, string artworkPath)
         {
-            var manager = new MediaManager();
+            var manager = new MediaManager(artworkPath);
             manager.Initialize(libraryPath);
 
             return manager;
@@ -95,11 +103,13 @@ namespace Gouter.Managers
             this.Tracks.LoadLibrary(this.Albums);
         });
 
-        /// <summary>トラックを登録する</summary>
+        /// <summary>
+        /// トラックを登録する
+        /// </summary>
         /// <param name="track">トラック情報</param>
         public void RegisterTrack(Track track)
         {
-            var newTrackId = this.Tracks.GenerateId();
+            int newTrackId = this.Tracks.GenerateId();
             var albumInfo = this.Albums.GetOrAddAlbum(track);
 
             var trackInfo = new TrackInfo(newTrackId, track, albumInfo);
@@ -107,29 +117,64 @@ namespace Gouter.Managers
         }
 
         /// <summary>トラックを一括登録する</summary>
-        /// <param name="tracks">トラック</param>
+        /// <param name="allTracks">トラック</param>
         /// <param name="progress"></param>
-        public void RegisterTracks(IEnumerable<Track> tracks, IProgress<int> progress = null)
+        public void RegisterTracks(IEnumerable<Track> allTracks, IProgress<TrackInsertProgress> progress = null)
         {
             int count = 0;
+            int maxCount = allTracks.Count();
 
             using var transaction = this._database.BeginTransaction();
 
             try
             {
-                foreach (var track in tracks.AsParallel())
+                var tracksByAlbumKey = allTracks
+                    .AsParallel()
+                    .GroupBy(t => t.GetAlbumKey());
+
+                foreach (var albumTracks in tracksByAlbumKey)
                 {
-                    this.RegisterTrack(track);
-                    progress?.Report(++count);
+                    var albumKey = albumTracks.Key;
+
+                    AlbumInfo albumInfo;
+
+                    if (!this.Albums.TryGetFromKey(albumKey, out albumInfo))
+                    {
+                        // トラック情報が見つからない場合は登録する
+
+                        // 1トラック目のアルバム
+                        var firstTrack = albumTracks
+                            .Aggregate((left, right) => TrackComparer.Instance.Compare(left, right) < 0 ? left : right);
+
+                        albumInfo = this.Albums.GetOrAddAlbum(firstTrack);
+                    }
+
+                    var tracks = albumTracks.Select(t => new TrackInfo(this.Tracks.GenerateId(), t, albumInfo)).ToArray();
+                    this.Tracks.Add(tracks);
+
+                    foreach (var track in tracks)
+                    {
+                        progress?.Report(new TrackInsertProgress
+                        {
+                            CurrentCount = ++count,
+                            MaxCount = maxCount,
+                            Track = track,
+                        });
+                    }
                 }
 
                 transaction.Commit();
             }
-            catch (Exception ex)
+            catch
             {
                 transaction.Rollback();
                 throw;
             }
+        }
+
+        public void Flush()
+        {
+            this._database.Flush();
         }
 
         /// <summary>

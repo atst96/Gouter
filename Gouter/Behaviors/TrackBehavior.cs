@@ -47,7 +47,7 @@ namespace Gouter.Behaviors
                             var imageSource = new BitmapImage();
                             imageSource.BeginInit();
                             imageSource.CacheOption = BitmapCacheOption.None;
-                            imageSource.StreamSource = ImageUtil.ShrinkImageData(albumArtData.PictureData, 128);
+                            imageSource.StreamSource = new MemoryStream(ImageUtil.ShrinkImageData(albumArtData.PictureData, 128));
                             imageSource.EndInit();
                             imageSource.Freeze();
 

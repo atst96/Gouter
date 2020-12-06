@@ -84,5 +84,10 @@ namespace Gouter
         {
             this.Disconnect();
         }
+
+        public void Flush()
+        {
+            this._connection.Checkpoint();
+        }
     }
 }

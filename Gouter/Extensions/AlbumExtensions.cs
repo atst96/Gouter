@@ -15,7 +15,7 @@ namespace Gouter
         /// <summary>トラック情報からアルバムキーを生成する</summary>
         /// <param name="track">トラック情報</param>
         /// <returns>アルバムキー</returns>
-        public static string GenerateAlbumKey(this Track track)
+        public static string GetAlbumKey(this Track track)
         {
             string albumName = track.Album;
             string albumArtist = track.GetAlbumArtist("unknown", "###compilation###");

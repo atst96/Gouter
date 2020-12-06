@@ -6,6 +6,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace Gouter.Commands.MainWindow
 {
@@ -38,9 +39,18 @@ namespace Gouter.Commands.MainWindow
 
                 this._viewModel.Status = "楽曲フォルダから新しい楽曲を検索しています...";
 
-                var newTracks = trackManager.GetUnregisteredTracks(setting.MusicDirectories, setting.ExcludeDirectories);
+                // 未登録のトラックを取得
+                var findDirectories = setting.MusicDirectories;
+                var excludeDirectories = setting.ExcludeDirectories;
+                // TODO: 除外パスを指定できるようにする
+                var excludePaths = Array.Empty<string>();
 
-                if (newTracks.Count <= 0)
+                var newTracks = trackManager.GetUnregisteredTracks(
+                    findDirectories,
+                    excludeDirectories,
+                    excludePaths);
+
+                if (!newTracks.Any())
                 {
                     this._viewModel.Status = null;
                     return;
@@ -51,6 +61,8 @@ namespace Gouter.Commands.MainWindow
                 progress.Reset(newTracks.Count);
 
                 mediaManager.RegisterTracks(newTracks, progress);
+
+                this._viewModel.MediaManager.Flush();
 
                 this._viewModel.Status = $"{newTracks.Count}件の楽曲が追加されました";
             });

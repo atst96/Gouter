@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Gouter.Data;
 
 namespace Gouter
 {
-    internal class StandardProgressReceiver : NotificationObject, IProgress<int>
+    internal class StandardProgressReceiver : NotificationObject, IProgress<TrackInsertProgress>
     {
         private int _currentCount;
         public int CurrentCount
@@ -48,9 +45,9 @@ namespace Gouter
             this.MaxCount = maxCount;
         }
 
-        public void Report(int value)
+        public void Report(TrackInsertProgress value)
         {
-            this.CurrentCount = value;
+            this.CurrentCount = value.CurrentCount;
         }
     }
 }

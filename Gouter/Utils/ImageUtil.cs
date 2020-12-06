@@ -19,9 +19,9 @@ namespace Gouter.Utils
         /// <param name="data">画像データ</param>
         /// <param name="maxSize">最大サイズ</param>
         /// <returns></returns>
-        public static MemoryStream ShrinkImageData(byte[] data, int maxSize)
+        public static byte[] ShrinkImageData(byte[] data, int maxSize)
         {
-            var srcStream = new MemoryStream(data);
+            using var srcStream = new MemoryStream(data);
             var srcImage = BitmapFrame.Create(srcStream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
 
             (double sourceWidth, double sourceHeight) = (srcImage.PixelWidth, srcImage.PixelHeight);
@@ -29,25 +29,19 @@ namespace Gouter.Utils
             if (sourceWidth <= maxSize && sourceHeight <= maxSize)
             {
                 // 幅／高さともに最大サイズ以下であれば縮小処理を省く
-                srcStream.Position = 0;
-                return srcStream;
+                return data;
             }
 
             double scale = Math.Min(maxSize / sourceWidth, maxSize / sourceHeight);
 
             var destImage = ResizeImage(srcImage, scale);
-            try
-            {
-                var imageStream = new MemoryStream();
-                SaveTiff(destImage, imageStream);
-                imageStream.Position = 0;
 
-                return imageStream;
-            }
-            finally
-            {
-                srcStream.Dispose();
-            }
+            using var imageStream = new MemoryStream(data.Length);
+
+            SaveTiff(destImage, imageStream);
+            imageStream.Position = 0;
+
+            return imageStream.ToArray();
         }
 
         /// <summary>

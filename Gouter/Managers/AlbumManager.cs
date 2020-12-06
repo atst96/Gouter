@@ -19,6 +19,11 @@ namespace Gouter.Managers
         private readonly Database _database;
 
         /// <summary>
+        /// アートワーク管理クラス
+        /// </summary>
+        public ArtworkManager Artwork { get; }
+
+        /// <summary>
         /// アルバム名の比較を行うComparer
         /// </summary>
         public static readonly StringComparer AlbumNameComparer = StringComparer.CurrentCultureIgnoreCase;
@@ -57,11 +62,13 @@ namespace Gouter.Managers
         /// AlbumMangaerを生成する。
         /// </summary>
         /// <param name="database">DB情報</param>
-        public AlbumManager(Database database)
+        /// <param name="artwork">アートワーク</param>
+        public AlbumManager(Database database, ArtworkManager artwork)
         {
             this._database = database ?? throw new InvalidOperationException();
 
             this.Albums = new ConcurrentNotifiableCollection<AlbumInfo>();
+            this.Artwork = artwork;
 
             BindingOperations.EnableCollectionSynchronization(this.Albums, new object());
         }
@@ -70,10 +77,7 @@ namespace Gouter.Managers
         /// アルバムIDを生成する。
         /// </summary>
         /// <returns>新規アルバムID</returns>
-        public int GenerateId()
-        {
-            return ++this._albumLatestIdx;
-        }
+        public int GenerateId() => ++this._albumLatestIdx;
 
         /// <summary>
         /// アルバム情報を追加する。
@@ -101,8 +105,7 @@ namespace Gouter.Managers
             byte[]? artwork = null;
             if (artworkData?.Length > 0)
             {
-                using var image = Utils.ImageUtil.ShrinkImageData(artworkData, Utils.ImageUtil.AlbumArtworkMaxSize);
-                artwork = image.ToArray();
+                artwork = ImageUtil.ShrinkImageData(artworkData, ImageUtil.AlbumArtworkMaxSize);
             }
 
             var dbContext = this._database.Context;
@@ -120,11 +123,21 @@ namespace Gouter.Managers
 
             if (artwork?.Length > 0)
             {
-                var arwkMgr = App.Instance.ArtworkManager;
-                arwkMgr.Add(albumInfo, artwork);
+                this.Artwork.Add(albumInfo, artwork);
             }
 
             this.AddImpl(albumInfo);
+        }
+
+        /// <summary>
+        /// アルバムキーからアルバム情報を取得する。
+        /// </summary>
+        /// <param name="albumKey"></param>
+        /// <param name="albumInfo"></param>
+        /// <returns></returns>
+        internal bool TryGetFromKey(string albumKey, out AlbumInfo albumInfo)
+        {
+            return this._albumKeyMap.TryGetValue(albumKey, out albumInfo);
         }
 
         /// <summary>
@@ -134,14 +147,14 @@ namespace Gouter.Managers
         /// <returns>アルバム情報</returns>
         public AlbumInfo GetOrAddAlbum(Track track)
         {
-            var albumKey = track.GenerateAlbumKey();
+            var albumKey = track.GetAlbumKey();
 
             if (this._albumKeyMap.TryGetValue(albumKey, out var albumInfo))
             {
                 return albumInfo;
             }
 
-            var artwork = track.GetArtworkData();
+            byte[] artwork = track.GetArtworkData();
             string artworkId;
 
             if (artwork?.Length > 0)

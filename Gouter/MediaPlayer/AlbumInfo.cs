@@ -123,8 +123,8 @@ namespace Gouter
                     }
                     else
                     {
-                        var awk = App.Instance.ArtworkManager;
-                        var stream = awk.GetStream(this);
+                        var awkMgr = App.Instance.MediaManager.Artwork;
+                        var stream = awkMgr.GetStream(this);
 
                         artwork = stream == null
                             ? ImageUtil.GetMissingAlbumImage()
