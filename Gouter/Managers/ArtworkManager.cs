@@ -1,13 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading;
 
 namespace Gouter.Managers
 {
     internal class ArtworkManager
     {
         private string _dirPath;
+
+        private object _lockObj = new();
+        private Dictionary<string, WeakReference<byte[]>> _artworkReferences = new();
 
         public ArtworkManager(string path)
         {
@@ -30,25 +32,48 @@ namespace Gouter.Managers
 
         public byte[] GetBytes(AlbumInfo album)
         {
-            var path = this.GetPath(album);
+            lock (this._lockObj)
+            {
+                var path = this.GetPath(album);
+                var albumId = album.ArtworkId;
 
-            try
-            {
-                return File.ReadAllBytes(path);
-            }
-            catch (FileNotFoundException)
-            {
-                return null;
+                try
+                {
+                    byte[] data;
+                    WeakReference<byte[]> weakReference = null;
+
+                    if (this._artworkReferences.TryGetValue(albumId, out weakReference)
+                        && weakReference.TryGetTarget(out data))
+                    {
+                        return data;
+                    }
+
+                    data = File.ReadAllBytes(path);
+
+                    if (weakReference == null)
+                    {
+                        weakReference = new WeakReference<byte[]>(data);
+                        this._artworkReferences.Add(albumId, weakReference);
+                    }
+                    else
+                    {
+                        weakReference.SetTarget(data);
+                    }
+
+                    return data;
+                }
+                catch (FileNotFoundException)
+                {
+                    return null;
+                }
             }
         }
 
         public Stream GetStream(AlbumInfo album)
         {
-            var path = this.GetPath(album);
-
             try
             {
-                return File.OpenRead(path);
+                return new MemoryStream(this.GetBytes(album));
             }
             catch (FileNotFoundException)
             {

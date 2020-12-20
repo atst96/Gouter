@@ -82,7 +82,14 @@ namespace Gouter.Utils
         /// <returns><see cref="BitmapImage"/></returns>
         public static BitmapSource BitmapSourceFromStream(Stream stream)
         {
-            return BitmapFrame.Create(stream, BitmapCreateOptions.None, BitmapCacheOption.OnDemand);
+            var bitmap = BitmapFrame.Create(stream, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
+
+            if (bitmap.CanFreeze)
+            {
+                bitmap.Freeze();
+            }
+
+            return bitmap;
         }
 
         private static BitmapSource _missingAlbumImage;

@@ -1,10 +1,7 @@
 ﻿using ATL;
 using Gouter.DataModels;
 using Gouter.Utils;
-using Microsoft.VisualBasic;
 using System;
-using System.Linq;
-using System.Runtime.InteropServices;
 using System.Windows.Media;
 
 namespace Gouter
@@ -99,8 +96,6 @@ namespace Gouter
 
         private object @_lockObj = new object();
 
-        private WeakReference<ImageSource> _weakArtwork;
-
         /// <summary>
         /// アートワーク
         /// </summary>
@@ -108,39 +103,18 @@ namespace Gouter
         {
             get
             {
-                lock (this._lockObj)
+                if (!this._isArtworkFound)
                 {
-                    if (this._weakArtwork != null && this._weakArtwork.TryGetTarget(out var target))
-                    {
-                        return target;
-                    }
+                    return ImageUtil.GetMissingAlbumImage();
+                }
+                else
+                {
+                    var awkMgr = App.Instance.MediaManager.Artwork;
+                    using var stream = awkMgr.GetStream(this);
 
-                    ImageSource artwork;
-
-                    if (!this._isArtworkFound)
-                    {
-                        artwork = ImageUtil.GetMissingAlbumImage();
-                    }
-                    else
-                    {
-                        var awkMgr = App.Instance.MediaManager.Artwork;
-                        var stream = awkMgr.GetStream(this);
-
-                        artwork = stream == null
-                            ? ImageUtil.GetMissingAlbumImage()
-                            : ImageUtil.BitmapSourceFromStream(stream);
-                    }
-
-                    if (this._weakArtwork == null)
-                    {
-                        this._weakArtwork = new WeakReference<ImageSource>(artwork);
-                    }
-                    else
-                    {
-                        this._weakArtwork.SetTarget(artwork);
-                    }
-
-                    return artwork;
+                    return stream == null
+                        ? ImageUtil.GetMissingAlbumImage()
+                        : ImageUtil.BitmapSourceFromStream(stream);
                 }
             }
         }
