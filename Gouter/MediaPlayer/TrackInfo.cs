@@ -30,8 +30,6 @@ namespace Gouter
             this.Artist = track.Artist;
             this.Genre = track.Genre;
             this.AlbumInfo = albumInfo;
-            // HACK: ここでAddしない
-            this.AlbumInfo.Playlist.Tracks.Add(this);
             this.RegisteredAt = DateTimeOffset.Now;
             this.UpdatedAt = this.RegisteredAt;
         }
@@ -51,12 +49,7 @@ namespace Gouter
             this.Title = dbItem.Title;
             this.Artist = dbItem.Artist;
             this.Genre = dbItem.Genre;
-
             this.AlbumInfo = albumInfo;
-
-            // HACK: ここでAddしない
-            this.AlbumInfo.Playlist.Tracks.Add(this);
-
             this.RegisteredAt = dbItem.CreatedAt;
             this.UpdatedAt = dbItem.UpdatedAt;
         }

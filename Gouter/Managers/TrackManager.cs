@@ -1,20 +1,11 @@
 ﻿using ATL;
-using Gouter.Data;
 using Gouter.DataModels;
-using Gouter.Extensions;
 using Gouter.Utils;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Data;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Data;
 
 namespace Gouter.Managers
 {
@@ -23,49 +14,62 @@ namespace Gouter.Managers
     /// </summary>
     internal class TrackManager
     {
-        /// <summary>データベース</summary>
+        /// <summary>
+        /// データベース
+        /// </summary>
         private readonly Database _database;
 
-        /// <summary>トラックの最終ID</summary>
-        private volatile int _latestTrackIdx = -1;
+        /// <summary>
+        /// トラックの最終ID
+        /// </summary>
+        private volatile int _latestTrackId = -1;
 
-        /// <summary>トラックIDとトラック情報が対応したマップ</summary>
-        private readonly IDictionary<int, TrackInfo> _trackIdMap;
+        /// <summary>
+        /// トラックIDリスト
+        /// </summary>
+        private readonly HashSet<int> _registeredTrackIds = new();
 
-        /// <summary>トラック一覧</summary>
-        public ConcurrentNotifiableCollection<TrackInfo> Tracks { get; }
+        /// <summary>
+        /// トラック情報リスト(内部用)
+        /// </summary>
+        private readonly List<TrackInfo> _registeredTracks = new();
 
-        /// <summary>TrackManagerを生成する</summary>
+        /// <summary>
+        /// トラック情報リスト
+        /// </summary>
+        public IReadOnlyList<TrackInfo> Tracks => this._registeredTracks;
+
+        /// <summary>
+        /// TrackManagerを生成する。
+        /// </summary>
         /// <param name="database">データベース</param>
         public TrackManager(Database database)
         {
             this._database = database ?? throw new InvalidOperationException();
-
-            this._trackIdMap = new Dictionary<int, TrackInfo>();
-            this.Tracks = new ConcurrentNotifiableCollection<TrackInfo>();
-
-            BindingOperations.EnableCollectionSynchronization(this.Tracks, new object());
         }
 
         /// <summary>
         /// トラックIDを生成する
         /// </summary>
         /// <returns>新しいトラックID</returns>
-        public int GenerateId() => ++this._latestTrackIdx;
+        public int GenerateId()
+        {
+            return ++this._latestTrackId;
+        }
 
         /// <summary>
         /// トラック情報を登録する。
         /// </summary>
         /// <param name="trackInfo">トラック情報</param>
-        private void AddImpl(TrackInfo trackInfo)
+        private void AddInternal(TrackInfo trackInfo)
         {
-            if (this._trackIdMap.ContainsKey(trackInfo.Id))
+            if (this._registeredTrackIds.Contains(trackInfo.Id))
             {
                 throw new InvalidOperationException("トラックIDが重複しています。");
             }
 
-            this._trackIdMap.Add(trackInfo.Id, trackInfo);
-            this.Tracks.Add(trackInfo);
+            this._registeredTrackIds.Add(trackInfo.Id);
+            this._registeredTracks.Add(trackInfo);
         }
 
         /// <summary>
@@ -93,7 +97,7 @@ namespace Gouter.Managers
                 UpdatedAt = trackInfo.UpdatedAt,
             });
 
-            this.AddImpl(trackInfo);
+            this.AddInternal(trackInfo);
 
             return trackInfo;
         }
@@ -102,19 +106,16 @@ namespace Gouter.Managers
         /// トラック情報を登録する。
         /// </summary>
         /// <param name="trackInfo">トラック情報</param>
-        private void AddImpl(IEnumerable<TrackInfo> tracks)
+        private void AddInternal(IEnumerable<TrackInfo> tracks)
         {
-            foreach (var track in tracks)
+            var trackIds = tracks.Select(t => t.Id);
+            if (trackIds.Any(this._registeredTrackIds.Contains))
             {
-                if (this._trackIdMap.ContainsKey(track.Id))
-                {
-                    throw new InvalidOperationException("トラックIDが重複しています。");
-                }
-
-                this._trackIdMap.Add(track.Id, track);
+                throw new InvalidOperationException("トラックIDが重複しています。");
             }
 
-            this.Tracks.AddRange(tracks);
+            this._registeredTrackIds.UnionWith(trackIds);
+            this._registeredTracks.AddRange(tracks);
         }
 
         /// <summary>
@@ -141,10 +142,10 @@ namespace Gouter.Managers
                 UpdatedAt = track.UpdatedAt,
             });
 
+            this.AddInternal(tracks);
+
             var dbContext = this._database.Context;
             dbContext.Tracks.InsertBulk(tracksData);
-
-            this.AddImpl(tracks);
         }
 
         /// <summary>
@@ -160,7 +161,7 @@ namespace Gouter.Managers
             IReadOnlyCollection<string> excludeFilePaths)
         {
             // 登録済みファイル
-            var registeredFilePaths = this.Tracks.Select(t => t.Path);
+            var registeredFilePaths = this._registeredTracks.Select(t => t.Path);
 
             var findDirs = PathUtil.ExcludeSubDirectories(musicDirectories);
             var excludeDirs = PathUtil.ExcludeSubDirectories(excludeDirectories);
@@ -175,9 +176,9 @@ namespace Gouter.Managers
                 .Where(path =>
                         PathUtil.IsSupportedMediaExtension(path)
                         && !PathUtil.IsContains(path, excludeDirs))
-                .ToList();
+                .ToArray();
 
-            var tracks = new List<Track>(unregisteredFiles.Count);
+            var tracks = new List<Track>(unregisteredFiles.Length);
 
             foreach (var path in unregisteredFiles)
             {
@@ -194,28 +195,32 @@ namespace Gouter.Managers
             return tracks;
         }
 
-        /// <summary>データベースから読み込む</summary>
+        /// <summary>
+        /// トラックリストをデータベースから読み込む。
+        /// </summary>
         /// <param name="albumManager"></param>
         public void LoadLibrary(AlbumManager albumManager)
         {
-            if (this.Tracks.Count > 0)
+            if (this._registeredTracks.Count > 0)
             {
                 // トラック情報が1件でも登録されている場合は操作を受け付けない
                 throw new InvalidOperationException();
             }
 
-            var dbContext = this._database.Context;
-            var results = dbContext.Tracks;
+            var tracksByAlbumId = this._database.Context.Tracks.GroupBy(key => key.AlbumId);
 
-            foreach (var result in results)
+            foreach (var trackGroup in tracksByAlbumId)
             {
-                var trackInfo = new TrackInfo(result, albumManager.FromId(result.AlbumId));
-                this.AddImpl(trackInfo);
+                var album = albumManager.FromId(trackGroup.Key);
+                var tracks = trackGroup.Select(t => new TrackInfo(t, album)).ToArray();
+
+                this.AddInternal(tracks);
+                album.Playlist.Tracks.AddRange(tracks);
             }
 
-            if (this.Tracks.Count > 0)
+            if (this._registeredTracks.Count > 0)
             {
-                this._latestTrackIdx = this.Tracks.Max(t => t.Id);
+                this._latestTrackId = this._registeredTrackIds.Max();
             }
         }
     }

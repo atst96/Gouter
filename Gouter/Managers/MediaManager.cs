@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Controls;
 using ATL;
 using Gouter.Data;
 
@@ -140,7 +140,7 @@ namespace Gouter.Managers
 
                     if (!this.Albums.TryGetFromKey(albumKey, out albumInfo))
                     {
-                        // トラック情報が見つからない場合は登録する
+                        // 新規トラックを登録する
 
                         // 1トラック目のアルバム
                         var firstTrack = albumTracks
@@ -149,18 +149,17 @@ namespace Gouter.Managers
                         albumInfo = this.Albums.GetOrAddAlbum(firstTrack);
                     }
 
-                    var tracks = albumTracks.Select(t => new TrackInfo(this.Tracks.GenerateId(), t, albumInfo)).ToArray();
+                    var tracks = albumTracks.Select(t => new TrackInfo(this.Tracks.GenerateId(), t, albumInfo)).ToImmutableList();
                     this.Tracks.Add(tracks);
+                    albumInfo.Playlist.Tracks.AddRange(tracks);
 
-                    foreach (var track in tracks)
+                    count += tracks.Count;
+                    progress?.Report(new TrackInsertProgress
                     {
-                        progress?.Report(new TrackInsertProgress
-                        {
-                            CurrentCount = ++count,
-                            MaxCount = maxCount,
-                            Track = track,
-                        });
-                    }
+                        CurrentCount = count,
+                        MaxCount = maxCount,
+                        Track = null,
+                    });
                 }
 
                 transaction.Commit();
