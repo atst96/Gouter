@@ -31,7 +31,7 @@ namespace Gouter.Extensions
         }
 
         /// <summary>
-        /// 指定型の子要素を列挙する
+        /// 指定型の子要素を列挙する。
         /// </summary>
         /// <typeparam name="T">子要素の型</typeparam>
         /// <param name="object">要素</param>

@@ -1,7 +1,5 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Windows.Data;
-using Gouter.Commands.MainWindow;
 using Gouter.Components.Mvvm;
 
 namespace Gouter.ViewModels

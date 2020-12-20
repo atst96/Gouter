@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Gouter.Extensions
 {
@@ -11,7 +7,9 @@ namespace Gouter.Extensions
     /// </summary>
     internal static class Extension
     {
-        /// <summary>IEnumerable<T>から要素のインデックスを取得する</summary>
+        /// <summary>
+        /// IEnumerable<T>から要素のインデックスを取得する。
+        /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="collection">コレクション</param>
         /// <param name="value">探索する要素</param>
@@ -21,7 +19,9 @@ namespace Gouter.Extensions
             return IndexOf(collection, value, EqualityComparer<T>.Default);
         }
 
-        /// <summary>IEnumerable<T>から要素のインデックスを取得する</summary>
+        /// <summary>
+        /// IEnumerable<T>から要素のインデックスを取得する。
+        /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="collection">コレクション</param>
         /// <param name="value">探索する要素</param>
@@ -44,7 +44,9 @@ namespace Gouter.Extensions
             return -1;
         }
 
-        /// <summary>LinkedList<T>から指定ノード以降のノードを削除する</summary>
+        /// <summary>
+        /// LinkedList<T>から指定ノード以降のノードを削除する。
+        /// </summary>
         /// <typeparam name="T">型</typeparam>
         /// <param name="linkedList">LinkedList<T></param>
         /// <param name="currentNode">現在のノード</param>

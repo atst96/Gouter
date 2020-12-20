@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ATL;
+﻿using ATL;
 
 namespace Gouter
 {
@@ -12,7 +9,9 @@ namespace Gouter
     {
         public const string AdditionalFields_Compilation = "cpil";
 
-        /// <summary>トラック情報からアルバムキーを生成する</summary>
+        /// <summary>
+        /// トラック情報からアルバムキーを生成する。
+        /// </summary>
         /// <param name="track">トラック情報</param>
         /// <returns>アルバムキー</returns>
         public static string GetAlbumKey(this Track track)
@@ -23,7 +22,9 @@ namespace Gouter
             return $"--#name={{{albumName}}};\n--#artist={{{albumArtist}}};";
         }
 
-        /// <summary>コンピレーションアルバムかどうかを取得する</summary>
+        /// <summary>
+        /// コンピレーションアルバムかどうかを取得する。
+        /// </summary>
         /// <param name="track">トラック情報</param>
         /// <returns>コンピレーションアルバムか否か</returns>
         public static bool GetIsCompiatilnAlbum(this Track track)
@@ -32,7 +33,9 @@ namespace Gouter
                 && isCompilation == "1";
         }
 
-        /// <summary>トラック情報からアルバムアーティストを取得する</summary>
+        /// <summary>
+        /// トラック情報からアルバムアーティストを取得する。
+        /// </summary>
         /// <param name="track">トラック情報</param>
         /// <param name="unknownValue">不明の戻り値</param>
         /// <param name="compilationValue">コンピレーションアルバム時の戻り値</param>

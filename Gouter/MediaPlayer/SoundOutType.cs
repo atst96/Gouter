@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.Serialization;
-using System.Text;
+﻿using System.Runtime.Serialization;
 
 namespace Gouter
 {
@@ -10,16 +7,29 @@ namespace Gouter
     /// </summary>
     internal enum SoundOutType : ushort
     {
+        /// <summary>
+        /// DirectSound
+        /// </summary>
         [EnumMember(Value = "directsound")]
-        /// <summary>DirectSound</summary>
         DirectSound = 0,
 
+        /// <summary>
+        /// WASAPI (共有)
+        /// </summary>
         [EnumMember(Value = "wasapi_shared")]
-        /// <summary>WASAPI (共有)</summary>
         Wasapi_Shraed = 1,
 
+        /// <summary>
+        /// WASAPI (専有)
+        /// </summary>
         [EnumMember(Value = "wasapi_exlusive")]
-        /// <summary>WASAPI (専有)</summary>
         Wasapi_Exclusive = 2,
+
+        // TODO: 非対応
+        ///// <summary>
+        ///// ASIO
+        ///// </summary>
+        //[EnumMember(Value = "asio")]
+        //ASIO,
     }
 }

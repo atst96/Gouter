@@ -1,10 +1,6 @@
 ﻿using ATL;
 using Gouter.DataModels;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Gouter
 {
@@ -13,7 +9,9 @@ namespace Gouter
     /// </summary>
     internal class TrackInfo : NotificationObject
     {
-        /// <summary>トラック情報を生成する</summary>
+        /// <summary>
+        /// トラック情報を生成する。
+        /// </summary>
         /// <param name="trackId">トラックID</param>
         /// <param name="track">トラック情報</param>
         /// <param name="albumInfo">アルバム情報</param>
@@ -34,7 +32,9 @@ namespace Gouter
             this.UpdatedAt = this.RegisteredAt;
         }
 
-        /// <summary>データベースからトラック情報を生成する</summary>
+        /// <summary>
+        /// データベースからトラック情報を生成する。
+        /// </summary>
         /// <param name="dbItem">トラック情報</param>
         /// <param name="albumInfo">アルバム情報</param>
         public TrackInfo(TrackDataModel dbItem, AlbumInfo albumInfo)
@@ -54,49 +54,79 @@ namespace Gouter
             this.UpdatedAt = dbItem.UpdatedAt;
         }
 
-        /// <summary>アルバム情報</summary>
+        /// <summary>
+        /// アルバム情報
+        /// </summary>
         public AlbumInfo AlbumInfo { get; private set; }
 
-        /// <summary>トラックID</summary>
+        /// <summary>
+        /// トラックID
+        /// </summary>
         public int Id { get; private set; }
 
-        /// <summary>ファイルパス</summary>
+        /// <summary>
+        /// ファイルパス
+        /// </summary>
         public string Path { get; private set; }
 
-        /// <summary>尺</summary>
+        /// <summary>
+        /// 楽曲の長さ(尺)
+        /// </summary>
         public TimeSpan Duration { get; private set; }
 
-        /// <summary>ディスク番号</summary>
+        /// <summary>
+        /// ディスク番号
+        /// </summary>
         public int DiskNumber { get; private set; }
 
-        /// <summary>トラック番号</summary>
+        /// <summary>
+        /// トラック番号
+        /// </summary>
         public int TrackNumber { get; private set; }
 
-        /// <summary>発売年</summary>
+        /// <summary>
+        /// 年
+        /// </summary>
         public int Year { get; private set; }
 
-        /// <summary>アルバムアーティスト</summary>
+        /// <summary>
+        /// アルバムアーティスト
+        /// </summary>
         public string AlbumArtist { get; private set; }
 
-        /// <summary>タイトル</summary>
+        /// <summary>
+        /// タイトル
+        /// </summary>
         public string Title { get; private set; }
 
-        /// <summary>アーティスト名</summary>
+        /// <summary>
+        /// アーティスト名
+        /// </summary>
         public string Artist { get; private set; }
 
-        /// <summary>ジャンル</summary>
+        /// <summary>
+        /// ジャンル
+        /// </summary>
         public string Genre { get; private set; }
 
-        /// <summary>トラック情報の登録日</summary>
+        /// <summary>
+        /// トラックの登録日時
+        /// </summary>
         public DateTimeOffset RegisteredAt { get; }
         
-        /// <summary>トラック情報の更新日</summary>
+        /// <summary>
+        /// トラックの更新日時
+        /// </summary>
         public DateTimeOffset UpdatedAt { get; private set; }
 
-        /// <summary>再生中かどうかを取得する</summary>
+        /// <summary>
+        /// 再生中かどうかを取得する
+        /// </summary>
         public bool IsPlaying { get; private set; }
 
-        /// <summary>トラックの再生状態を設定する</summary>
+        /// <summary>
+        /// トラックの再生状態を設定する。
+        /// </summary>
         /// <param name="isPlaying">再生状態</param>
         public void SetPlayState(bool isPlaying)
         {

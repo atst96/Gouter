@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using CSCore.CoreAudioAPI;
 
 namespace Gouter
@@ -12,29 +10,43 @@ namespace Gouter
     {
         private MMDevice _device;
         
-        /// <summary>デバイスID</summary>
+        /// <summary>
+        /// デバイスID
+        /// </summary>
         public string Id { get; }
 
-        /// <summary>システムのデフォルトデバイスか否か</summary>
+        /// <summary>
+        /// システムのデフォルトデバイスか否か
+        /// </summary>
         public bool IsDefaultDevice { get; } = false;
 
-        /// <summary>表示名</summary>
+        /// <summary>
+        /// 表示名
+        /// </summary>
         public string Name => this._device.FriendlyName;
 
-        /// <summary>チャンネル数</summary>
+        /// <summary>
+        /// チャンネル数
+        /// </summary>
         public int Channels => this._device.DeviceFormat.Channels;
 
-        /// <summary>サンプリングレート</summary>
+        /// <summary>
+        /// サンプリングレート
+        /// </summary>
         public int SampleRate => this._device.DeviceFormat.SampleRate;
 
-        /// <summary>コンストラクタ</summary>
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         /// <param name="device">デバイス情報</param>
         public SoundDeviceInfo(MMDevice device)
             : this(device, false)
         {
         }
 
-        /// <summary>コンストラクタ</summary>
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         /// <param name="device">デバイス情報</param>
         /// <param name="isDefaultDevice">システムのデフォルトデバイスか否か</param>
         public SoundDeviceInfo(MMDevice device, bool isDefaultDevice = false)
@@ -44,7 +56,9 @@ namespace Gouter
             this.Update(device);
         }
 
-        /// <summary>デバイス情報を更新する</summary>
+        /// <summary>
+        /// デバイス情報を更新する。
+        /// </summary>
         /// <param name="device">デバイス情報</param>
         internal void Update(MMDevice device)
         {
@@ -58,7 +72,9 @@ namespace Gouter
             this.RaisePropertyChanged(nameof(this.Name));
         }
 
-        /// <summary>デバイス情報を取得する</summary>
+        /// <summary>
+        /// デバイス情報を取得する。
+        /// </summary>
         /// <returns>デバイス情報</returns>
         public MMDevice GetDevice() => this._device;
     }

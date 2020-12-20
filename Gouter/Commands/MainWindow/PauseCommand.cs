@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Gouter.ViewModels;
+﻿using Gouter.ViewModels;
 
 namespace Gouter.Commands.MainWindow
 {

@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Gouter.Extensions
 {
@@ -11,7 +8,9 @@ namespace Gouter.Extensions
     /// </summary>
     internal static class ExceptionExtension
     {
-        /// <summary>例外からメッセージを生成する</summary>
+        /// <summary>
+        /// 例外からメッセージを生成する
+        /// </summary>
         /// <param name="exception">例外オブジェクト</param>
         /// <returns></returns>
         public static string GetMessage(this Exception exception)

@@ -3,8 +3,6 @@
  * https://github.com/filoe/cscore/blob/af1792ea680743c5172ece4727e2b331012e99de/CSCore/Streams/LinearFadeStrategy.cs
  */
 using System;
-using System.Runtime.CompilerServices;
-using System.Windows.Documents;
 using CSCore.Streams;
 
 namespace Gouter.AudioFilters
