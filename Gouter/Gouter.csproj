@@ -55,4 +55,5 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
+  <Import Project="..\Gouter.Shared\Gouter.Shared.projitems" Label="Shared" />
 </Project>
