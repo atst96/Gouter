@@ -60,7 +60,7 @@
             Grid.Row="0"
             BorderThickness="0,0,0,1"
             BorderBrush="{StaticResource ToolBar.Static.BorderBrush}"
-            Background="{StaticResource ToolBar.Static.Background}">
+            Background="#EAEAEA">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -70,49 +70,71 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <StackPanel
+                <Grid
                     Margin="18,0"
-                    Grid.Column="0"
-                    Orientation="Horizontal">
-                    <Button
-                        Margin="3" Padding="6"
+                    Grid.Column="0" Width="120">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <controls:CornerButton
+                        Grid.Column="0"
+                        Padding="0,0,12,0"
+                        Width="48" Height="28"
+                        CornerRadius="3,0,0,3"
                         VerticalAlignment="Center"
-                        Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
+                        HorizontalAlignment="Left"
+                        Style="{StaticResource PlayControlButtonStyle}"
                         Command="{Binding PreviousTrackCommand, Mode=OneTime}">
                         <app:GeometryIcon
-                            Width="20" Height="20"
+                            Width="20" Height="14"
                             Data="{StaticResource MaterialIcons.FastRewind}" />
-                    </Button>
-                    <Button
-                        Padding="12"
+                    </controls:CornerButton>
+                    <controls:CornerButton
+                        Grid.Column="1"
+                        Padding="12,0,0,0"
+                        Width="48" Height="28"
+                        CornerRadius="0,3,3,0"
                         VerticalAlignment="Center"
-                        Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
+                        HorizontalAlignment="Right"
+                        Style="{StaticResource PlayControlButtonStyle}"
+                        Command="{Binding NextTrackCommand, Mode=OneTime}">
+                        <app:GeometryIcon
+                            Width="20" Height="20"
+                            Data="{StaticResource MaterialIcons.FastForward}" />
+                    </controls:CornerButton>
+                    <controls:CornerButton
+                        Grid.ColumnSpan="2"
+                        Width="52" Height="52"
+                        Padding="5,0,0,0"
+                        CornerRadius="26"
+                        Style="{StaticResource PlayControlButtonStyle}"
+                        VerticalAlignment="Center"
                         Command="{Binding PlayCommand, Mode=OneTime}"
                         b:ElementBehavior.IsCollapse="{Binding Player.IsPlaying, Mode=OneWay}">
                         <app:GeometryIcon
-                            Width="24" Height="24"
+                            Width="19" Height="24"
                             Data="{StaticResource MaterialIcons.PlayArrow}" />
-                    </Button>
-                    <Button
-                        Padding="12"
+                        <controls:CornerButton.Effect>
+                            <DropShadowEffect Direction="270" ShadowDepth="3" Opacity="0.1" BlurRadius="8" />
+                        </controls:CornerButton.Effect>
+                    </controls:CornerButton>
+                    <controls:CornerButton
+                        Grid.ColumnSpan="2"
+                        Width="52" Height="52"
+                        CornerRadius="26"
+                        Style="{StaticResource PlayControlButtonStyle}"
                         VerticalAlignment="Center"
-                        Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
                         Command="{Binding PauseCommand, Mode=OneTime}"
                         b:ElementBehavior.Visible="{Binding Player.IsPlaying, Mode=OneWay}">
                         <app:GeometryIcon
                             Width="24" Height="24"
                             Data="{StaticResource MaterialIcons.Pause}" />
-                    </Button>
-                    <Button
-                        Margin="3" Padding="6"
-                        VerticalAlignment="Center"
-                        Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}"
-                        Command="{Binding NextTrackCommand, Mode=OneTime}">
-                        <app:GeometryIcon
-                            Width="20" Height="20"
-                            Data="{StaticResource MaterialIcons.FastForward}" />
-                    </Button>
-                </StackPanel>
+                        <controls:CornerButton.Effect>
+                            <DropShadowEffect Direction="270" ShadowDepth="3" Opacity="0.1" BlurRadius="8" />
+                        </controls:CornerButton.Effect>
+                    </controls:CornerButton>
+                </Grid>
 
                 <StackPanel
                     Grid.Column="1"
@@ -330,6 +352,8 @@
                 </i:Interaction.Triggers>
                 <i:Interaction.Behaviors>
                     <b:HorizontalScrollBehavior />
+                    <b:ScrollBehavior 
+                        HorizontalPosition="{Binding HorizontalOffset, Mode=TwoWay}" />
                 </i:Interaction.Behaviors>
                 <ListBox.ItemsPanel>
                     <ItemsPanelTemplate>

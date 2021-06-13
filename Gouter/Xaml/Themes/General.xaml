@@ -1,13 +1,14 @@
 ﻿<ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2">
+    xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2"
+    xmlns:ctrl="clr-namespace:Gouter.Controls">
 
     <Color x:Key="AccentColor">#07c</Color>
     <SolidColorBrush x:Key="AccentColorBrush" Color="#07c" />
 
     <SolidColorBrush x:Key="DisabledForeground" Color="#666" />
-    
+
     <SolidColorBrush x:Key="InputBox.Static.Border" Color="#FFABABAB"/>
     <SolidColorBrush x:Key="InputBox.MouseOver.Border" Color="#FF898989"/>
     <SolidColorBrush x:Key="InputBox.Focus.Border" Color="#07C"/>
@@ -2476,6 +2477,132 @@
     </Style>
 
     <!--#endregion Slider style -->
+
+    <Style x:Key="PlayControlButtonStyle" TargetType="ctrl:CornerButton">
+        <Setter Property="Foreground" Value="#7C7C7C" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ctrl:CornerButton">
+                    <ControlTemplate.Resources>
+                        <Duration x:Key="BeginAnimateDuration">0:0:0.03</Duration>
+                        <Duration x:Key="EndAnimateDuration">0:0:0.2</Duration>
+
+                        <Storyboard x:Key="RestoreStoryboard" FillBehavior="HoldEnd">
+                            <ColorAnimation
+                                Storyboard.TargetName="border"
+                                Storyboard.TargetProperty="BorderBrush.Color"
+                                Duration="{StaticResource EndAnimateDuration}" />
+                            <ColorAnimation
+                                Storyboard.TargetName="border"
+                                Storyboard.TargetProperty="Background.Color"
+                                Duration="{StaticResource EndAnimateDuration}" />
+                            <ColorAnimation
+                                Storyboard.TargetProperty="Foreground.Color"
+                                Duration="{StaticResource EndAnimateDuration}" />
+                        </Storyboard>
+                    </ControlTemplate.Resources>
+
+                    <Border
+                        x:Name="border"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        Padding="{TemplateBinding Padding}"
+                        Background="#F8F8F8"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        BorderBrush="#E3E3E3">
+                        <ContentPresenter
+                            x:Name="content"
+                            TextElement.Foreground="#7C7C7C"
+                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}" />
+                    </Border>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard FillBehavior="HoldEnd">
+                                        <ColorAnimation
+                                            Storyboard.TargetName="border"
+                                            Storyboard.TargetProperty="BorderBrush.Color"
+                                            To="#D4D4D4"
+                                            Duration="{StaticResource BeginAnimateDuration}" />
+                                        <ColorAnimation
+                                            Storyboard.TargetName="border"
+                                            Storyboard.TargetProperty="Background.Color"
+                                            To="#EEEEEE"
+                                            Duration="{StaticResource BeginAnimateDuration}" />
+                                        <ColorAnimation
+                                            Storyboard.TargetProperty="Foreground.Color"
+                                            To="#767474"
+                                            Duration="{StaticResource BeginAnimateDuration}" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard Storyboard="{StaticResource RestoreStoryboard}" />
+                            </Trigger.ExitActions>
+                        </Trigger>
+
+                        <Trigger Property="IsPressed" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard FillBehavior="HoldEnd">
+                                        <ColorAnimation
+                                            Storyboard.TargetName="border"
+                                            Storyboard.TargetProperty="BorderBrush.Color"
+                                            To="#AAAAAA"
+                                            Duration="{StaticResource BeginAnimateDuration}" />
+                                        <ColorAnimation
+                                            Storyboard.TargetName="border"
+                                            Storyboard.TargetProperty="Background.Color"
+                                            To="#D8D8D8"
+                                            Duration="{StaticResource BeginAnimateDuration}" />
+                                        <ColorAnimation
+                                            Storyboard.TargetProperty="Foreground.Color"
+                                            To="#767474"
+                                            Duration="{StaticResource BeginAnimateDuration}" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard Storyboard="{StaticResource RestoreStoryboard}" />
+                            </Trigger.ExitActions>
+                        </Trigger>
+
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard FillBehavior="HoldEnd">
+                                        <ColorAnimation
+                                            Storyboard.TargetName="border"
+                                            Storyboard.TargetProperty="BorderBrush.Color"
+                                            To="#E0E0E0"
+                                            Duration="{StaticResource BeginAnimateDuration}" />
+                                        <ColorAnimation
+                                            Storyboard.TargetName="border"
+                                            Storyboard.TargetProperty="Background.Color"
+                                            To="#F4F3F3"
+                                            Duration="{StaticResource BeginAnimateDuration}" />
+                                        <ColorAnimation
+                                            Storyboard.TargetProperty="Foreground.Color"
+                                            To="#C4C4C4"
+                                            Duration="{StaticResource BeginAnimateDuration}" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard Storyboard="{StaticResource RestoreStoryboard}" />
+                            </Trigger.ExitActions>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 
 
 </ResourceDictionary>
