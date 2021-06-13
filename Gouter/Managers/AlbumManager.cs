@@ -187,7 +187,7 @@ namespace Gouter.Managers
         /// <summary>
         /// データベースからアルバム情報をロードする。
         /// </summary>
-        public void LoadLibrary()
+        public void Load()
         {
             if (this.Albums.Count > 0)
             {
@@ -196,16 +196,21 @@ namespace Gouter.Managers
             }
 
             var dbContext = this._database.Context;
-            var albums = dbContext.Albums;
+            var albums = dbContext.Albums.ToArray();
             var artworksByAlbumId = dbContext.AlbumArtworks.ToDictionary(aw => aw.AlbumId);
 
+            var registeredAlbums = new List<AlbumInfo>(albums.Length);
             foreach (var album in albums)
             {
                 var artwork = artworksByAlbumId.TryGetValue(album.Id, out var aw) ? aw : default;
-
                 var albumInfo = new AlbumInfo(album, artwork);
-                this.AddImpl(albumInfo);
+
+                this._albumIdMap.Add(albumInfo.Id, albumInfo);
+                this._albumKeyMap.Add(albumInfo.Key, albumInfo);
+                registeredAlbums.Add(albumInfo);
             }
+
+            this.Albums.AddRange(registeredAlbums);
 
             if (this.Albums.Count > 0)
             {

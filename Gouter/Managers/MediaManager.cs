@@ -99,8 +99,9 @@ namespace Gouter.Managers
         /// <returns></returns>
         public Task LoadLibrary() => Task.Run(() =>
         {
-            this.Albums.LoadLibrary();
-            this.Tracks.LoadLibrary(this.Albums);
+            this.Albums.Load();
+            this.Tracks.Load(this.Albums);
+            this.Playlists.Load();
         });
 
         /// <summary>

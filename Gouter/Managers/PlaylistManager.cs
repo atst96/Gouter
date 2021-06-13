@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace Gouter.Managers
 {
@@ -52,6 +53,14 @@ namespace Gouter.Managers
         private void OnRemoved(object sender, AlbumInfo albumInfo)
         {
             this.Albums.Remove(albumInfo.Playlist);
+        }
+
+        /// <summary>
+        /// プレイリストを読み込む。
+        /// </summary>
+        internal void Load()
+        {
+            this.Albums.AddRange(this._albumManager.Albums.Select(a => a.Playlist));
         }
 
         /// <summary>

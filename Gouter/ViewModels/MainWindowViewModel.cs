@@ -43,6 +43,13 @@ namespace Gouter.ViewModels
             }
         }
 
+        private double _horizontalOffset;
+        public double HorizontalOffset
+        {
+            get => this._horizontalOffset;
+            set => this.SetProperty(ref this._horizontalOffset, value);
+        }
+
         public MainWindowViewModel() : base()
         {
             this.Albums = new SortedNotifiableCollectionWrapper<AlbumPlaylist>(this.Playlists.Albums, AlbumComparer.Instance);

@@ -199,7 +199,7 @@ namespace Gouter.Managers
         /// トラックリストをデータベースから読み込む。
         /// </summary>
         /// <param name="albumManager"></param>
-        public void LoadLibrary(AlbumManager albumManager)
+        public void Load(AlbumManager albumManager)
         {
             if (this._registeredTracks.Count > 0)
             {
