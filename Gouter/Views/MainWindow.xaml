@@ -104,35 +104,35 @@
                             Data="{StaticResource MaterialIcons.FastForward}" />
                     </controls:CornerButton>
                     <controls:CornerButton
+                        x:Name="PlayButton"
+                        Grid.Column="0"
                         Grid.ColumnSpan="2"
                         Width="52" Height="52"
-                        Padding="5,0,0,0"
                         CornerRadius="26"
-                        Style="{StaticResource PlayControlButtonStyle}"
                         VerticalAlignment="Center"
+                        Content="{Binding Mode=OneTime}"
                         Command="{Binding PlayCommand, Mode=OneTime}"
-                        b:ElementBehavior.IsCollapse="{Binding Player.IsPlaying, Mode=OneWay}">
-                        <app:GeometryIcon
-                            Width="19" Height="24"
-                            Data="{StaticResource MaterialIcons.PlayArrow}" />
+                        Style="{StaticResource PlayControlButtonStyle}">
                         <controls:CornerButton.Effect>
                             <DropShadowEffect Direction="270" ShadowDepth="3" Opacity="0.1" BlurRadius="8" />
                         </controls:CornerButton.Effect>
-                    </controls:CornerButton>
-                    <controls:CornerButton
-                        Grid.ColumnSpan="2"
-                        Width="52" Height="52"
-                        CornerRadius="26"
-                        Style="{StaticResource PlayControlButtonStyle}"
-                        VerticalAlignment="Center"
-                        Command="{Binding PauseCommand, Mode=OneTime}"
-                        b:ElementBehavior.Visible="{Binding Player.IsPlaying, Mode=OneWay}">
-                        <app:GeometryIcon
-                            Width="24" Height="24"
-                            Data="{StaticResource MaterialIcons.Pause}" />
-                        <controls:CornerButton.Effect>
-                            <DropShadowEffect Direction="270" ShadowDepth="3" Opacity="0.1" BlurRadius="8" />
-                        </controls:CornerButton.Effect>
+                        <controls:CornerButton.ContentTemplate>
+                            <DataTemplate DataType="vm:MainWindowViewModel">
+                                <Border x:Name="border" Padding="5,0,0,0">
+                                    <app:GeometryIcon
+                                        x:Name="icon"
+                                        Width="19" Height="24"
+                                        Data="{StaticResource MaterialIcons.PlayArrow}" />
+                                </Border>
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding  Player.IsPlaying, Mode=OneWay}" Value="True">
+                                        <Setter TargetName="border" Property="Padding" Value="0" />
+                                        <Setter TargetName="icon" Property="Width" Value="24" />
+                                        <Setter TargetName="icon" Property="Data" Value="{StaticResource MaterialIcons.Pause}" />
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </controls:CornerButton.ContentTemplate>
                     </controls:CornerButton>
                 </Grid>
 
@@ -400,7 +400,7 @@
                                         Source="{Binding Album.Artwork, Mode=OneWay, IsAsync=True}"/>
                                 </Border>
                             </Grid>
-                            
+
                             <TextBlock
                                 Grid.Row="1"
                                 TextTrimming="CharacterEllipsis"
