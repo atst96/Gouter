@@ -43,15 +43,17 @@ namespace Gouter.ViewModels
             }
         }
 
-        private double _horizontalOffset;
-        public double HorizontalOffset
+        private double _verticalOffset;
+        public double VerticalOffset
         {
-            get => this._horizontalOffset;
-            set => this.SetProperty(ref this._horizontalOffset, value);
+            get => this._verticalOffset;
+            set => this.SetProperty(ref this._verticalOffset, value);
         }
 
         public MainWindowViewModel() : base()
         {
+            _app.SettingSaving += OnSettingSaving;
+
             this.Albums = new SortedNotifiableCollectionWrapper<AlbumPlaylist>(this.Playlists.Albums, AlbumComparer.Instance);
 
             var player = this.Player;
@@ -62,6 +64,11 @@ namespace Gouter.ViewModels
             this._timer.Tick += this.OnTimerTick;
 
             BindingOperations.EnableCollectionSynchronization(this.Albums, new object());
+        }
+
+        private void OnSettingSaving(object? sender, ApplicationSetting e)
+        {
+            e.AlbumListScrollPosition = this.VerticalOffset;
         }
 
         private AlbumTrackViewModel _albumTracks;

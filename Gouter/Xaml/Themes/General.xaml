@@ -2306,7 +2306,7 @@
                         <MultiTrigger>
                             <MultiTrigger.Conditions>
                                 <Condition Property="ComputedVerticalScrollBarVisibility" Value="Visible" />
-                                <!--<Condition Property="ComputedHorizontalScrollBarVisibility" Value="Visible" />-->
+                                <Condition Property="ComputedHorizontalScrollBarVisibility" Value="Visible" />
                             </MultiTrigger.Conditions>
                             <Setter TargetName="ScrollHole" Property="Visibility" Value="Visible" />
                         </MultiTrigger>

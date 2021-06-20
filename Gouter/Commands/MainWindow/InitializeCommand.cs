@@ -63,6 +63,8 @@ namespace Gouter.Commands.MainWindow
                     }
                 }
             }
+
+            this._viewModel.VerticalOffset = App.Instance.Setting.AlbumListScrollPosition;
         }
     }
 }

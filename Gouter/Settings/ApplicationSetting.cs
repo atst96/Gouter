@@ -43,5 +43,11 @@ namespace Gouter
 
         [Key("player.last_playlist")]
         public int? LastPlaylistId { get; set; } = null;
+
+        /// <summary>
+        /// アルバムリストのスクロール位置
+        /// </summary>
+        [Key("interface.albums.scroll_position")]
+        public double AlbumListScrollPosition { get; set; } = 0.0d;
     }
 }

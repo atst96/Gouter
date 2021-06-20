@@ -22,6 +22,8 @@ namespace Gouter
 
         internal const string Version = "0.0.0.0";
 
+        public EventHandler<ApplicationSetting> SettingSaving;
+
         /// <summary>
         /// メディア管理
         /// </summary>
@@ -155,6 +157,8 @@ namespace Gouter
         /// <returns></returns>
         private Task SaveSettings()
         {
+            this.SettingSaving?.Invoke(this, this.Setting);
+
             var setting = this.Setting;
 
             var player = this.MediaPlayer;
