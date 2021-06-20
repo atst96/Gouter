@@ -140,7 +140,8 @@ namespace Gouter
         {
             var settingFilePath = this.GetLocalFilePath(Config.SettingFileName);
 
-            this.Setting = await MessagePackUtil.DeserializeFile<ApplicationSetting>(settingFilePath).ConfigureAwait(false);
+            this.Setting = await MessagePackUtil.DeserializeFile<ApplicationSetting>(settingFilePath)
+                .ConfigureAwait(false);
 
             if (this.Setting == null)
             {
@@ -199,6 +200,28 @@ namespace Gouter
             this.IsRequireSaveSettings = false;
             this.ShutdownMode = ShutdownMode.OnExplicitShutdown;
             this.Shutdown();
+        }
+
+        /// <summary>
+        /// メインビューの準備完了時
+        /// </summary>
+        internal void OnMainViewReady()
+        {
+            var settings = this.Setting;
+            var mediaManager = this.MediaManager;
+            var trackManager = mediaManager.Tracks;
+
+            // TODO: ファイル検索時の除外パスを指定できるようにする
+            var excludeFiles = Array.Empty<string>();
+
+            mediaManager.LoadLibrary()
+                .ContinueWith(t =>
+                {
+                    mediaManager.SearchAndRegisterNewTracks(
+                        settings.MusicDirectories,
+                        settings.ExcludeDirectories,
+                        excludeFiles);
+                }, TaskContinuationOptions.OnlyOnRanToCompletion);
         }
     }
 }

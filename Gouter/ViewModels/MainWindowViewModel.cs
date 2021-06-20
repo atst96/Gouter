@@ -114,9 +114,6 @@ namespace Gouter.ViewModels
         private Command _playCommand;
         public Command PlayCommand => this._playCommand ??= new PlayCommand(this);
 
-        private Command _pauseCommand;
-        public Command PauseCommand => this._pauseCommand ??= new PauseCommand(this);
-
         private Command _previousTrackCommand;
         public Command PreviousTrackCommand => this._previousTrackCommand ??= new PreviousTrackCommand(this);
 

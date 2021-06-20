@@ -165,20 +165,20 @@ namespace Gouter.Managers
 
             var findDirs = PathUtil.ExcludeSubDirectories(musicDirectories);
             var excludeDirs = PathUtil.ExcludeSubDirectories(excludeDirectories);
-            var excludePaths = excludeFilePaths ?? Array.Empty<string>();
+            var excludePaths = excludeFilePaths;
 
             // 未登録ファイルを列挙する
             var unregisteredFiles = findDirs
                 .SelectMany(path => PathUtil.GetFiles(path, true))
-                .Except(excludeFilePaths ?? Array.Empty<string>())
+                .Except(excludeFilePaths)
                 .Except(registeredFilePaths)
                 .AsParallel()
                 .Where(path =>
-                        PathUtil.IsSupportedMediaExtension(path)
-                        && !PathUtil.IsContains(path, excludeDirs))
-                .ToArray();
+                    PathUtil.IsSupportedMediaExtension(path)
+                    && !PathUtil.IsContains(path, excludeDirs))
+                .ToList();
 
-            var tracks = new List<Track>(unregisteredFiles.Length);
+            var tracks = new List<Track>(unregisteredFiles.Count);
 
             foreach (var path in unregisteredFiles)
             {

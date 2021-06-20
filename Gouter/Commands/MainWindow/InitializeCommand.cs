@@ -2,6 +2,8 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Controls;
+using System.Windows.Threading;
 
 namespace Gouter.Commands.MainWindow
 {
@@ -17,50 +19,18 @@ namespace Gouter.Commands.MainWindow
 
         public override bool CanExecute(object parameter) => !this._isCalled;
 
-        public override async void Execute(object parameter)
+        public override void Execute(object parameter)
         {
             this._isCalled = true;
 
-            var setting = App.Instance.Setting;
+            this._viewModel.MediaManager.Loaded += this.OnMediaManagerLoaded;
 
-            var mediaManager = App.Instance.MediaManager;
-            var trackManager = mediaManager.Tracks;
+            App.Instance.OnMainViewReady();
+        }
 
-            await Task.Run(async () =>
-            {
-                await mediaManager.LoadLibrary().ConfigureAwait(false);
-
-                var progress = this._viewModel.LoadProgress;
-
-                this._viewModel.Status = "楽曲フォルダから新しい楽曲を検索しています...";
-
-                // 未登録のトラックを取得
-                var findDirectories = setting.MusicDirectories;
-                var excludeDirectories = setting.ExcludeDirectories;
-                // TODO: 除外パスを指定できるようにする
-                var excludePaths = Array.Empty<string>();
-
-                var newTracks = trackManager.GetUnregisteredTracks(
-                    findDirectories,
-                    excludeDirectories,
-                    excludePaths);
-
-                if (!newTracks.Any())
-                {
-                    this._viewModel.Status = null;
-                    return;
-                }
-
-                this._viewModel.Status = $"{newTracks.Count}件の楽曲が見つかりました。楽曲情報をライブラリに登録しています...";
-
-                progress.Reset(newTracks.Count);
-
-                mediaManager.RegisterTracks(newTracks, progress);
-
-                this._viewModel.MediaManager.Flush();
-
-                this._viewModel.Status = $"{newTracks.Count}件の楽曲が追加されました";
-            });
+        private void OnMediaManagerLoaded(object sender, EventArgs e)
+        {
+            this._viewModel.MediaManager.Loaded -= this.OnMediaManagerLoaded;
 
             // プレーヤ状態を復元する（暫定）
             var player = this._viewModel.Player;

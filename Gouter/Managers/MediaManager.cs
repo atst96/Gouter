@@ -49,6 +49,11 @@ namespace Gouter.Managers
         public PlaylistManager Playlists { get; private set; }
 
         /// <summary>
+        /// 読み込み完了イベント
+        /// </summary>
+        public event EventHandler Loaded;
+
+        /// <summary>
         /// メディア管理クラスを生成する。
         /// </summary>
         /// <param name="libInfo"></param>
@@ -102,6 +107,7 @@ namespace Gouter.Managers
             this.Albums.Load();
             this.Tracks.Load(this.Albums);
             this.Playlists.Load();
+            this.Loaded?.Invoke(this, new());
         });
 
         /// <summary>
@@ -183,6 +189,42 @@ namespace Gouter.Managers
         public void Dispose()
         {
             this._database?.Dispose();
+        }
+
+        /// <summary>
+        /// 新しい楽曲ファイルの検索を行い、アルバムとトラックに登録する
+        /// TODO:
+        /// ・除外する楽曲のパスを指定できるようにする
+        /// </summary>
+        /// <param name="musicDirectories">楽曲ファイルの検索を行うディレクトリ</param>
+        /// <param name="excludeDirectories">除外する楽曲ファイルのディレクトリ</param>
+        /// <param name="excludePaths">除外する楽曲ファイルのパス</param>
+        /// <returns></returns>
+        public void SearchAndRegisterNewTracks(
+            IReadOnlyCollection<string> musicDirectories,
+            IReadOnlyCollection<string> excludeDirectories,
+            IReadOnlyCollection<string> excludePaths)
+        {
+            var newTracks = this.Tracks.GetUnregisteredTracks(
+                musicDirectories, excludeDirectories, excludePaths);
+
+            if (newTracks.Count <= 0)
+            {
+                return;
+            }
+
+            // this._viewModel.Status = $"{newTracks.Count}件の楽曲が見つかりました。楽曲情報をライブラリに登録しています...";
+
+            // this.TracksRegistering?.Invoke(new EventArgs(newTracks));
+
+            this.RegisterTracks(newTracks);
+
+            // this._viewModel.Status = $"{newTracks.Count}件の楽曲が追加されました";
+
+            this.RegisterTracks(newTracks);
+            this.Flush();
+
+            // this._viewModel.Status = $"{newTracks.Count}件の楽曲が追加されました";
         }
     }
 }

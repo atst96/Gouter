@@ -186,7 +186,8 @@ namespace Gouter.Players
             var playlist = this.Playlist;
             if (playlist == null || !playlist.Tracks.Contains(track))
             {
-                throw new InvalidOperationException();
+                // throw new InvalidOperationException();
+                return;
             }
 
             if (isTrackChanged)
