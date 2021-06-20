@@ -18,7 +18,15 @@ namespace Gouter.Commands.MainWindow
 
         public override void Execute(object parameter)
         {
-            this._viewModel.Play();
+            if (this._viewModel.Player.IsPlaying)
+            {
+                this._viewModel.IsPlayRequired = false;
+                this._viewModel.Player.Pause();
+            }
+            else
+            {
+                this._viewModel.Play();
+            }
         }
     }
 }
