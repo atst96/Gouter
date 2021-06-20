@@ -15,6 +15,11 @@ namespace Gouter.ViewModels
 
         private static readonly App _app = App.Instance;
 
+        /// <summary>
+        /// スレッド
+        /// </summary>
+        private Dispatcher _thread = _app.Dispatcher;
+
         public MediaManager MediaManager { get; } = _app.MediaManager;
 
         public PlaylistPlayer Player { get; } = _app.MediaPlayer;
@@ -31,14 +36,7 @@ namespace Gouter.ViewModels
             {
                 if (this.SetProperty(ref this._selectedAlbumPlaylist, value))
                 {
-                    if (value != null)
-                    {
-                        this.AlbumTracks = new AlbumTrackViewModel(value);
-                    }
-                    else
-                    {
-                        this.AlbumTracks = null;
-                    }
+                    this.AlbumTracks = this._thread.Invoke(() => value != null ? new AlbumTrackViewModel(value) : null);
                 }
             }
         }
