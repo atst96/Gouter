@@ -60,6 +60,19 @@ namespace Gouter.Players
         }
 
         /// <summary>
+        /// ミュート状態を取得または設定する
+        /// </summary>
+        public bool IsMuted
+        {
+            get => this._player.IsMuted;
+            set
+            {
+                this._player.IsMuted = value;
+                this.RaisePropertyChanged(nameof(this.IsMuted));
+            }
+        }
+
+        /// <summary>
         /// 再生履歴の最大数を取得または設定する。
         /// </summary>
         public int MaxHistoryCount { get; set; } = 50;

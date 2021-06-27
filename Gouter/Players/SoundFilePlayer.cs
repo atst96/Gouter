@@ -101,6 +101,11 @@ namespace Gouter.Players
         }
 
         /// <summary>
+        /// ミュート状態
+        /// </summary>
+        private bool _isMuted;
+
+        /// <summary>
         /// 現在再生中のファイルパス
         /// </summary>
         private string _currentAudioSource;
@@ -134,13 +139,7 @@ namespace Gouter.Players
             set
             {
                 this._volume = value;
-
-                // 出力デバイスのボリュームを変更
-                var device = this._soundDevice;
-                if (device != null && this._isSoundSourceInitialized)
-                {
-                    device.Volume = value;
-                }
+                this.UpdateVolume();
             }
         }
         /// <summary>
@@ -158,6 +157,38 @@ namespace Gouter.Players
         /// </summary>
         public event EventHandler<PlayState> PlayStateChanged;
 
+        /// <summary>
+        /// ミュート状態を取得または設定する
+        /// </summary>
+        public bool IsMuted
+        {
+            get => this._isMuted;
+            set
+            {
+                this._isMuted = value;
+                this.UpdateVolume();
+            }
+        }
+
+        /// <summary>
+        /// ボリュームの更新
+        /// </summary>
+        private void UpdateVolume()
+        {
+            if (this._soundDevice is null)
+            {
+                return;
+            }
+
+            float volume = 0.0f;
+
+            if (!this._isMuted)
+            {
+                volume = this._volume;
+            }
+
+            this._soundDevice.Volume = volume;
+        }
 
         /// <summary>
         /// コンストラクタ
@@ -635,7 +666,7 @@ namespace Gouter.Players
 
             var device = this._soundDevice;
             device.Initialize(this._outputSource);
-            device.Volume = this._volume;
+            this.UpdateVolume();
 
             this._currentAudioSource = this._nextAudioSource;
             this._nextAudioSource = null;

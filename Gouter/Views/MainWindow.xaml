@@ -139,22 +139,33 @@
                 <StackPanel
                     Grid.Column="1"
                     Orientation="Horizontal">
-                    <Button
+                    <ToggleButton
+                        x:Name="MuteButton"
                         Padding="6"
                         VerticalAlignment="Center"
                         HorizontalAlignment="Center"
-                        Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}">
-                        <app:GeometryIcon
-                            Width="16" Height="16"
-                            Data="{StaticResource MaterialIcons.VolumeUp}" />
-                    </Button>
+                        IsChecked="{Binding IsMuted, Mode=TwoWay}"
+                        Style="{StaticResource {x:Static ToolBar.ToggleButtonStyleKey}}">
+                        <Grid>
+                            <app:GeometryIcon
+                                Width="16" Height="16"
+                                Data="{StaticResource MaterialIcons.VolumeUp}"
+                                b:ElementBehavior.IsCollapse="{Binding IsChecked ,ElementName=MuteButton, Mode=OneWay}"/>
+                            <app:GeometryIcon
+                                Width="16" Height="16"
+                                Fill="#FF0000"
+                                Data="{StaticResource MaterialIcons.VolumeOff}"
+                                b:ElementBehavior.Show="{Binding IsChecked ,ElementName=MuteButton, Mode=OneWay}"/>
+                        </Grid>
+                    </ToggleButton>
 
-                    <Slider
+                    <controls:SliderEx
                         Width="80"
                         IsMoveToPointEnabled="True"
                         Minimum="0.0" Maximum="1.0"
                         Value="{Binding Player.Volume, Mode=TwoWay}"
-                        VerticalAlignment="Center" />
+                        VerticalAlignment="Center"
+                        Style="{StaticResource TrackSeekBarStyle}"/>
                 </StackPanel>
 
                 <StackPanel

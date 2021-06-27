@@ -239,6 +239,15 @@ namespace Gouter.ViewModels
             }
         }
 
+        /// <summary>
+        /// ミュート状態を取得または設定する
+        /// </summary>
+        public bool IsMuted
+        {
+            get => this.Player.IsMuted;
+            set => this.Player.IsMuted = value;
+        }
+
         public bool IsSeeking { get; set; }
 
         private void UpdateTime()
