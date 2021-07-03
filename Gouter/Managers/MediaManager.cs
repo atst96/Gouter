@@ -221,7 +221,6 @@ namespace Gouter.Managers
 
             // this._viewModel.Status = $"{newTracks.Count}件の楽曲が追加されました";
 
-            this.RegisterTracks(newTracks);
             this.Flush();
 
             // this._viewModel.Status = $"{newTracks.Count}件の楽曲が追加されました";
