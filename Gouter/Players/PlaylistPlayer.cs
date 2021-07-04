@@ -173,22 +173,33 @@ namespace Gouter.Players
         public void SwitchTrack(TrackInfo track, IPlaylist nextPlaylist, bool isClearHistory = true, bool isUpdateHistory = true)
         {
             bool isTrackChanged = this.Track != track;
-            if (!isTrackChanged)
+            if (isTrackChanged)
             {
-                this._player.Seek(TimeSpan.Zero);
-            }
-            else
-            {
+                // トラック切り替え
+
+                var prevTrack = this.Track;
                 this.Track = track;
+
+                // 再生状態の更新
+                prevTrack?.SetPlayState(false);
+                track?.SetPlayState(true);
+
                 if (isClearHistory)
                 {
+                    // 再生履歴のクリア
                     this._playHistory.Clear();
                 }
 
                 if (isUpdateHistory)
                 {
+                    // 再生履歴更新
                     this.AddPlayHistory(track);
                 }
+            }
+            else
+            {
+                // 同一トラックの場合は再生位置を先頭に戻す
+                this._player.Seek(TimeSpan.Zero);
             }
 
             if (nextPlaylist != null && this.Playlist != nextPlaylist)

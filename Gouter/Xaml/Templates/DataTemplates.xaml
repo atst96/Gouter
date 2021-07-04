@@ -55,6 +55,7 @@
                 Grid.Column="0"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Stretch"
+                Fill="#666666"
                 Data="{StaticResource MaterialIcons.VolumeUp}" />
 
             <TextBlock
@@ -241,10 +242,21 @@
                             </GroupStyle.HeaderTemplate>
                         </GroupStyle>
                     </app:ListBoxEx.GroupStyle>
+                    <app:ListBoxEx.Resources>
+                        <ContextMenu
+                            x:Key="ItemContextMenu"
+                            DataContext="{Binding}">
+                            <MenuItem
+                                Header="再生" />
+                            <MenuItem
+                                Header="エクスプローラで表示" />
+                        </ContextMenu>
+                    </app:ListBoxEx.Resources>
                     <app:ListBoxEx.ItemContainerStyle>
                         <Style TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource {x:Type ListBoxItem}}">
                             <Setter Property="Width" Value="{Binding ViewportWidth, Mode=OneWay, RelativeSource={RelativeSource AncestorType=ScrollViewer}}" />
                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="ContextMenu" Value="{StaticResource ItemContextMenu}" />
                         </Style>
                     </app:ListBoxEx.ItemContainerStyle>
                 </app:ListBoxEx>
