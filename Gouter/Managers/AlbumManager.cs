@@ -46,7 +46,7 @@ namespace Gouter.Managers
         /// <summary>
         /// アルバム一覧
         /// </summary>
-        public ConcurrentNotifiableCollection<AlbumInfo> Albums { get; } = new ConcurrentNotifiableCollection<AlbumInfo>();
+        public ConcurrentObservableList<AlbumInfo> Albums { get; } = new ConcurrentObservableList<AlbumInfo>();
 
         /// <summary>
         /// アルバム登録時のイベント
@@ -67,7 +67,7 @@ namespace Gouter.Managers
         {
             this._database = database ?? throw new InvalidOperationException();
 
-            this.Albums = new ConcurrentNotifiableCollection<AlbumInfo>();
+            this.Albums = new ConcurrentObservableList<AlbumInfo>();
             this.Artwork = artwork;
 
             BindingOperations.EnableCollectionSynchronization(this.Albums, new object());

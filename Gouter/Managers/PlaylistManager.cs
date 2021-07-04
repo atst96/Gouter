@@ -21,7 +21,7 @@ namespace Gouter.Managers
         /// <summary>
         /// アルバムプレイリストの一覧
         /// </summary>
-        public NotifiableCollection<AlbumPlaylist> Albums { get; } = new NotifiableCollection<AlbumPlaylist>();
+        public ObservableList<AlbumPlaylist> Albums { get; } = new ObservableList<AlbumPlaylist>();
 
         /// <summary>
         /// PlaylistManagerを生成する

@@ -29,7 +29,7 @@ namespace Gouter.Managers
         /// <summary>
         /// デバイス情報一覧
         /// </summary>
-        public NotifiableCollection<SoundDeviceInfo> Devices { get; }
+        public ObservableList<SoundDeviceInfo> Devices { get; }
 
         /// <summary>
         /// デフォルトデバイス変更時に呼び出されるイベントハンドラ
@@ -72,7 +72,7 @@ namespace Gouter.Managers
 
             var devices = enumerator.EnumAudioEndpoints(DataFlow.Render, DeviceState.Active);
 
-            this.Devices = new NotifiableCollection<SoundDeviceInfo> { this.SystemDefault };
+            this.Devices = new ObservableList<SoundDeviceInfo> { this.SystemDefault };
             this.Devices.AddRange(devices.Select(device => new SoundDeviceInfo(device)));
         }
 
