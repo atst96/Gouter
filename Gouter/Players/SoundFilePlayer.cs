@@ -17,19 +17,22 @@ namespace Gouter.Players
         /// <summary>
         /// フェード後に遷移する状態
         /// </summary>
-        private PlayState? _afterFadeState = null;
+        private PlayState? _afterFadeState;
 
         /// <summary>
         /// 破棄済みかどうかのフラグ
         /// </summary>
-        private bool _isDisposed = false;
+        private bool _isDisposed;
 
-        private readonly object @_lockObject = new object();
+        /// <summary>
+        /// ロック用のオブジェクト
+        /// </summary>
+        private readonly object @_lockObject = new();
 
         /// <summary>
         /// 音声ソースが初夏済みかどうかのフラグ
         /// </summary>
-        private volatile bool _isSoundSourceInitialized = false;
+        private volatile bool _isSoundSourceInitialized;
 
         /// <summary>
         /// 音声入力ソース
@@ -118,17 +121,17 @@ namespace Gouter.Players
         /// <summary>
         /// 停止後に次のファイルを再生するかどうかのフラグ
         /// </summary>
-        private bool _isStopToNextSource = false;
+        private bool _isStopToNextSource;
 
         /// <summary>
         /// 内部プレーヤが再生中かどうかのフラグ
         /// </summary>
-        private bool _isPlaying = false;
+        private bool _isPlaying;
 
         /// <summary>
         /// 次のオーディオソースが指定されているかどうかのフラグ
         /// </summary>
-        private bool _hasNextAudioSource = false;
+        private bool _hasNextAudioSource;
 
         /// <summary>
         /// ボリュームを取得または設定する。

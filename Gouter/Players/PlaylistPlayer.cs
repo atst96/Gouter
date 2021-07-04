@@ -217,6 +217,13 @@ namespace Gouter.Players
             this._player.Play();
         }
 
+        /// <summary>
+        /// トラック情報を指定して再生を行う
+        /// </summary>
+        /// <param name="track"></param>
+        /// <param name="nextPlaylist"></param>
+        /// <param name="isClearHistory"></param>
+        /// <param name="isUpdateHistory"></param>
         public void Play(TrackInfo track, IPlaylist nextPlaylist = null, bool isClearHistory = true, bool isUpdateHistory = true)
         {
             this.SwitchTrack(track, nextPlaylist, isClearHistory, isUpdateHistory);
