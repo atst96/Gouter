@@ -2712,7 +2712,12 @@
     <SolidColorBrush x:Key="TrackSeekBarThumb.Disabled.Background" Color="#D9D9D9" />
     <SolidColorBrush x:Key="TrackSeekBarThumb.Disabled.Border" Color="#0077CC" />
     <SolidColorBrush x:Key="TrackSeekBarThumb.Track.Background" Color="#E1E1E1" />
-    <SolidColorBrush x:Key="TrackSeekBarThumb.Track.Passed.Background" Color="#44AAFF" />
+    <LinearGradientBrush
+        x:Key="TrackSeekBarThumb.Track.Passed.Background"
+        StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Offset="0" Color="#1188DD" />
+        <GradientStop Offset="1" Color="#44AAFF" />
+    </LinearGradientBrush>
 
     <Style x:Key="TrackSeekBarRepeatButtonStyle" TargetType="{x:Type RepeatButton}">
         <Setter Property="OverridesDefaultStyle" Value="True"/>

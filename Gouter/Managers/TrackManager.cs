@@ -172,6 +172,7 @@ namespace Gouter.Managers
                 .SelectMany(path => PathUtil.GetFiles(path, true))
                 .Except(excludeFilePaths)
                 .Except(registeredFilePaths)
+                .Distinct()
                 .AsParallel()
                 .Where(path =>
                     PathUtil.IsSupportedMediaExtension(path)

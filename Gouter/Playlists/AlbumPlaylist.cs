@@ -16,7 +16,7 @@ namespace Gouter
         public AlbumPlaylist(AlbumInfo albumInfo)
         {
             this.Album = albumInfo;
-            this.Tracks = new NotifiableCollection<TrackInfo>();
+            this.Tracks = new ObservableList<TrackInfo>();
 
             this.Name = albumInfo.Name;
 
@@ -25,7 +25,7 @@ namespace Gouter
 
         public AlbumInfo Album { get; }
 
-        public NotifiableCollection<TrackInfo> Tracks { get; }
+        public ObservableList<TrackInfo> Tracks { get; }
 
         IList<TrackInfo> IPlaylist.Tracks => this.Tracks;
     }

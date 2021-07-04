@@ -22,7 +22,7 @@ namespace Gouter.ViewModels
         /// <summary>
         /// トラックリスト
         /// </summary>
-        public NotifiableCollection<TrackInfo> Tracks { get; }
+        public ObservableList<TrackInfo> Tracks { get; }
 
         /// <summary>
         /// </summary>

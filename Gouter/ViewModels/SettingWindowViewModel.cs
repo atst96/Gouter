@@ -32,7 +32,7 @@ namespace Gouter.ViewModels
 
         public ApplicationSetting Setting { get; }
 
-        public NotifiableCollection<string> MusicDirectories { get; }
+        public ObservableList<string> MusicDirectories { get; }
 
         private string _selectedMusicDirectory;
         public string SelectedMusicDirectory
@@ -53,7 +53,7 @@ namespace Gouter.ViewModels
         private Command<string> _removeMusicDirectoryCommand;
         public Command<string> RemoveMusicDirectoryCommand => this._removeMusicDirectoryCommand ?? (this._removeMusicDirectoryCommand = new RemoveMusicDirectoryCommand(this));
 
-        public NotifiableCollection<string> ExcludeDirectories { get; }
+        public ObservableList<string> ExcludeDirectories { get; }
 
         private string _selectedExcludeDirectory;
         public string SelectedExcludeDirectory
@@ -93,6 +93,6 @@ namespace Gouter.ViewModels
             [SoundOutType.Wasapi_Exclusive] = "WASAPI (専有モード)"
         };
 
-        public NotifiableCollection<SoundDeviceInfo> SoundDevices { get; }
+        public ObservableList<SoundDeviceInfo> SoundDevices { get; }
     }
 }

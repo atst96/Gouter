@@ -11,16 +11,16 @@ namespace Gouter
     internal class ApplicationSetting : NotificationObject
     {
         [Key("directory.musics")]
-        private NotifiableCollection<string> _musicDirectories;
+        private ObservableList<string> _musicDirectories;
 
         [IgnoreMember]
-        public NotifiableCollection<string> MusicDirectories => this._musicDirectories ??= new NotifiableCollection<string>();
+        public ObservableList<string> MusicDirectories => this._musicDirectories ??= new ObservableList<string>();
 
         [Key("directory.excludes")]
-        private NotifiableCollection<string> _excludeDirectories;
+        private ObservableList<string> _excludeDirectories;
 
         [IgnoreMember]
-        public NotifiableCollection<string> ExcludeDirectories => this._excludeDirectories ??= new NotifiableCollection<string>();
+        public ObservableList<string> ExcludeDirectories => this._excludeDirectories ??= new ObservableList<string>();
 
         [Key("player.volume")]
         public float SoundVolumne { get; set; } = 1.0f;
