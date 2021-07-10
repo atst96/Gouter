@@ -2,28 +2,54 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Gouter
 {
-    internal abstract class ViewModelBase : INotifyPropertyChanged
+    /// <summary>
+    /// ViewModelのベースクラス
+    /// </summary>
+    internal abstract class ViewModelBase : INotifyPropertyChanged, IDisposable
     {
+        private List<IDisposable> _disposables = new();
+
         private DialogService _dialogService;
-        public DialogService DialogService => this._dialogService ?? (this._dialogService = new DialogService(this));
+        /// <summary>
+        /// ダイアログ関連サービス
+        /// </summary>
+        public DialogService DialogService => this._dialogService ??= new DialogService(this);
 
         private WindowService _windowService;
-        public WindowService WindowService => this._windowService ?? (this._windowService = new WindowService(this));
 
+        /// <summary>
+        /// ウィンドウ関連サービス
+        /// </summary>
+        public WindowService WindowService => this._windowService ??= new WindowService(this);
+
+        /// <summary>
+        /// プロパティ変更通知イベントハンドラ
+        /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
+        /// <summary>
+        /// プロパティの変更通知を行う
+        /// </summary>
+        /// <param name="propertyName">プロパティ名</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected void RaisePropertyChanged([CallerMemberName] string propertyName = "")
         {
-            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            this.PropertyChanged?.Invoke(this, new(propertyName));
         }
 
+        /// <summary>
+        /// インスタンスを破棄する
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="changedValue"></param>
+        /// <param name="newValue"></param>
+        /// <param name="propertyName"></param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected bool SetProperty<T>(ref T changedValue, T newValue, [CallerMemberName] string propertyName = "")
         {
             if (object.Equals(changedValue, newValue))
@@ -35,6 +61,49 @@ namespace Gouter
             this.RaisePropertyChanged(propertyName);
 
             return true;
+        }
+
+        #region Commands
+
+        /// <summary>
+        /// ViewModelにコマンドを登録する
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected T RegisterCommand<T>(T command)
+            where T : IDisposableCommand
+        {
+            this._disposables.Add(command);
+            return command;
+        }
+
+        #endregion
+
+        /// <summary>
+        /// インスタンス破棄時
+        /// </summary>
+        protected virtual void OnDispose()
+        {
+            this._disposables.ForEach(cmd => cmd.Dispose());
+            this._disposables.Clear();
+        }
+
+        /// <summary>
+        /// インスタンス破棄時
+        /// </summary>
+        ~ViewModelBase()
+        {
+            this.OnDispose();
+        }
+
+        /// <summary>
+        /// インスタンスを破棄する
+        /// </summary>
+        void IDisposable.Dispose()
+        {
+            this.OnDispose();
+            GC.SuppressFinalize(this);
         }
     }
 }

@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
+using Gouter.Components.Mvvm;
 
 namespace Gouter
 {
@@ -73,5 +70,44 @@ namespace Gouter
         {
             this._weakHandlers.Clear();
         }
+
+        #region Create command
+
+        /// <summary>
+        /// コマンド生成
+        /// </summary>
+        /// <param name="execute"></param>
+        /// <returns></returns>
+        public static Command<T> Create(Action<T> execute) => new DelegateCommand<T>(execute);
+
+        /// <summary>
+        /// コマンド生成
+        /// </summary>
+        /// <param name="execute"></param>
+        /// <param name="hookRequerySuggested"></param>
+        /// <returns></returns>
+        public static Command<T> Create(Action<T> execute, bool hookRequerySuggested)
+            => new DelegateCommand<T>(execute, hookRequerySuggested);
+
+        /// <summary>
+        /// コマンド生成
+        /// </summary>
+        /// <param name="execute"></param>
+        /// <param name="canExecute"></param>
+        /// <returns></returns>
+        public static Command<T> Create(Action<T> execute, Predicate<T> canExecute)
+            => new DelegateCommand<T>(execute, canExecute);
+
+        /// <summary>
+        /// コマンド生成
+        /// </summary>
+        /// <param name="execute"></param>
+        /// <param name="canExecute"></param>
+        /// <param name="hookRequerySuggested"></param>
+        /// <returns></returns>
+        public static Command<T> Create(Action<T> execute, Predicate<T> canExecute, bool hookRequerySuggested)
+            => new DelegateCommand<T>(execute, canExecute, hookRequerySuggested);
+
+        #endregion Create command
     }
 }
