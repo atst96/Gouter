@@ -1,20 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Forms;
 using System.Windows.Interop;
-using Microsoft.WindowsAPICodePack.Dialogs;
 
 namespace Gouter.Services
 {
     internal class DialogService : IDisposable
     {
-        private Application app = Application.Current;
+        private System.Windows.Application app = System.Windows.Application.Current;
 
         private Window _view;
         private IntPtr _hwnd;
+        private NativeWindow _window;
         private ViewModelBase _viewModel;
 
         public DialogService()
@@ -60,6 +59,8 @@ namespace Gouter.Services
         private void OnViewLoaded(object sender, RoutedEventArgs e)
         {
             this._hwnd = new WindowInteropHelper(this._view).Handle;
+            this._window = new NativeWindow();
+            this._window.AssignHandle(this._hwnd);
         }
 
         private void OnViewClosed(object sender, EventArgs e)
@@ -67,192 +68,160 @@ namespace Gouter.Services
             this.OnViewUnregister(this._view);
         }
 
-        private TaskDialog CreateTaskDialog(string message, string caption, string instruction)
+        private TaskDialogPage CreateTaskDialog(string message, string caption, string instruction)
         {
-            return new TaskDialog
+            return new()
             {
-                OwnerWindowHandle = this._hwnd,
+                // OwnerWindowHandle = this._hwnd,
                 Text = message,
                 Caption = caption,
-                InstructionText = instruction,
+                Heading = instruction,
             };
         }
 
         public void WarningMessage(string message, string caption = null, string instruction = null)
         {
-            using (var dialog = CreateTaskDialog(message, caption, instruction))
+            TaskDialog.ShowDialog(this._hwnd, new()
             {
-                dialog.StandardButtons = TaskDialogStandardButtons.Ok;
-                dialog.Icon = TaskDialogStandardIcon.Warning;
-
-                dialog.Show();
-            }
+                Caption = caption,
+                Icon = TaskDialogIcon.Warning,
+                Heading = instruction,
+                Text = message,
+                Buttons = new()
+                {
+                    TaskDialogButton.OK,
+                },
+            });
         }
 
         public void ErrorMessage(string message, string caption = null, string instruction = null)
         {
-            using (var dialog = CreateTaskDialog(message, caption, instruction))
+            TaskDialog.ShowDialog(this._hwnd, new()
             {
-                dialog.StandardButtons = TaskDialogStandardButtons.Ok;
-                dialog.Icon = TaskDialogStandardIcon.Error;
-
-                dialog.Show();
-            }
+                Caption = caption,
+                Icon = TaskDialogIcon.Error,
+                Heading = instruction,
+                Text = message,
+                Buttons = new()
+                {
+                    TaskDialogButton.OK,
+                },
+            });
         }
 
         public void InfoMessage(string message, string caption = null, string instruction = null)
         {
-            using (var dialog = CreateTaskDialog(message, caption, instruction))
+            TaskDialog.ShowDialog(this._hwnd, new()
             {
-                dialog.StandardButtons = TaskDialogStandardButtons.Ok;
-                dialog.Icon = TaskDialogStandardIcon.Information;
-
-                dialog.Show();
-            }
+                Caption = caption,
+                Icon = TaskDialogIcon.Information,
+                Heading = instruction,
+                Text = message,
+                Buttons = new()
+                {
+                    TaskDialogButton.OK,
+                },
+            });
         }
 
         public bool ConfirmMessage(string message, string caption = null, string instruction = null)
         {
-            using (var dialog = CreateTaskDialog(message, caption, instruction))
+            var result = TaskDialog.ShowDialog(this._hwnd, new()
             {
-                dialog.StandardButtons = TaskDialogStandardButtons.Yes | TaskDialogStandardButtons.No;
-                dialog.Icon = TaskDialogStandardIcon.Information;
+                Caption = caption,
+                Icon = TaskDialogIcon.Warning,
+                Heading = instruction,
+                Text = message,
+                Buttons = new()
+                {
+                    TaskDialogButton.Yes,
+                    TaskDialogButton.No,
+                },
+            });
 
-                return dialog.Show() == TaskDialogResult.Yes;
-            }
+            return result == TaskDialogButton.Yes;
         }
 
-        private static void SetCommonFileDialogFilter(CommonFileDialog dialog, IDictionary<string, string[]> filters)
+        private static string GetExtensions(IDictionary<string, string[]> filters)
         {
-            if (filters == null || filters.Count == 0)
-            {
-                return;
-            }
-
-            var filterCollection = dialog.Filters;
-
-            foreach (var kvp in filters)
-            {
-                filterCollection.Add(new CommonFileDialogFilter(kvp.Key, string.Join(",", kvp.Value)));
-            }
-        }
-
-        private bool OpenCommonFileDialog(CommonFileDialog dialog)
-        {
-            CommonFileDialogResult result = this._hwnd == IntPtr.Zero
-                ? dialog.ShowDialog()
-                : dialog.ShowDialog(this._hwnd);
-
-            return result == CommonFileDialogResult.Ok;
+            return string.Join("|", filters.Select(kvp => string.Concat(kvp.Key, "|", string.Join(",", kvp.Value))));
         }
 
         public string SelectOpenFile(string caption = null, IDictionary<string, string[]> filters = null, string initialDirectory = null)
         {
-            var dialog = new CommonOpenFileDialog
+            using var dialog = new OpenFileDialog()
             {
                 Title = caption,
-                Multiselect = false,
                 InitialDirectory = initialDirectory,
+                AutoUpgradeEnabled = false,
+                Multiselect = false,
+                Filter = GetExtensions(filters),
             };
 
-            SetCommonFileDialogFilter(dialog, filters);
-
-            using (dialog)
-            {
-                if (this.OpenCommonFileDialog(dialog))
-                {
-                    return dialog.FileName;
-                }
-            }
-
-            return null;
+            return dialog.ShowDialog() != DialogResult.OK ? null : dialog.FileName;
         }
 
         public IEnumerable<string> SelectOpenFiles(string caption = null, IDictionary<string, string[]> filters = null, string initialDirectory = null)
         {
-            var dialog = new CommonOpenFileDialog
+            using var dialog = new OpenFileDialog()
             {
                 Title = caption,
-                Multiselect = true,
-                IsFolderPicker = true,
                 InitialDirectory = initialDirectory,
+                AutoUpgradeEnabled = false,
+                Multiselect = true,
+                Filter = GetExtensions(filters),
             };
 
-            SetCommonFileDialogFilter(dialog, filters);
-
-            using (dialog)
-            {
-                if (this.OpenCommonFileDialog(dialog))
-                {
-                    return dialog.FileNames;
-                }
-            }
-
-            return null;
+            return dialog.ShowDialog() != DialogResult.OK ? null : dialog.FileNames;
         }
 
         public string SelectSaveFile(string caption = null, IDictionary<string, string[]> filters = null, string initialDirectory = null)
         {
-            var dialog = new CommonSaveFileDialog
+            using var dialog = new SaveFileDialog()
             {
                 Title = caption,
                 InitialDirectory = initialDirectory,
+                AutoUpgradeEnabled = false,
+                Filter = GetExtensions(filters),
             };
 
-            SetCommonFileDialogFilter(dialog, filters);
-
-            using (dialog)
-            {
-                if (this.OpenCommonFileDialog(dialog))
-                {
-                    return dialog.FileName;
-                }
-            }
-
-            return null;
+            return dialog.ShowDialog() != DialogResult.OK ? null : dialog.FileName;
         }
 
         public string SelectDirectory(string caption = null, string initialDirectory = null)
         {
-            var dialog = new CommonOpenFileDialog
+            using var dialog = new FolderBrowserDialog
             {
-                Title = caption,
-                InitialDirectory = initialDirectory,
-                IsFolderPicker = true,
-                Multiselect = false,
+                Description = caption,
+                AutoUpgradeEnabled = true,
+                SelectedPath = initialDirectory,
+                UseDescriptionForTitle = true,
             };
 
-            using (dialog)
+            if (dialog.ShowDialog(this._window) == DialogResult.OK)
             {
-                if (this.OpenCommonFileDialog(dialog))
-                {
-                    return dialog.FileName;
-                }
+                return dialog.SelectedPath;
             }
 
             return null;
         }
 
-        public IEnumerable<string> SelectDirectories(string caption = null, string initialDirectory = null)
-        {
-            var dialog = new CommonOpenFileDialog
-            {
-                Title = caption,
-                Multiselect = true,
-                IsFolderPicker = true,
-                InitialDirectory = initialDirectory,
-            };
+        //public IEnumerable<string> SelectDirectories(string caption = null, string initialDirectory = null)
+        //{
+        //    using var dialog = new FolderBrowserDialog
+        //    {
+        //        Description = caption,
+        //        AutoUpgradeEnabled = true,
+        //        SelectedPath = initialDirectory,
+        //    };
 
-            using (dialog)
-            {
-                if (this.OpenCommonFileDialog(dialog))
-                {
-                    return dialog.FileNames;
-                }
-            }
+        //    if (dialog.ShowDialog(this._window) == DialogResult.OK)
+        //    {
+        //        return dialog.SelectedPath;
+        //    }
 
-            return null;
-        }
+        //    return null;
+        //}
 
         public void Dispose()
         {

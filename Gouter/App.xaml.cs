@@ -1,12 +1,9 @@
 ﻿using Gouter.Data;
-using Gouter.Extensions;
 using Gouter.Managers;
 using Gouter.Players;
 using Gouter.Utils;
-using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
@@ -80,7 +77,11 @@ namespace Gouter
             }
             catch (Exception ex)
             {
-                TaskDialog.Show(ex.GetMessage(), null, App.Name);
+                System.Windows.Forms.TaskDialog.ShowDialog(new()
+                {
+                    Caption = App.Name,
+                    Text = ex.Message,
+                });
                 this.ForceShutdown();
                 return;
             }
