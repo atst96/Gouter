@@ -1,6 +1,7 @@
 ﻿using Gouter.Commands.MainWindow;
 using Gouter.Managers;
 using Gouter.Players;
+using Livet.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -19,6 +20,11 @@ namespace Gouter.ViewModels
         /// スレッド
         /// </summary>
         private Dispatcher _thread = _app.Dispatcher;
+
+        /// <summary>
+        /// メッセンジャー
+        /// </summary>
+        public InteractionMessenger Messenger { get; } = new();
 
         public MediaManager MediaManager { get; } = _app.MediaManager;
 
