@@ -13,7 +13,12 @@ https://github.com/filoe/cscore/blob/master/license.md
 - [LiteDB](https://github.com/mbdavid/LiteDB)  
 Copyright (c) 2014-2020 Mauricio David  
 Released under the MIT license  
-https://github.com/mbdavid/LiteDB/blob/master/LICENSE  
+https://github.com/mbdavid/LiteDB/blob/master/LICENSE
+
+- [Livet](https://github.com/runceel/Livet)
+Livet Copyright (c) 2010-2011 Livet Project  
+Released under the zlib/libpng license  
+https://github.com/runceel/Livet/blob/master/license-en.txt  
 
 - [Material design icons](https://material.io/resources/icons)  
 Released under the Apache License, Version 2.0  
