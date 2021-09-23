@@ -2,14 +2,14 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net5.0-windows</TargetFramework>
-    <UseWPF>true</UseWPF>
+    <UseWPF>True</UseWPF>
+    <UseWindowsForms>True</UseWindowsForms>
     <Authors>atst</Authors>
     <Version>0.0.1.0</Version>
     <Company />
     <PackageProjectUrl>https://github.com/atst1996/Gouter</PackageProjectUrl>
     <RepositoryUrl>https://github.com/atst1996/Gouter</RepositoryUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <UseWindowsForms>True</UseWindowsForms>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Resources\missing_album.png" />
