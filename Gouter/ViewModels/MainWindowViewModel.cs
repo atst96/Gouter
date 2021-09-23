@@ -1,16 +1,21 @@
 ﻿using Gouter.Commands.MainWindow;
+using Gouter.Components.Mvvm;
 using Gouter.Managers;
 using Gouter.Players;
 using Livet.Messaging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Data;
+using System.Windows.Forms;
 using System.Windows.Threading;
+using Gouter.Messaging;
 
 namespace Gouter.ViewModels
 {
-    internal class MainWindowViewModel : ViewModelBase, IDisposable
+    internal sealed class MainWindowViewModel : ViewModelBase, IDisposable
     {
         private readonly Random _rand = new Random();
 
@@ -83,8 +88,135 @@ namespace Gouter.ViewModels
             set => this.SetProperty(ref this._albumTracks, value);
         }
 
-        private Command _initializeCommand;
-        public Command InitializeCommand => this._initializeCommand ?? (this._initializeCommand = new InitializeCommand(this));
+        private bool _isInitialized = false;
+
+        /// <summary>
+        /// 初期化時
+        /// </summary>
+        public void OnInitialized()
+        {
+            if (this._isInitialized)
+            {
+                return;
+            }
+
+            this._isInitialized = true;
+
+            this.MediaManager.Loaded += this.OnMediaManagerLoaded;
+            this.MediaManager.TrackRegisterStateChanged += this.OnTrackRegisterStateChanged;
+
+            App.Instance.OnMainViewReady();
+        }
+
+        /// <summary>
+        /// <see cref="MediaManager"/>読み込み時
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnMediaManagerLoaded(object sender, EventArgs e)
+        {
+            this.MediaManager.Loaded -= this.OnMediaManagerLoaded;
+
+            // プレーヤ状態を復元する（暫定）
+            var player = this.Player;
+            var settings = App.Instance.Setting;
+
+            IPlaylist lastPlaylist = null;
+            if (settings.LastPlaylistId != null)
+            {
+                int lastPlaylistId = (int)settings.LastPlaylistId;
+                lastPlaylist = player.MediaManager.Playlists.Albums
+                    .FirstOrDefault(a => a.Album.Id == lastPlaylistId);
+            }
+
+            if (settings.LastTrackId != null)
+            {
+                int lastTrackId = (int)settings.LastTrackId;
+
+                var track = player.MediaManager.Tracks.Tracks
+                    .FirstOrDefault(t => t.Id == lastTrackId);
+                if (track != null)
+                {
+                    if (lastPlaylist != null)
+                    {
+                        player.SwitchTrack(track, lastPlaylist);
+                        this.SelectedAlbumPlaylist = player.Playlist as AlbumPlaylist;
+                    }
+                    else
+                    {
+                        player.SwitchTrack(track);
+                    }
+                }
+            }
+
+            this.VerticalOffset = settings.AlbumListScrollPosition;
+        }
+
+        private TaskDialogPage _taskDialog;
+        private TaskDialogButton _taskDialogButton;
+
+        /// <summary>
+        /// トラック情報登録状況の変更時
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnTrackRegisterStateChanged(object sender, TrackRegisterProgress e) =>
+            this._thread.InvokeAsync(() =>
+            {
+                var taskDialog = this._taskDialog;
+                var button = this._taskDialogButton;
+
+                switch (e.State)
+                {
+                    case TrackRegisterState.Finding:
+                        button = this._taskDialogButton = new(TaskDialogButton.Close.Text, false, false);
+                        taskDialog = this._taskDialog = new()
+                        {
+                            Caption = App.Name,
+                            Heading = "楽曲の登録",
+                            Text = "楽曲情報を検索しています...",
+                            ProgressBar = new()
+                            {
+                                State = TaskDialogProgressBarState.Marquee,
+                                Maximum = default
+                            },
+                            Buttons = new TaskDialogButtonCollection { button },
+                        };
+
+                        this.Status = "楽曲情報を検索しています...";
+                        this.Messenger.Raise(new TaskDialogMessage("ShowTrackRegisterDialog", taskDialog));
+
+                        break;
+
+                    case TrackRegisterState.NotFound:
+                        this.Status = null;
+                        taskDialog.BoundDialog?.Close();
+                        this._taskDialogButton = null;
+                        this._taskDialog = null;
+                        break;
+
+                    case TrackRegisterState.Registering:
+                        var progress = taskDialog.ProgressBar;
+                        if (progress.Maximum == default)
+                        {
+                            progress.State = TaskDialogProgressBarState.Normal;
+                            progress.Maximum = e.Total;
+
+                            taskDialog.Text = $"{e.Total}件の楽曲が見つかりました。楽曲情報をライブラリに登録しています...";
+                        }
+
+                        progress.Value = e.Current;
+                        break;
+
+                    case TrackRegisterState.Complete:
+                        button.Enabled = true;
+                        taskDialog.BoundDialog?.Close();
+                        this.Status = $"{e.Total}件の楽曲を追加しました";
+                        this._taskDialogButton = null;
+                        this._taskDialog = null;
+                        break;
+                }
+            });
 
         private IPlaylist _currentPlaylist;
         public IPlaylist CurrentPlaylist
@@ -105,8 +237,6 @@ namespace Gouter.ViewModels
                 }
             }
         }
-
-        public StandardProgressReceiver LoadProgress { get; } = new StandardProgressReceiver();
 
         private string _status;
         public string Status
@@ -131,8 +261,12 @@ namespace Gouter.ViewModels
         private Command _nextTrackCommand;
         public Command NextTrackCommand => this._nextTrackCommand ??= new NextTrackCommand(this);
 
-        private Command _onCloseCommand;
-        public Command OnCloseCommand => this._onCloseCommand ??= new OnCloseCommand(this);
+        /// <summary>
+        /// ウィンドウを閉じた場合
+        /// </summary>
+        public void OnClosed()
+        {
+        }
 
         private Command<AlbumPlaylist> _selectAlbumPlaylistCommand;
         public Command<AlbumPlaylist> SelectAlbumPlaylistCommand => this._selectAlbumPlaylistCommand ??= new SelectAlbumPlaylistCommand(this);
@@ -274,8 +408,8 @@ namespace Gouter.ViewModels
         /// </summary>
         void IDisposable.Dispose()
         {
-            var player = this.Player;
-            player.PlayStateChanged -= this.OnPlayStateChanged;
+            this.Player.PlayStateChanged -= this.OnPlayStateChanged;
+            this.MediaManager.TrackRegisterStateChanged += this.OnTrackRegisterStateChanged;
         }
     }
 }

@@ -68,6 +68,7 @@ namespace Gouter
         protected override void OnStartup(StartupEventArgs e)
         {
             App.Instance = (App)Current;
+            System.Windows.Forms.Application.EnableVisualStyles();
 
             base.OnStartup(e);
 

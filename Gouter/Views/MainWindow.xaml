@@ -8,6 +8,7 @@
     xmlns:vm="clr-namespace:Gouter.ViewModels"
     xmlns:app="clr-namespace:Gouter"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:l="http://schemas.livet-mvvm.net/2011/wpf"
     xmlns:b="clr-namespace:Gouter.Behaviors"
     xmlns:conv="clr-namespace:Gouter.Converters"
     xmlns:cnm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
@@ -42,11 +43,14 @@
     </Window.Resources>
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="ContentRendered">
-            <i:InvokeCommandAction Command="{Binding InitializeCommand, Mode=OneTime}" />
+            <i:CallMethodAction TargetObject="{Binding Mode=OneTime}" MethodName="OnInitialized" />
         </i:EventTrigger>
         <i:EventTrigger EventName="Closed">
-            <i:InvokeCommandAction Command="{Binding OnCloseCommand, Mode=OneTime}" />
+            <i:CallMethodAction TargetObject="{Binding Mode=OneTime}" MethodName="OnClosed" />
         </i:EventTrigger>
+        <l:InteractionMessageTrigger Messenger="{Binding Messenger, Mode=OneTime}" MessageKey="ShowTrackRegisterDialog">
+            <b:DialogInteractionMessageAction />
+        </l:InteractionMessageTrigger>
     </i:Interaction.Triggers>
     <Grid>
         <Grid.RowDefinitions>

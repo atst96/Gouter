@@ -1,10 +1,7 @@
-﻿using ATL;
-using Gouter.DataModels;
-using Gouter.Utils;
+﻿using Gouter.DataModels;
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics;
 using System.Linq;
 
 namespace Gouter.Managers
@@ -12,7 +9,7 @@ namespace Gouter.Managers
     /// <summary>
     /// トラック情報の管理を行う
     /// </summary>
-    internal class TrackManager
+    internal sealed class TrackManager : ICollection<TrackInfo>
     {
         /// <summary>
         /// データベース
@@ -103,9 +100,57 @@ namespace Gouter.Managers
         }
 
         /// <summary>
+        /// コレクション内の要素を削除する
+        /// </summary>
+        public void Clear()
+        {
+            this._registeredTracks.Clear();
+            this._registeredTrackIds.Clear();
+        }
+
+        /// <summary>
+        /// コレクション内に要素が存在するかを取得する
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public bool Contains(TrackInfo item)
+            => this._registeredTracks.Contains(item);
+
+        /// <summary>
+        /// コレクションの要素をコピーする
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="arrayIndex"></param>
+        public void CopyTo(TrackInfo[] array, int arrayIndex)
+            => this._registeredTracks.CopyTo(array, arrayIndex);
+
+        /// <summary>
+        /// コレクション内の要素を削除する
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public bool Remove(TrackInfo item)
+        {
+            _ = item ?? throw new ArgumentNullException(nameof(item));
+
+            return this._registeredTracks.Remove(item)
+                && this._registeredTrackIds.Remove(item.Id);
+        }
+
+        /// <summary>
+        /// コレクションの要素数を削除する
+        /// </summary>
+        public int Count => this._registeredTracks.Count;
+
+        /// <summary>
+        /// コレクションが読み取り専用であるかどうかを取得する
+        /// </summary>
+        public bool IsReadOnly => false;
+
+        /// <summary>
         /// トラック情報を登録する。
         /// </summary>
-        /// <param name="trackInfo">トラック情報</param>
+        /// <param name="tracks">トラック情報</param>
         private void AddInternal(IEnumerable<TrackInfo> tracks)
         {
             var trackIds = tracks.Select(t => t.Id);
@@ -149,54 +194,6 @@ namespace Gouter.Managers
         }
 
         /// <summary>
-        /// 未登録の楽曲情報を取得する。
-        /// </summary>
-        /// <param name="musicDirectories">音楽ファイルのディレクトリ</param>
-        /// <param name="excludeDirectories">除外するディレクトリ</param>
-        /// <param name="excludePaths"></param>
-        /// <returns>楽曲情報リスト</returns>
-        public IReadOnlyList<Track> GetUnregisteredTracks(
-            IReadOnlyCollection<string> musicDirectories,
-            IReadOnlyCollection<string> excludeDirectories,
-            IReadOnlyCollection<string> excludeFilePaths)
-        {
-            // 登録済みファイル
-            var registeredFilePaths = this._registeredTracks.Select(t => t.Path);
-
-            var findDirs = PathUtil.ExcludeSubDirectories(musicDirectories);
-            var excludeDirs = PathUtil.ExcludeSubDirectories(excludeDirectories);
-            var excludePaths = excludeFilePaths;
-
-            // 未登録ファイルを列挙する
-            var unregisteredFiles = findDirs
-                .SelectMany(path => PathUtil.GetFiles(path, true))
-                .Except(excludeFilePaths)
-                .Except(registeredFilePaths)
-                .Distinct()
-                .AsParallel()
-                .Where(path =>
-                    PathUtil.IsSupportedMediaExtension(path)
-                    && !PathUtil.IsContains(path, excludeDirs))
-                .ToList();
-
-            var tracks = new List<Track>(unregisteredFiles.Count);
-
-            foreach (var path in unregisteredFiles)
-            {
-                try
-                {
-                    tracks.Add(new Track(path));
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"読み込み失敗: {path}, {ex}");
-                }
-            }
-
-            return tracks;
-        }
-
-        /// <summary>
         /// トラックリストをデータベースから読み込む。
         /// </summary>
         /// <param name="albumManager"></param>
@@ -224,5 +221,23 @@ namespace Gouter.Managers
                 this._latestTrackId = this._registeredTrackIds.Max();
             }
         }
+
+        /// <summary>
+        /// <see cref="IEnumerator"/>を取得する
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerator<TrackInfo> GetEnumerator() => this._registeredTracks.GetEnumerator();
+
+        /// <summary>
+        /// <see cref="IEnumerator"/>を取得する
+        /// </summary>
+        /// <returns></returns>
+        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
+
+        /// <summary>
+        /// 要素をつ追加する
+        /// </summary>
+        /// <param name="item"></param>
+        void ICollection<TrackInfo>.Add(TrackInfo item) => this.Add(item);
     }
 }

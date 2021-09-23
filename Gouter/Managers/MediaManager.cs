@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using ATL;
 using Gouter.Data;
@@ -13,6 +14,11 @@ namespace Gouter.Managers
     /// </summary>
     internal class MediaManager : IDisposable
     {
+        /// <summary>
+        /// トラック情報の登録状況変更時
+        /// </summary>
+        public event EventHandler<TrackRegisterProgress> TrackRegisterStateChanged;
+
         /// <summary>
         /// データベース情報
         /// </summary>
@@ -124,18 +130,21 @@ namespace Gouter.Managers
         }
 
         /// <summary>トラックを一括登録する</summary>
-        /// <param name="allTracks">トラック</param>
+        /// <param name="newTracks">トラック</param>
         /// <param name="progress"></param>
-        public void RegisterTracks(IEnumerable<Track> allTracks, IProgress<TrackInsertProgress> progress = null)
+        public void RegisterTracks(IReadOnlyCollection<Track> newTracks)
         {
+            _ = newTracks ?? throw new ArgumentNullException(nameof(newTracks));
+
             int count = 0;
-            int maxCount = allTracks.Count();
+            int maxCount = newTracks.Count;
 
             using var transaction = this._database.BeginTransaction();
 
             try
             {
-                var tracksByAlbumKey = allTracks
+                // トラック情報をアルバム毎にグループ化
+                var tracksByAlbumKey = newTracks
                     .AsParallel()
                     .GroupBy(t => t.GetAlbumKey());
 
@@ -144,7 +153,6 @@ namespace Gouter.Managers
                     var albumKey = albumTracks.Key;
 
                     AlbumInfo albumInfo;
-
                     if (!this.Albums.TryGetFromKey(albumKey, out albumInfo))
                     {
                         // 新規トラックを登録する
@@ -161,12 +169,7 @@ namespace Gouter.Managers
                     albumInfo.Playlist.Tracks.AddRange(tracks);
 
                     count += tracks.Count;
-                    progress?.Report(new TrackInsertProgress
-                    {
-                        CurrentCount = count,
-                        MaxCount = maxCount,
-                        Track = null,
-                    });
+                    this.TrackRegisterStateChanged?.Invoke(this, new(TrackRegisterState.Registering, count, maxCount));
                 }
 
                 transaction.Commit();
@@ -193,8 +196,6 @@ namespace Gouter.Managers
 
         /// <summary>
         /// 新しい楽曲ファイルの検索を行い、アルバムとトラックに登録する
-        /// TODO:
-        /// ・除外する楽曲のパスを指定できるようにする
         /// </summary>
         /// <param name="musicDirectories">楽曲ファイルの検索を行うディレクトリ</param>
         /// <param name="excludeDirectories">除外する楽曲ファイルのディレクトリ</param>
@@ -205,24 +206,31 @@ namespace Gouter.Managers
             IReadOnlyCollection<string> excludeDirectories,
             IReadOnlyCollection<string> excludePaths)
         {
-            var newTracks = this.Tracks.GetUnregisteredTracks(
+            // 新規トラック情報検索開始
+            this.TrackRegisterStateChanged?.Invoke(this, new(TrackRegisterState.Finding));
+
+            var newTracks = TrackFinder.FindUnregistered(this.Tracks,
                 musicDirectories, excludeDirectories, excludePaths);
 
-            if (newTracks.Count <= 0)
+            int trackCount = newTracks.Count;
+            if (trackCount <= 0)
             {
+                // 新規トラック情報なし
+                this.TrackRegisterStateChanged?.Invoke(this, new(TrackRegisterState.NotFound));
                 return;
             }
 
-            // this._viewModel.Status = $"{newTracks.Count}件の楽曲が見つかりました。楽曲情報をライブラリに登録しています...";
-
-            // this.TracksRegistering?.Invoke(new EventArgs(newTracks));
+            // トラック情報登録開始
+            this.TrackRegisterStateChanged?.Invoke(this, new(TrackRegisterState.Registering, 0, trackCount));
 
             this.RegisterTracks(newTracks);
-
-            // this._viewModel.Status = $"{newTracks.Count}件の楽曲が追加されました";
-
             this.Flush();
 
+            // トラック情報登録完了
+            this.TrackRegisterStateChanged?.Invoke(this, new(TrackRegisterState.Complete, trackCount, trackCount));
+
+            // TODO: メッセージのメモ
+            // this._viewModel.Status = $"{newTracks.Count}件の楽曲が見つかりました。楽曲情報をライブラリに登録しています...";
             // this._viewModel.Status = $"{newTracks.Count}件の楽曲が追加されました";
         }
     }
