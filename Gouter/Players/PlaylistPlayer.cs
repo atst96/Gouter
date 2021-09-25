@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using CSCore.CoreAudioAPI;
 using CSCore.SoundOut;
 using Gouter.Extensions;
@@ -302,7 +303,7 @@ namespace Gouter.Players
         }
 
         /// <summary>
-        /// 次のトラックを選択する。
+        /// 次のトラックを選択する
         /// </summary>
         /// <param name="currentTrack">現在のトラック</param>
         /// <param name="playlist">プレイリスト</param>
@@ -316,57 +317,69 @@ namespace Gouter.Players
             }
 
             var tracks = playlist.Tracks;
-            var shuffleMode = options.ShuffleMode;
 
+            return options.ShuffleMode switch
+            {
+                ShuffleMode.None => GetSequentialNextTrack(currentTrack, tracks),
+                ShuffleMode.Random => ShuffleNextTrack(currentTrack, tracks, options),
+                _ => throw new ArgumentOutOfRangeException()
+            };
+        }
+
+        /// <summary>
+        /// 次のトラック(逐次)を取得する
+        /// </summary>
+        /// <param name="currentTrack">現在再生中のトラック</param>
+        /// <param name="tracks">トラック情報リスト</param>
+        /// <returns></returns>
+        private static TrackInfo GetSequentialNextTrack(TrackInfo currentTrack, IList<TrackInfo> tracks)
+        {
             int currentTrackIndex = tracks.IndexOf(currentTrack);
 
-            switch (shuffleMode)
+            // シャッフルモードでない場合
+            // 次のトラックを選択する
+            int nextTrackIndex = currentTrackIndex + 1;
+            if (nextTrackIndex >= tracks.Count)
             {
-                case ShuffleMode.None:
-                    {
-                        // シャッフルモードでない場合
-                        // 次のトラックを選択する
-                        int nextTrackIndex = currentTrackIndex + 1;
-                        if (nextTrackIndex >= tracks.Count)
-                        {
-                            // トラックのインデックスが範囲外であれば最初のトラックに戻る
-                            nextTrackIndex = 0;
-                        }
-
-                        return tracks[nextTrackIndex];
-                    }
-
-                case ShuffleMode.Random:
-                    {
-                        // ランダムシャッフルの場合
-
-                        int tracksCount = tracks.Count;
-
-                        if (tracksCount <= 1)
-                        {
-                            // 1トラック登録されている場合
-                            return currentTrack;
-                        }
-
-                        if (tracksCount == 2 && options.IsShuffleAvoidCurrentTrack)
-                        {
-                            // 2トラック登録されている & 同一トラック回避の場合
-                            return tracks[1 - currentTrackIndex];
-                        }
-
-                        int nextTrackIndex;
-                        do
-                        {
-                            nextTrackIndex = random.Next(0, tracks.Count);
-                        }
-                        while (nextTrackIndex == currentTrackIndex && options.IsShuffleAvoidCurrentTrack);
-
-                        return tracks[nextTrackIndex];
-                    }
-
-                default:
-                    throw new NotImplementedException();
+                // トラックのインデックスが範囲外であれば最初のトラックに戻る
+                nextTrackIndex = 0;
             }
+
+            return tracks[nextTrackIndex];
+        }
+
+        /// <summary>
+        /// 次のトラックを取得する(シャッフル)
+        /// </summary>
+        /// <param name="currentTrack">現在再生中のトラック</param>
+        /// <param name="tracks">トラック情報リスト</param>
+        /// <param name="options">再生オプション</param>
+        /// <returns></returns>
+        private static TrackInfo ShuffleNextTrack(TrackInfo currentTrack, IList<TrackInfo> tracks, IPlayerOptions options)
+        {
+            int tracksCount = tracks.Count;
+
+            switch (tracksCount)
+            {
+                // 他に選択するトラックがない場合
+                case <= 1:
+                    return currentTrack;
+
+                // トラックが2件のみ＆同一トラックの選択を回避する場合
+                case 2 when options.IsShuffleAvoidCurrentTrack:
+                    return tracks[0] == currentTrack ? tracks[1] : tracks[0];
+            }
+
+            int currentTrackIndex = tracks.IndexOf(currentTrack);
+            int nextTrackIndex;
+
+            do
+            {
+                nextTrackIndex = random.Next(0, tracks.Count);
+            }
+            while (nextTrackIndex == currentTrackIndex && options.IsShuffleAvoidCurrentTrack);
+
+            return tracks[nextTrackIndex];
         }
 
         /// <summary>
@@ -516,6 +529,9 @@ namespace Gouter.Players
         /// <param name="ex"></param>
         private void OnPlayerFailed(object sender, Exception ex)
         {
+            Debug.WriteLine("Player failed!!!");
+            Debug.WriteLine(ex.Message);
+            Debug.WriteLine(ex.StackTrace);
         }
 
         /// <summary>

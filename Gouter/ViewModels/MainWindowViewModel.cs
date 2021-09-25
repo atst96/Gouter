@@ -1,16 +1,14 @@
 ﻿using Gouter.Commands.MainWindow;
-using Gouter.Components.Mvvm;
 using Gouter.Managers;
 using Gouter.Players;
 using Livet.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Forms;
 using System.Windows.Threading;
+using Gouter.Components.Mvvm;
 using Gouter.Messaging;
 
 namespace Gouter.ViewModels
@@ -24,7 +22,7 @@ namespace Gouter.ViewModels
         /// <summary>
         /// スレッド
         /// </summary>
-        private Dispatcher _thread = _app.Dispatcher;
+        private Dispatcher _dispatcher = _app.Dispatcher;
 
         /// <summary>
         /// メッセンジャー
@@ -47,7 +45,7 @@ namespace Gouter.ViewModels
             {
                 if (this.SetProperty(ref this._selectedAlbumPlaylist, value))
                 {
-                    this.AlbumTracks = this._thread.Invoke(() => value != null ? new AlbumTrackViewModel(value) : null);
+                    this.AlbumTracks = this._dispatcher.Invoke(() => value != null ? new AlbumTrackViewModel(value) : null);
                 }
             }
         }
@@ -61,7 +59,7 @@ namespace Gouter.ViewModels
 
         public MainWindowViewModel() : base()
         {
-            _app.SettingSaving += OnSettingSaving;
+            _app.SettingSaving += this.OnSettingSaving;
 
             this.Albums = new SortedNotifiableCollectionWrapper<AlbumPlaylist>(this.Playlists.Albums, AlbumComparer.Instance);
 
@@ -152,71 +150,112 @@ namespace Gouter.ViewModels
             this.VerticalOffset = settings.AlbumListScrollPosition;
         }
 
-        private TaskDialogPage _taskDialog;
-        private TaskDialogButton _taskDialogButton;
+        private TaskDialogPage? _registerProgressDialog;
 
         /// <summary>
         /// トラック情報登録状況の変更時
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void OnTrackRegisterStateChanged(object sender, TrackRegisterProgress e) =>
-            this._thread.InvokeAsync(() =>
+        private void OnTrackRegisterStateChanged(object sender, TrackRegisterProgress e) => this._dispatcher.InvokeAsync(() =>
+        {
+            switch (e.State)
             {
-                var taskDialog = this._taskDialog;
-                var button = this._taskDialogButton;
+                case TrackRegisterState.Collecting:
+                    // 新規トラック情報収集中
+                    this.OnTrackCollecting(e);
+                    break;
 
-                switch (e.State)
+                case TrackRegisterState.InProgress:
+                    // トラック情報登録中
+                    this.OnTrackRegisterInProgress(e);
+                    break;
+
+                case TrackRegisterState.NotFound:
+                case TrackRegisterState.Complete:
+                    // トラック情報収集完了
+                    this.OnTrackRegisterFinished(e);
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        });
+
+        /// <summary>
+        /// トラック情報の登録処理
+        /// </summary>
+        /// <param name="e"></param>
+        private void OnTrackCollecting(TrackRegisterProgress e)
+        {
+            var instruction = "楽曲情報の登録";
+            var message = "新しい楽曲情報を検索しています...";
+
+            var taskDialog = this._registerProgressDialog = new()
+            {
+                Caption = App.Name,
+                Heading = instruction,
+                Text = message,
+                ProgressBar = new()
                 {
-                    case TrackRegisterState.Finding:
-                        button = this._taskDialogButton = new(TaskDialogButton.Close.Text, false, false);
-                        taskDialog = this._taskDialog = new()
-                        {
-                            Caption = App.Name,
-                            Heading = "楽曲の登録",
-                            Text = "楽曲情報を検索しています...",
-                            ProgressBar = new()
-                            {
-                                State = TaskDialogProgressBarState.Marquee,
-                                Maximum = default
-                            },
-                            Buttons = new TaskDialogButtonCollection { button },
-                        };
+                    State = TaskDialogProgressBarState.Marquee,
+                    Maximum = default
+                },
+                Buttons = new TaskDialogButtonCollection
+                {
+                    new TaskDialogButton(TaskDialogButton.Close.Text, false, false)
+                },
+            };
 
-                        this.Status = "楽曲情報を検索しています...";
-                        this.Messenger.Raise(new TaskDialogMessage("ShowTrackRegisterDialog", taskDialog));
+            this.Status = message;
+            this.Messenger.Raise(new TaskDialogMessage("ShowTrackRegisterDialog", taskDialog));
+        }
 
-                        break;
+        /// <summary>
+        /// トラック情報登録中
+        /// </summary>
+        /// <param name="e"></param>
+        private void OnTrackRegisterInProgress(TrackRegisterProgress e)
+        {
+            var taskDialog = this._registerProgressDialog;
+            var progress = taskDialog?.ProgressBar;
 
-                    case TrackRegisterState.NotFound:
-                        this.Status = null;
-                        taskDialog.BoundDialog?.Close();
-                        this._taskDialogButton = null;
-                        this._taskDialog = null;
-                        break;
+            if (progress == null)
+            {
+                return;
+            }
 
-                    case TrackRegisterState.Registering:
-                        var progress = taskDialog.ProgressBar;
-                        if (progress.Maximum == default)
-                        {
-                            progress.State = TaskDialogProgressBarState.Normal;
-                            progress.Maximum = e.Total;
+            if (progress.State == TaskDialogProgressBarState.Marquee)
+            {
+                progress.State = TaskDialogProgressBarState.Normal;
+                progress.Maximum = e.Total;
 
-                            taskDialog.Text = $"{e.Total}件の楽曲が見つかりました。楽曲情報をライブラリに登録しています...";
-                        }
+                taskDialog.Text = $"{e.Total}件の楽曲が見つかりました。楽曲情報をライブラリに登録しています...";
+            }
 
-                        progress.Value = e.Current;
-                        break;
+            progress.Value = e.Current;
+        }
 
-                    case TrackRegisterState.Complete:
-                        button.Enabled = true;
-                        taskDialog.BoundDialog?.Close();
-                        this.Status = $"{e.Total}件の楽曲を追加しました";
-                        this._taskDialogButton = null;
-                        this._taskDialog = null;
-                        break;
-                }
-            });
+        /// <summary>
+        /// トラック情報登録完了
+        /// </summary>
+        /// <param name="e"></param>
+        private void OnTrackRegisterFinished(TrackRegisterProgress e)
+        {
+            ref var taskDialog = ref this._registerProgressDialog;
+            if (taskDialog is null)
+            {
+                return;
+            }
+
+            // 登録データがあればステータスに件数を表示する
+            this.Status = e.State == TrackRegisterState.Complete
+                ? $"{e.Total}件の楽曲を追加しました"
+                : null;
+            taskDialog.BoundDialog?.Close();
+
+            this._registerProgressDialog = null;
+        }
 
         private IPlaylist _currentPlaylist;
         public IPlaylist CurrentPlaylist
@@ -252,27 +291,12 @@ namespace Gouter.ViewModels
             set => this.SetProperty(ref this._selectedTrack, value);
         }
 
-        private Command _playCommand;
-        public Command PlayCommand => this._playCommand ??= new PlayCommand(this);
-
-        private Command _previousTrackCommand;
-        public Command PreviousTrackCommand => this._previousTrackCommand ??= new PreviousTrackCommand(this);
-
-        private Command _nextTrackCommand;
-        public Command NextTrackCommand => this._nextTrackCommand ??= new NextTrackCommand(this);
-
         /// <summary>
         /// ウィンドウを閉じた場合
         /// </summary>
         public void OnClosed()
         {
         }
-
-        private Command<AlbumPlaylist> _selectAlbumPlaylistCommand;
-        public Command<AlbumPlaylist> SelectAlbumPlaylistCommand => this._selectAlbumPlaylistCommand ??= new SelectAlbumPlaylistCommand(this);
-
-        private Command _closeAlbumPlaylistTrackListCommand;
-        public Command CloseAlbumPlaylistTrackListCommand => this._closeAlbumPlaylistTrackListCommand ??= new CloseAlbumPlaylistTrackListCommand(this);
 
         private IPlaylist _playingPlaylist;
         public IPlaylist PlayingPlaylist
@@ -300,33 +324,6 @@ namespace Gouter.ViewModels
         public const int MaxHistoryCount = 50;
 
         public bool IsPlayRequired { get; set; }
-
-        public void Play()
-        {
-            this.IsPlayRequired = true;
-
-            try
-            {
-                this.Player.Play();
-            }
-            catch (Exception ex) when (ex is TaskCanceledException || ex is OperationCanceledException)
-            {
-                // pass
-            }
-        }
-
-        public void Play(TrackInfo track, IPlaylist playlist)
-        {
-            this.IsPlayRequired = true;
-            try
-            {
-                this.Player.Play(track, playlist);
-            }
-            catch (Exception ex) when (ex is TaskCanceledException || ex is OperationCanceledException)
-            {
-                // pass
-            }
-        }
 
         private bool _isOpenAlbumPlaylistTrackList = false;
         public bool IsOpenAlbumPlaylistTrackList
@@ -378,6 +375,39 @@ namespace Gouter.ViewModels
                     break;
             }
         }
+
+        private Command _playCommand;
+        private Command _previousTrackCommand;
+        private Command _nextTrackCommand;
+
+        /// <summary>
+        /// 再生コマンド
+        /// </summary>
+        public Command PlayCommand => this._playCommand ??= new DelegateCommand(() =>
+        {
+            if (this.Player.IsPlaying)
+            {
+                this.IsPlayRequired = false;
+                this.Player.Pause();
+            }
+            else
+            {
+                this.IsPlayRequired = true;
+                this.Player.Play();
+            }
+        });
+
+        /// <summary>
+        /// 次トラックへの変更コマンド
+        /// </summary>
+        public Command NextTrackCommand => this._nextTrackCommand ??= new DelegateCommand(
+            () => this.Player.PlayNext());
+
+        /// <summary>
+        /// 前トラックへの変更コマンド
+        /// </summary>
+        public Command PreviousTrackCommand => this._previousTrackCommand ??= new DelegateCommand(
+            () => this.Player.PlayPrevious());
 
         /// <summary>
         /// ミュート状態を取得または設定する

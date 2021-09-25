@@ -169,7 +169,7 @@ namespace Gouter.Managers
                     albumInfo.Playlist.Tracks.AddRange(tracks);
 
                     count += tracks.Count;
-                    this.TrackRegisterStateChanged?.Invoke(this, new(TrackRegisterState.Registering, count, maxCount));
+                    this.TrackRegisterStateChanged?.Invoke(this, new(TrackRegisterState.InProgress, count, maxCount));
                 }
 
                 transaction.Commit();
@@ -207,7 +207,7 @@ namespace Gouter.Managers
             IReadOnlyCollection<string> excludePaths)
         {
             // 新規トラック情報検索開始
-            this.TrackRegisterStateChanged?.Invoke(this, new(TrackRegisterState.Finding));
+            this.TrackRegisterStateChanged?.Invoke(this, new(TrackRegisterState.Collecting));
 
             var newTracks = TrackFinder.FindUnregistered(this.Tracks,
                 musicDirectories, excludeDirectories, excludePaths);
@@ -221,7 +221,7 @@ namespace Gouter.Managers
             }
 
             // トラック情報登録開始
-            this.TrackRegisterStateChanged?.Invoke(this, new(TrackRegisterState.Registering, 0, trackCount));
+            this.TrackRegisterStateChanged?.Invoke(this, new(TrackRegisterState.InProgress, 0, trackCount));
 
             this.RegisterTracks(newTracks);
             this.Flush();

@@ -8,12 +8,12 @@
         /// <summary>
         /// 検索中
         /// </summary>
-        Finding,
+        Collecting,
 
         /// <summary>
         /// 登録中
         /// </summary>
-        Registering,
+        InProgress,
 
         /// <summary>
         /// 完了
