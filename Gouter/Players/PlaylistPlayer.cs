@@ -13,7 +13,7 @@ namespace Gouter.Players
     /// </summary>
     internal class PlaylistPlayer : NotificationObject, IDisposable
     {
-        private static readonly Random random = new Random();
+        private static readonly Random _random = new();
 
         /// <summary>
         /// メディア管理クラス
@@ -28,12 +28,12 @@ namespace Gouter.Players
         /// <summary>
         /// プレーや設定の内部変数
         /// </summary>
-        private IPlayerOptions _options;
+        private PlayerOptions _options;
 
         /// <summary>
         /// プレーヤ設定
         /// </summary>
-        public IPlayerOptions Options
+        public PlayerOptions Options
         {
             get => this._options;
             set
@@ -127,7 +127,7 @@ namespace Gouter.Players
         /// コンストラクタ
         /// </summary>
         /// <param name="mediaManager">メディア管理クラス</param>
-        public PlaylistPlayer(MediaManager mediaManager, IPlayerOptions options)
+        public PlaylistPlayer(MediaManager mediaManager, PlayerOptions options)
             : base()
         {
             this.Options = options ?? throw new ArgumentNullException(nameof(options));
@@ -355,7 +355,7 @@ namespace Gouter.Players
         /// <param name="tracks">トラック情報リスト</param>
         /// <param name="options">再生オプション</param>
         /// <returns></returns>
-        private static TrackInfo ShuffleNextTrack(TrackInfo currentTrack, IList<TrackInfo> tracks, IPlayerOptions options)
+        private static TrackInfo ShuffleNextTrack(TrackInfo currentTrack, IList<TrackInfo> tracks, PlayerOptions options)
         {
             int tracksCount = tracks.Count;
 
@@ -375,7 +375,7 @@ namespace Gouter.Players
 
             do
             {
-                nextTrackIndex = random.Next(0, tracks.Count);
+                nextTrackIndex = _random.Next(0, tracks.Count);
             }
             while (nextTrackIndex == currentTrackIndex && options.IsShuffleAvoidCurrentTrack);
 

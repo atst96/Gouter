@@ -92,12 +92,12 @@ namespace Gouter.Players
         /// <summary>
         /// プレーヤ設定(内部変数)
         /// </summary>
-        private IPlayerOptions _options;
+        private PlayerOptions _options = new();
 
         /// <summary>
         /// プレーヤ設定
         /// </summary>
-        public IPlayerOptions Options
+        public PlayerOptions Options
         {
             get => this._options;
             set => this._options = value ?? throw new ArgumentNullException(nameof(this.Options));
@@ -196,7 +196,7 @@ namespace Gouter.Players
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public SoundFilePlayer(IPlayerOptions options)
+        public SoundFilePlayer(PlayerOptions options)
         {
             this.Options = options ?? throw new ArgumentNullException(nameof(options));
         }

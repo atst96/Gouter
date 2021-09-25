@@ -172,20 +172,6 @@
                         Style="{StaticResource TrackSeekBarStyle}"/>
                 </StackPanel>
 
-                <StackPanel
-                    Margin="6,0,12,0"
-                    Grid.Column="3"
-                    Orientation="Vertical"
-                    VerticalAlignment="Center">
-                    <CheckBox
-                        Content="ループ再生"
-                        IsChecked="{Binding IsLoop, Mode=TwoWay}" />
-
-                    <CheckBox
-                        Content="シャッフル再生" 
-                        IsChecked="{Binding IsShuffle, Mode=TwoWay}" />
-                </StackPanel>
-
                 <Button
                     Grid.Column="4"
                     Style="{DynamicResource {x:Static ToolBar.ButtonStyleKey}}"
@@ -205,6 +191,7 @@
                             <ColumnDefinition Width="56" />
                             <ColumnDefinition />
                             <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="120" />
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition />
@@ -258,6 +245,24 @@
                             VerticalAlignment="Center"
                             TextWrapping="NoWrap"
                             TextTrimming="CharacterEllipsis" />
+
+                        <StackPanel
+                            Grid.Column="3" Grid.RowSpan="2" Margin="5,0"
+                            VerticalAlignment="Center">
+                            <ComboBox
+                                Margin="1" Padding="4,3"
+                                SelectedValue="{Binding LoopMode, Mode=TwoWay}"
+                                ItemsSource="{Binding LoopModes, Mode=OneTime}"
+                                SelectedValuePath="Key"
+                                DisplayMemberPath="Value" />
+
+                            <ComboBox
+                                Margin="1" Padding="4,3"
+                                SelectedValue="{Binding ShuffleMode, Mode=TwoWay}"
+                                ItemsSource="{Binding ShuffleModes, Mode=OneTime}"
+                                SelectedValuePath="Key"
+                                DisplayMemberPath="Value" />
+                        </StackPanel>
                     </Grid>
                 </Border>
             </Grid>

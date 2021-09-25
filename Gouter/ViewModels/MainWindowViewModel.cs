@@ -305,20 +305,6 @@ namespace Gouter.ViewModels
             set => this.SetProperty(ref this._playingPlaylist, value);
         }
 
-        private bool _isLoop = true;
-        public bool IsLoop
-        {
-            get => this._isLoop;
-            set => this.SetProperty(ref this._isLoop, value);
-        }
-
-        private bool _isShuffle;
-        public bool IsShuffle
-        {
-            get => this._isShuffle;
-            set => this.SetProperty(ref this._isShuffle, value);
-        }
-
         private readonly LinkedList<TrackInfo> _playHistory = new LinkedList<TrackInfo>();
 
         public const int MaxHistoryCount = 50;
@@ -431,6 +417,51 @@ namespace Gouter.ViewModels
         private void OnTimerTick(object sender, EventArgs e)
         {
             this.UpdateTime();
+        }
+
+        /// <summary>
+        /// ループモードの表示名
+        /// </summary>
+        public IReadOnlyDictionary<LoopMode, string> LoopModes { get; } = new Dictionary<LoopMode, string>
+        {
+            [LoopMode.None] = "リピートなし",
+            [LoopMode.SingleTrack] = "1曲のみリピート",
+            [LoopMode.Playlist] = "プレイリストをリピート",
+        };
+
+        /// <summary>
+        /// シャッフルモードの表示名
+        /// </summary>
+        public IReadOnlyDictionary<ShuffleMode, string> ShuffleModes { get; } = new Dictionary<ShuffleMode, string>
+        {
+            [ShuffleMode.None] = "シャッフルなし",
+            [ShuffleMode.Random] = "プレイリストをシャッフル",
+        };
+
+        /// <summary>
+        /// ループモード
+        /// </summary>
+        public LoopMode LoopMode
+        {
+            get => this.Player.Options.LoopMode;
+            set
+            {
+                this.Player.Options.LoopMode = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// シャッフルモード
+        /// </summary>
+        public ShuffleMode ShuffleMode
+        {
+            get => this.Player.Options.ShuffleMode;
+            set
+            {
+                this.Player.Options.ShuffleMode = value;
+                this.RaisePropertyChanged();
+            }
         }
 
         /// <summary>
