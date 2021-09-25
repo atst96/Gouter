@@ -6,6 +6,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:app="clr-namespace:Gouter"
     xmlns:vm="clr-namespace:Gouter.ViewModels"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:l="http://schemas.livet-mvvm.net/2011/wpf"
     mc:Ignorable="d"
     Title="設定" Height="450" Width="620"
     FontFamily="Meiryo"
@@ -39,10 +41,20 @@
                 HorizontalAlignment="Right">
                 <Button
                     Padding="24 2"
-                    Content="閉じる"/>
+                    Content="閉じる">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Click">
+                            <l:WindowInteractionMessageAction>
+                                <l:DirectInteractionMessage>
+                                    <l:WindowActionMessage Action="Close" />
+                                </l:DirectInteractionMessage>
+                            </l:WindowInteractionMessageAction>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </Button>
             </StackPanel>
         </Border>
-        
+
         <TabControl Style="{StaticResource LeftHeaderTabControlStyle}">
             <TabItem Header="ディレクトリ">
                 <StackPanel Margin="{StaticResource PanelPadding}">
@@ -68,7 +80,7 @@
                             Padding="24 3"
                             Content="フォルダの追加"
                             Command="{Binding AddMusicDirectoryCommand, Mode=OneTime}"/>
-                        
+
                         <Button
                             Padding="24 3"
                             Content="削除"
@@ -109,7 +121,7 @@
                     </StackPanel>
                 </StackPanel>
             </TabItem>
-            
+
             <TabItem Header="一般">
                 <StackPanel Margin="{StaticResource PanelPadding}">
                     <Label
@@ -120,6 +132,7 @@
 
             <TabItem Header="サウンド出力">
                 <StackPanel
+                    IsEnabled="False"
                     Margin="{StaticResource PanelPadding}">
                     <Label
                         Style="{StaticResource HeaderTitleStyle}"
