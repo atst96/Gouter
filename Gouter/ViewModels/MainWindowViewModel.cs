@@ -13,10 +13,11 @@ using Gouter.Messaging;
 
 namespace Gouter.ViewModels
 {
+    /// <summary>
+    /// <see cref="Views.MainWindow"/>のViewModel
+    /// </summary>
     internal sealed class MainWindowViewModel : ViewModelBase, IDisposable
     {
-        private readonly Random _rand = new Random();
-
         private static readonly App _app = App.Instance;
 
         /// <summary>
@@ -291,13 +292,6 @@ namespace Gouter.ViewModels
             set => this.SetProperty(ref this._selectedTrack, value);
         }
 
-        /// <summary>
-        /// ウィンドウを閉じた場合
-        /// </summary>
-        public void OnClosed()
-        {
-        }
-
         private IPlaylist _playingPlaylist;
         public IPlaylist PlayingPlaylist
         {
@@ -462,6 +456,13 @@ namespace Gouter.ViewModels
                 this.Player.Options.ShuffleMode = value;
                 this.RaisePropertyChanged();
             }
+        }
+
+        /// <summary>
+        /// ウィンドウを閉じた場合
+        /// </summary>
+        public void OnClosed()
+        {
         }
 
         /// <summary>

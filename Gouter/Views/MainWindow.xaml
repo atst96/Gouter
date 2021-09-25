@@ -10,36 +10,17 @@
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:l="http://schemas.livet-mvvm.net/2011/wpf"
     xmlns:b="clr-namespace:Gouter.Behaviors"
-    xmlns:conv="clr-namespace:Gouter.Converters"
-    xmlns:cnm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
     xmlns:controls="clr-namespace:Gouter.Controls"
     mc:Ignorable="d"
     Title="Gouter" Height="450" Width="800"
     UseLayoutRounding="True"
     FontFamily="Meiryo"
-    xmlns:sys="clr-namespace:System;assembly=System.Runtime"
     DataContext="{app:ViewModelConnector vm:MainWindowViewModel}"
     d:DataContext="{d:DesignInstance vm:MainWindowViewModel, IsDesignTimeCreatable=True}">
     <Window.Resources>
         <ItemsPanelTemplate x:Key="ItemsPanelTemplate">
             <VirtualizingStackPanel Orientation="Vertical" />
         </ItemsPanelTemplate>
-
-        <CollectionViewSource
-            x:Key="TracksCollectionViewSource"
-            Source="{Binding SelectedAlbumPlaylist.Tracks, Mode=OneWay}">
-            <CollectionViewSource.GroupDescriptions>
-                <PropertyGroupDescription PropertyName="DiskNumber" />
-            </CollectionViewSource.GroupDescriptions>
-            <CollectionViewSource.SortDescriptions>
-                <cnm:SortDescription PropertyName="DiskNumber" />
-                <cnm:SortDescription PropertyName="TrackNumber" />
-                <cnm:SortDescription PropertyName="Name" />
-            </CollectionViewSource.SortDescriptions>
-        </CollectionViewSource>
-
-        <Duration x:Key="AnimateDuration">0:0:0.5</Duration>
-        <KeyTime x:Key="AnimationEndKeyTime">0:0:0.5</KeyTime>
     </Window.Resources>
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="ContentRendered">
