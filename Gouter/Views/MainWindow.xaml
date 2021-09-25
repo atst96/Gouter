@@ -10,6 +10,8 @@
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:l="http://schemas.livet-mvvm.net/2011/wpf"
     xmlns:b="clr-namespace:Gouter.Behaviors"
+    xmlns:a="clr-namespace:Gouter.Behaviors.Messages"
+    xmlns:m="clr-namespace:Gouter.Messaging"
     xmlns:controls="clr-namespace:Gouter.Controls"
     mc:Ignorable="d"
     Title="Gouter" Height="450" Width="800"
@@ -155,10 +157,19 @@
 
                 <Button
                     Grid.Column="4"
-                    Style="{DynamicResource {x:Static ToolBar.ButtonStyleKey}}"
-                    Command="{Binding OpenSettingWindowCommand, Mode=OneTime}">
+                    Style="{DynamicResource {x:Static ToolBar.ButtonStyleKey}}">
                     <app:GeometryIcon
                         Data="{StaticResource MaterialIcons.Settings}" />
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Click">
+                            <!--設定ダイアログを開く-->
+                            <a:OpenSettingViewDialogAction>
+                                <l:DirectInteractionMessage>
+                                    <m:OpenSettingDialogMessage />
+                                </l:DirectInteractionMessage>
+                            </a:OpenSettingViewDialogAction>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
                 </Button>
 
                 <Border

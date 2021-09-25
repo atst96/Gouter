@@ -61,16 +61,10 @@ namespace Gouter
                 this._view = view;
 
                 var dialogService = viewModel.DialogService;
-                var windowService = viewModel.WindowService;
 
                 if (this.ConnectDialogService)
                 {
                     dialogService.SetView(view);
-                }
-
-                if (this.ConnectWindowService)
-                {
-                    windowService.SetView(view);
                 }
             }
 

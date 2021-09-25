@@ -19,13 +19,6 @@ namespace Gouter
         /// </summary>
         public DialogService DialogService => this._dialogService ??= new DialogService(this);
 
-        private WindowService _windowService;
-
-        /// <summary>
-        /// ウィンドウ関連サービス
-        /// </summary>
-        public WindowService WindowService => this._windowService ??= new WindowService(this);
-
         /// <summary>
         /// プロパティ変更通知イベントハンドラ
         /// </summary>

@@ -1,5 +1,4 @@
-﻿using Gouter.Commands.MainWindow;
-using Gouter.Managers;
+﻿using Gouter.Managers;
 using Gouter.Players;
 using Livet.Messaging;
 using System;
@@ -311,9 +310,6 @@ namespace Gouter.ViewModels
             get => this._isOpenAlbumPlaylistTrackList;
             set => this.SetProperty(ref this._isOpenAlbumPlaylistTrackList, value);
         }
-
-        private Command _openSettingWindowCommand;
-        public Command OpenSettingWindowCommand => this._openSettingWindowCommand ??= (new OpenSettingWindowCommand(this));
 
         private double _currentTime = 0.0d;
         private double _duration = 0.0d;
