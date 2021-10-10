@@ -1,5 +1,4 @@
-﻿using Gouter.Services;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -12,12 +11,6 @@ namespace Gouter
     internal abstract class ViewModelBase : INotifyPropertyChanged, IDisposable
     {
         private List<IDisposable> _disposables = new();
-
-        private DialogService _dialogService;
-        /// <summary>
-        /// ダイアログ関連サービス
-        /// </summary>
-        public DialogService DialogService => this._dialogService ??= new DialogService(this);
 
         /// <summary>
         /// プロパティ変更通知イベントハンドラ

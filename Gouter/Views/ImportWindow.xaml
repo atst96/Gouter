@@ -8,9 +8,11 @@
     xmlns:vm="clr-namespace:Gouter.ViewModels"
     mc:Ignorable="d"
     Title="ImportWindow" Height="450" Width="800"
-    DataContext="{app:ViewModelConnector vm:ImportWindowViewModel}"
     d:DataContext="{d:DesignInstance vm:ImportWindowViewModel, IsDesignTimeCreatable=True}">
+    <Window.DataContext>
+        <vm:ImportWindowViewModel />
+    </Window.DataContext>
     <Grid>
-        
+
     </Grid>
 </Window>

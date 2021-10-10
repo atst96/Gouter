@@ -17,8 +17,10 @@
     Title="Gouter" Height="450" Width="800"
     UseLayoutRounding="True"
     FontFamily="Meiryo"
-    DataContext="{app:ViewModelConnector vm:MainWindowViewModel}"
     d:DataContext="{d:DesignInstance vm:MainWindowViewModel, IsDesignTimeCreatable=True}">
+    <Window.DataContext>
+        <vm:MainWindowViewModel />
+    </Window.DataContext>
     <Window.Resources>
         <ItemsPanelTemplate x:Key="ItemsPanelTemplate">
             <VirtualizingStackPanel Orientation="Vertical" />

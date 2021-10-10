@@ -17,8 +17,10 @@
     UseLayoutRounding="True"
     TextOptions.TextFormattingMode="Display"
     xmlns:sys="clr-namespace:System;assembly=System.Runtime"
-    DataContext="{app:ViewModelConnector vm:SettingWindowViewModel}"
     d:DataContext="{d:DesignInstance vm:SettingWindowViewModel, IsDesignTimeCreatable=True}">
+    <Window.DataContext>
+        <vm:SettingWindowViewModel />
+    </Window.DataContext>
     <Window.Resources>
         <Thickness x:Key="PanelPadding">16,10</Thickness>
         <Thickness x:Key="TopAdjacentMargin">0,8,0,0</Thickness>
