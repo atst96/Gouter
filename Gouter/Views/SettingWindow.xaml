@@ -8,6 +8,8 @@
     xmlns:vm="clr-namespace:Gouter.ViewModels"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
     xmlns:l="http://schemas.livet-mvvm.net/2011/wpf"
+    xmlns:b="clr-namespace:Gouter.Behaviors.Messages"
+    xmlns:m="clr-namespace:Gouter.Messaging"
     mc:Ignorable="d"
     Title="設定" Height="450" Width="620"
     FontFamily="Meiryo"
@@ -78,8 +80,18 @@
                         Orientation="Horizontal">
                         <Button
                             Padding="24 3"
-                            Content="フォルダの追加"
-                            Command="{Binding AddMusicDirectoryCommand, Mode=OneTime}"/>
+                            Content="フォルダの追加">
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="Click">
+                                    <b:SelectFolderDialogInteractionMessageAction>
+                                        <l:DirectInteractionMessage CallbackCommand="{Binding AddMusicDirectoryCommand, Mode=OneTime}">
+                                            <m:FolderSelectionMessage 
+                                                Description="音楽フォルダを選択" />
+                                        </l:DirectInteractionMessage>
+                                    </b:SelectFolderDialogInteractionMessageAction>
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                        </Button>
 
                         <Button
                             Padding="24 3"
@@ -108,8 +120,18 @@
                         Orientation="Horizontal">
                         <Button
                             Padding="24 3"
-                            Content="フォルダの追加"
-                            Command="{Binding AddExcludeDirectoryCommand, Mode=OneTime}"/>
+                            Content="フォルダの追加">
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="Click">
+                                    <b:SelectFolderDialogInteractionMessageAction>
+                                        <l:DirectInteractionMessage CallbackCommand="{Binding AddExcludeDirectoryCommand, Mode=OneTime}">
+                                            <m:FolderSelectionMessage 
+                                                Description="検索から除外するディレクトリを選択" />
+                                        </l:DirectInteractionMessage>
+                                    </b:SelectFolderDialogInteractionMessageAction>
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                        </Button>
 
                         <Button
                             Padding="24 3"

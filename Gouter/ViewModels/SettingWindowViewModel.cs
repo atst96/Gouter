@@ -1,6 +1,9 @@
 ﻿using Gouter.Commands.SettingWindow;
 using Gouter.Managers;
+using Gouter.Messaging;
 using Gouter.Players;
+using Livet.Commands;
+using Livet.Messaging;
 using System;
 using System.Collections.Generic;
 
@@ -13,6 +16,11 @@ namespace Gouter.ViewModels
         private readonly MediaManager _mediaManager = AppInstance.MediaManager;
         private readonly PlaylistPlayer _mediaPlayer = AppInstance.MediaPlayer;
         private readonly SoundDeviceListener _soundDeviceListener = AppInstance.SoundDeviceListener;
+
+        /// <summary>
+        /// Messenger
+        /// </summary>
+        public InteractionMessenger Messenger { get; } = new();
 
         public SettingWindowViewModel()
         {
@@ -47,8 +55,16 @@ namespace Gouter.ViewModels
             }
         }
 
-        private Command _addMusicDirectoryCommand;
-        public Command AddMusicDirectoryCommand => this._addMusicDirectoryCommand ?? (this._addMusicDirectoryCommand = new AddMusicDirectoryCommand(this));
+        private ListenerCommand<FolderSelectionMessage> _addMusicDirectoryCommand;
+        public ListenerCommand<FolderSelectionMessage> AddMusicDirectoryCommand => this._addMusicDirectoryCommand ??= new(msg =>
+        {
+            var (path, directories) = (msg.Response, this.MusicDirectories);
+
+            if (!string.IsNullOrEmpty(path) && !directories.Contains(path))
+            {
+                directories.Add(path);
+            }
+        });
 
         private Command<string> _removeMusicDirectoryCommand;
         public Command<string> RemoveMusicDirectoryCommand => this._removeMusicDirectoryCommand ?? (this._removeMusicDirectoryCommand = new RemoveMusicDirectoryCommand(this));
@@ -68,8 +84,16 @@ namespace Gouter.ViewModels
             }
         }
 
-        private Command _addExcludeDirectoryCommand;
-        public Command AddExcludeDirectoryCommand => this._addExcludeDirectoryCommand ??= new AddExcludeDirectoryCommand(this);
+        private ListenerCommand<FolderSelectionMessage> _addExcludeDirectoryCommand;
+        public ListenerCommand<FolderSelectionMessage> AddExcludeDirectoryCommand => this._addExcludeDirectoryCommand ??= new(msg =>
+        {
+            var (path, directories) = (msg.Response, this.ExcludeDirectories);
+
+            if (!string.IsNullOrEmpty(path) && !directories.Contains(path))
+            {
+                directories.Add(path);
+            }
+        });
 
         private Command<string> _removeExcludeDirectoryCommand;
         public Command<string> RemoveExcludeDirectoryCommand => this._removeExcludeDirectoryCommand ??= new RemoveExcludeDirectoryCommand(this);
