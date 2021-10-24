@@ -87,7 +87,8 @@
                                 <i:EventTrigger EventName="Click">
                                     <b:SelectFolderDialogInteractionMessageAction>
                                         <l:DirectInteractionMessage CallbackCommand="{Binding AddMusicDirectoryCommand, Mode=OneTime}">
-                                            <m:FolderSelectionMessage 
+                                            <m:FolderSelectionMessage
+                                                UseDescriptionForTitle="True"
                                                 Description="音楽フォルダを選択" />
                                         </l:DirectInteractionMessage>
                                     </b:SelectFolderDialogInteractionMessageAction>
@@ -128,6 +129,7 @@
                                     <b:SelectFolderDialogInteractionMessageAction>
                                         <l:DirectInteractionMessage CallbackCommand="{Binding AddExcludeDirectoryCommand, Mode=OneTime}">
                                             <m:FolderSelectionMessage 
+                                                UseDescriptionForTitle="True"
                                                 Description="検索から除外するディレクトリを選択" />
                                         </l:DirectInteractionMessage>
                                     </b:SelectFolderDialogInteractionMessageAction>
