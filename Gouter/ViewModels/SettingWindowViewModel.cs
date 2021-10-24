@@ -1,8 +1,6 @@
-﻿using Gouter.Commands.SettingWindow;
-using Gouter.Managers;
+﻿using Gouter.Managers;
 using Gouter.Messaging;
 using Gouter.Players;
-using Livet.Commands;
 using Livet.Messaging;
 using System;
 using System.Collections.Generic;
@@ -55,8 +53,8 @@ namespace Gouter.ViewModels
             }
         }
 
-        private ListenerCommand<FolderSelectionMessage> _addMusicDirectoryCommand;
-        public ListenerCommand<FolderSelectionMessage> AddMusicDirectoryCommand => this._addMusicDirectoryCommand ??= new(msg =>
+        private Command<FolderSelectionMessage> _addMusicDirectoryCommand;
+        public Command<FolderSelectionMessage> AddMusicDirectoryCommand => this._addMusicDirectoryCommand ??= this.Commands.Create<FolderSelectionMessage>(msg =>
         {
             var (path, directories) = (msg.Response, this.MusicDirectories);
 
@@ -67,7 +65,8 @@ namespace Gouter.ViewModels
         });
 
         private Command<string> _removeMusicDirectoryCommand;
-        public Command<string> RemoveMusicDirectoryCommand => this._removeMusicDirectoryCommand ?? (this._removeMusicDirectoryCommand = new RemoveMusicDirectoryCommand(this));
+        public Command<string> RemoveMusicDirectoryCommand => this._removeMusicDirectoryCommand
+            ??= this.Commands.Create<string>(path => this.MusicDirectories.Remove(path));
 
         public ObservableList<string> ExcludeDirectories { get; }
 
@@ -84,8 +83,8 @@ namespace Gouter.ViewModels
             }
         }
 
-        private ListenerCommand<FolderSelectionMessage> _addExcludeDirectoryCommand;
-        public ListenerCommand<FolderSelectionMessage> AddExcludeDirectoryCommand => this._addExcludeDirectoryCommand ??= new(msg =>
+        private Command<FolderSelectionMessage> _addExcludeDirectoryCommand;
+        public Command<FolderSelectionMessage> AddExcludeDirectoryCommand => this._addExcludeDirectoryCommand ??= this.Commands.Create<FolderSelectionMessage>(msg =>
         {
             var (path, directories) = (msg.Response, this.ExcludeDirectories);
 
@@ -96,7 +95,8 @@ namespace Gouter.ViewModels
         });
 
         private Command<string> _removeExcludeDirectoryCommand;
-        public Command<string> RemoveExcludeDirectoryCommand => this._removeExcludeDirectoryCommand ??= new RemoveExcludeDirectoryCommand(this);
+        public Command<string> RemoveExcludeDirectoryCommand => this._removeExcludeDirectoryCommand
+            ??= this.Commands.Create<string>(path => this.ExcludeDirectories.Remove(path));
 
         public SoundOutType SelectedSoundOutType
         {

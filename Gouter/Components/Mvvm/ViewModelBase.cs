@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Gouter.Components.Mvvm;
 
 namespace Gouter
 {
@@ -10,12 +11,15 @@ namespace Gouter
     /// </summary>
     internal abstract class ViewModelBase : INotifyPropertyChanged, IDisposable
     {
-        private List<IDisposable> _disposables = new();
-
         /// <summary>
         /// プロパティ変更通知イベントハンドラ
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// コマンド管理
+        /// </summary>
+        protected MvvmCommandManager Commands { get; } = new();
 
         /// <summary>
         /// プロパティの変更通知を行う
@@ -49,30 +53,12 @@ namespace Gouter
             return true;
         }
 
-        #region Commands
-
-        /// <summary>
-        /// ViewModelにコマンドを登録する
-        /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected T RegisterCommand<T>(T command)
-            where T : IDisposableCommand
-        {
-            this._disposables.Add(command);
-            return command;
-        }
-
-        #endregion
-
         /// <summary>
         /// インスタンス破棄時
         /// </summary>
         protected virtual void OnDispose()
         {
-            this._disposables.ForEach(cmd => cmd.Dispose());
-            this._disposables.Clear();
+            this.Commands.Dispose();
         }
 
         /// <summary>

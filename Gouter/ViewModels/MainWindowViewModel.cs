@@ -359,7 +359,7 @@ namespace Gouter.ViewModels
         /// <summary>
         /// 再生コマンド
         /// </summary>
-        public Command PlayCommand => this._playCommand ??= new DelegateCommand(() =>
+        public Command PlayCommand => this._playCommand ??= this.Commands.Create(() =>
         {
             if (this.Player.IsPlaying)
             {
@@ -376,14 +376,14 @@ namespace Gouter.ViewModels
         /// <summary>
         /// 次トラックへの変更コマンド
         /// </summary>
-        public Command NextTrackCommand => this._nextTrackCommand ??= new DelegateCommand(
-            () => this.Player.PlayNext());
+        public Command NextTrackCommand => this._nextTrackCommand
+            ??= this.Commands.Create(() => this.Player.PlayNext());
 
         /// <summary>
         /// 前トラックへの変更コマンド
         /// </summary>
-        public Command PreviousTrackCommand => this._previousTrackCommand ??= new DelegateCommand(
-            () => this.Player.PlayPrevious());
+        public Command PreviousTrackCommand => this._previousTrackCommand
+            ??= this.Commands.Create(() => this.Player.PlayPrevious());
 
         /// <summary>
         /// ミュート状態を取得または設定する

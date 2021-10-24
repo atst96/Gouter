@@ -1,13 +1,12 @@
 ﻿using System.ComponentModel;
 using System.Windows.Data;
-using Gouter.Components.Mvvm;
 
 namespace Gouter.ViewModels
 {
     /// <summary>
     /// アルバムのトラック情報リスト
     /// </summary>
-    internal class AlbumTrackViewModel : NotificationObject
+    internal class AlbumTrackViewModel : ViewModelBase
     {
         /// <summary>
         /// アルバム情報
@@ -69,7 +68,7 @@ namespace Gouter.ViewModels
         /// トラックのダブルクリック時のコマンド
         /// </summary>
         public Command<TrackInfo> TrackPlayCommand => this._trackPlayCommand
-            ??= new DelegateCommand<TrackInfo>(this.OnPlayCommandExecute, track => track != null);
+            ??= this.Commands.Create<TrackInfo>(this.OnPlayCommandExecute, track => track != null);
 
         private void OnPlayCommandExecute(TrackInfo track)
         {
