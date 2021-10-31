@@ -77,7 +77,7 @@
                         Command="{Binding PreviousTrackCommand, Mode=OneTime}">
                         <app:GeometryIcon
                             Width="20" Height="14"
-                            Data="{StaticResource MaterialIcons.FastRewind}" />
+                            Data="{StaticResource Icons.FastRewind}" />
                     </controls:CornerButton>
                     <controls:CornerButton
                         Grid.Column="1"
@@ -90,7 +90,7 @@
                         Command="{Binding NextTrackCommand, Mode=OneTime}">
                         <app:GeometryIcon
                             Width="20" Height="20"
-                            Data="{StaticResource MaterialIcons.FastForward}" />
+                            Data="{StaticResource Icons.FastForward}" />
                     </controls:CornerButton>
                     <controls:CornerButton
                         x:Name="PlayButton"
@@ -111,13 +111,13 @@
                                     <app:GeometryIcon
                                         x:Name="icon"
                                         Width="19" Height="24"
-                                        Data="{StaticResource MaterialIcons.PlayArrow}" />
+                                        Data="{StaticResource Icons.PlayArrow}" />
                                 </Border>
                                 <DataTemplate.Triggers>
                                     <DataTrigger Binding="{Binding  Player.IsPlaying, Mode=OneWay}" Value="True">
                                         <Setter TargetName="border" Property="Padding" Value="0" />
                                         <Setter TargetName="icon" Property="Width" Value="24" />
-                                        <Setter TargetName="icon" Property="Data" Value="{StaticResource MaterialIcons.Pause}" />
+                                        <Setter TargetName="icon" Property="Data" Value="{StaticResource Icons.Pause}" />
                                     </DataTrigger>
                                 </DataTemplate.Triggers>
                             </DataTemplate>
@@ -138,12 +138,12 @@
                         <Grid>
                             <app:GeometryIcon
                                 Width="16" Height="16"
-                                Data="{StaticResource MaterialIcons.VolumeUp}"
+                                Data="{StaticResource Icons.VolumeUp}"
                                 b:ElementBehavior.IsCollapse="{Binding IsChecked ,ElementName=MuteButton, Mode=OneWay}"/>
                             <app:GeometryIcon
                                 Width="16" Height="16"
                                 Fill="#FF0000"
-                                Data="{StaticResource MaterialIcons.VolumeOff}"
+                                Data="{StaticResource Icons.VolumeOff}"
                                 b:ElementBehavior.Show="{Binding IsChecked ,ElementName=MuteButton, Mode=OneWay}"/>
                         </Grid>
                     </ToggleButton>
@@ -161,7 +161,7 @@
                     Grid.Column="4"
                     Style="{DynamicResource {x:Static ToolBar.ButtonStyleKey}}">
                     <app:GeometryIcon
-                        Data="{StaticResource MaterialIcons.Settings}" />
+                        Data="{StaticResource Icons.Settings}" />
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="Click">
                             <!--設定ダイアログを開く-->

@@ -56,7 +56,7 @@
                 HorizontalAlignment="Right"
                 VerticalAlignment="Stretch"
                 Fill="#666666"
-                Data="{StaticResource MaterialIcons.VolumeUp}" />
+                Data="{StaticResource Icons.VolumeUp}" />
 
             <TextBlock
                 Margin="0,0,4,0"
