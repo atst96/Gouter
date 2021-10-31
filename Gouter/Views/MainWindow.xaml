@@ -284,73 +284,62 @@
             </StatusBarItem>
         </StatusBar>
 
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="240" />
-                <ColumnDefinition Width="8" />
-                <ColumnDefinition />
-            </Grid.ColumnDefinitions>
+        <TabControl Grid.Row="1" Style="{StaticResource PlaylistSelectTabControlStyle}">
+            <TabItem>
+                <TabItem.Header>
+                    <app:GeometryIcon
+                        Width="16" Height="16"
+                        Data="{StaticResource Icons.Album}" />
+                </TabItem.Header>
 
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition />
-                </Grid.RowDefinitions>
-
-                <ComboBox
-                    BorderThickness="0"
-                    SelectedIndex="0"
-                    IsEnabled="False">
-                    <ComboBoxItem Content="アルバム" />
-                </ComboBox>
-
-                <Grid Grid.Row="0">
+                <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="240" />
+                        <ColumnDefinition Width="8" />
                         <ColumnDefinition />
                     </Grid.ColumnDefinitions>
+
+                    <ListBox
+                        Grid.Column="0"
+                        SelectionMode="Single"
+                        AlternationCount="2"
+                        ItemsPanel="{StaticResource ItemsPanelTemplate}"
+                        VirtualizingPanel.ScrollUnit="Item"
+                        VirtualizingPanel.IsVirtualizing="True"
+                        VirtualizingPanel.VirtualizationMode="Recycling"
+                        ItemsSource="{Binding Albums, Mode=OneTime}"
+                        SelectedItem="{Binding SelectedAlbumPlaylist, Mode=TwoWay}">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseDoubleClick">
+                                <i:InvokeCommandAction Command="{Binding DataContext.AlbumPlaylistSelectedCommand, Mode=OneTime, RelativeSource={RelativeSource AncestorType=view:MainWindow}}"  />
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                        <i:Interaction.Behaviors>
+                            <b:ScrollBehavior VerticalPosition="{Binding VerticalOffset, Mode=TwoWay}" />
+                        </i:Interaction.Behaviors>
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                <Setter Property="Padding" Value="8" />
+                                <Setter Property="Height" Value="64" />
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                    </ListBox>
+
+                    <GridSplitter
+                        Grid.Column="1"
+                        Width="6"
+                        VerticalAlignment="Stretch"
+                        HorizontalAlignment="Center"
+                        Background="Transparent"
+                        BorderThickness="2,0,0,0"
+                        Style="{StaticResource GridSplitterStyle}" />
+
+                    <ContentPresenter
+                        Grid.Column="2"
+                        Content="{Binding AlbumTracks, Mode=OneWay}"
+                        ContentTemplate="{StaticResource AlbumTrackViewTemplate}" />
                 </Grid>
-
-                <ListBox
-                    Grid.Row="1"
-                    SelectionMode="Single"
-                    AlternationCount="2"
-                    ItemsPanel="{StaticResource ItemsPanelTemplate}"
-                    VirtualizingPanel.ScrollUnit="Item"
-                    VirtualizingPanel.IsVirtualizing="True"
-                    VirtualizingPanel.VirtualizationMode="Recycling"
-                    ItemsSource="{Binding Albums, Mode=OneTime}"
-                    SelectedItem="{Binding SelectedAlbumPlaylist, Mode=TwoWay}">
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="MouseDoubleClick">
-                            <i:InvokeCommandAction Command="{Binding DataContext.AlbumPlaylistSelectedCommand, Mode=OneTime, RelativeSource={RelativeSource AncestorType=view:MainWindow}}"  />
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
-                    <i:Interaction.Behaviors>
-                        <b:ScrollBehavior VerticalPosition="{Binding VerticalOffset, Mode=TwoWay}" />
-                    </i:Interaction.Behaviors>
-                    <ListBox.ItemContainerStyle>
-                        <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
-                            <Setter Property="Padding" Value="8" />
-                            <Setter Property="Height" Value="64" />
-                        </Style>
-                    </ListBox.ItemContainerStyle>
-                </ListBox>
-            </Grid>
-
-            <GridSplitter
-                Grid.Column="1"
-                Width="6"
-                VerticalAlignment="Stretch"
-                HorizontalAlignment="Center"
-                Background="Transparent"
-                BorderThickness="2,0,0,0"
-                Style="{StaticResource GridSplitterStyle}" />
-
-            <ContentPresenter
-                Grid.Column="2"
-                Content="{Binding AlbumTracks, Mode=OneWay}"
-                ContentTemplate="{StaticResource AlbumTrackViewTemplate}" />
-        </Grid>
+            </TabItem>
+        </TabControl>
     </Grid>
 </Window>
