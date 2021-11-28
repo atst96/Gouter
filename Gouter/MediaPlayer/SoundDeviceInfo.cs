@@ -9,7 +9,7 @@ namespace Gouter
     internal class SoundDeviceInfo : NotificationObject
     {
         private MMDevice _device;
-        
+
         /// <summary>
         /// デバイスID
         /// </summary>

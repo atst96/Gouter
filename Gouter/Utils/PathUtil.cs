@@ -76,7 +76,7 @@ namespace Gouter.Utils
         /// <summary>
         /// 検索するファイルの拡張子
         /// </summary>
-        public static readonly ImmutableHashSet<string> SupportedMediaExtensions = ImmutableHashSet.Create(new []
+        public static readonly ImmutableHashSet<string> SupportedMediaExtensions = ImmutableHashSet.Create(new[]
         {
             ".wav", ".mp3", ".acc", ".m4a", ".flac", ".ogg",
         });

@@ -1,6 +1,6 @@
-﻿using MessagePack;
-using System.IO;
+﻿using System.IO;
 using System.Threading.Tasks;
+using MessagePack;
 
 namespace Gouter.Utils
 {

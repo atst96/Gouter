@@ -1,8 +1,8 @@
-﻿using ATL;
+﻿using System;
+using System.Windows.Media;
+using ATL;
 using Gouter.DataModels;
 using Gouter.Utils;
-using System;
-using System.Windows.Media;
 
 namespace Gouter
 {

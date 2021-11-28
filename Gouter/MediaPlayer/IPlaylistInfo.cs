@@ -5,6 +5,6 @@
     /// </summary>
     internal interface IPlaylistInfo
     {
-        
+
     }
 }

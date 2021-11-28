@@ -1,6 +1,6 @@
-﻿using ATL;
+﻿using System;
+using ATL;
 using Gouter.DataModels;
-using System;
 
 namespace Gouter
 {
@@ -113,7 +113,7 @@ namespace Gouter
         /// トラックの登録日時
         /// </summary>
         public DateTimeOffset RegisteredAt { get; }
-        
+
         /// <summary>
         /// トラックの更新日時
         /// </summary>

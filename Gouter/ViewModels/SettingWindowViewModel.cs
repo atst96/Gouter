@@ -1,9 +1,9 @@
-﻿using Gouter.Managers;
+﻿using System;
+using System.Collections.Generic;
+using Gouter.Managers;
 using Gouter.Messaging;
 using Gouter.Players;
 using Livet.Messaging;
-using System;
-using System.Collections.Generic;
 
 namespace Gouter.ViewModels
 {

@@ -1,12 +1,11 @@
-﻿using Gouter.Data;
-using Gouter.Managers;
-using Gouter.Players;
-using Gouter.Utils;
-using System;
+﻿using System;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
+using Gouter.Managers;
+using Gouter.Players;
+using Gouter.Utils;
 
 namespace Gouter
 {

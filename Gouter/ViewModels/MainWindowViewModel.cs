@@ -1,14 +1,13 @@
-﻿using Gouter.Managers;
-using Gouter.Players;
-using Livet.Messaging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Data;
 using System.Windows.Forms;
 using System.Windows.Threading;
-using Gouter.Components.Mvvm;
+using Gouter.Managers;
 using Gouter.Messaging;
+using Gouter.Players;
+using Livet.Messaging;
 
 namespace Gouter.ViewModels
 {

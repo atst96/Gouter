@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using CSCore.CoreAudioAPI;
 using System.Linq;
+using CSCore.CoreAudioAPI;
 using CSCore.Win32;
 
 namespace Gouter.Managers
