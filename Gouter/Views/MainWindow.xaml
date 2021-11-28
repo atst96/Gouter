@@ -21,6 +21,42 @@
     <Window.DataContext>
         <vm:MainWindowViewModel />
     </Window.DataContext>
+    <Window.TaskbarItemInfo>
+        <TaskbarItemInfo>
+            <TaskbarItemInfo.ThumbButtonInfos>
+                <!--前のトラック-->
+                <ThumbButtonInfo
+                    Description="前のトラック"
+                    Command="{Binding PreviousTrackCommand, Mode=OneTime}"
+                    ImageSource="{StaticResource Images.PreviousTrack}" />
+
+                <!-- 再生／停止 -->
+                <ThumbButtonInfo
+                    Description=""
+                    ImageSource="{x:Null}"
+                    Command="{Binding PlayCommand, Mode=OneTime}">
+                    <i:Interaction.Triggers>
+                        <!--プレイ状態変更時(再生)-->
+                        <i:DataTrigger Binding="{Binding Player.IsPlaying, Mode=OneWay}" Value="False">
+                            <i:ChangePropertyAction PropertyName="Description" Value="再生" />
+                            <i:ChangePropertyAction PropertyName="ImageSource" Value="{StaticResource Images.Play}" />
+                        </i:DataTrigger>
+                        <!-- プレイ状態変更時(一時停止) -->
+                        <i:DataTrigger Binding="{Binding Player.IsPlaying, Mode=OneWay}" Value="True">
+                            <i:ChangePropertyAction PropertyName="Description" Value="一時停止" />
+                            <i:ChangePropertyAction PropertyName="ImageSource" Value="{StaticResource Images.Pause}" />
+                        </i:DataTrigger>
+                    </i:Interaction.Triggers>
+                </ThumbButtonInfo>
+
+                <!-- 次のトラック -->
+                <ThumbButtonInfo
+                    Description="次のトラック"
+                    Command="{Binding NextTrackCommand, Mode=OneTime}"
+                    ImageSource="{StaticResource Images.NextTrack}" />
+            </TaskbarItemInfo.ThumbButtonInfos>
+        </TaskbarItemInfo>
+    </Window.TaskbarItemInfo>
     <Window.Resources>
         <ItemsPanelTemplate x:Key="ItemsPanelTemplate">
             <VirtualizingStackPanel Orientation="Vertical" />
