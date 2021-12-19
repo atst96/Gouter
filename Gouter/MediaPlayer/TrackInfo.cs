@@ -77,17 +77,17 @@ namespace Gouter
         /// <summary>
         /// ディスク番号
         /// </summary>
-        public int DiskNumber { get; private set; }
+        public int? DiskNumber { get; private set; }
 
         /// <summary>
         /// トラック番号
         /// </summary>
-        public int TrackNumber { get; private set; }
+        public int? TrackNumber { get; private set; }
 
         /// <summary>
         /// 年
         /// </summary>
-        public int Year { get; private set; }
+        public int? Year { get; private set; }
 
         /// <summary>
         /// アルバムアーティスト
