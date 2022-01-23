@@ -1,80 +1,79 @@
 ﻿using System.ComponentModel;
 using System.Windows.Data;
 
-namespace Gouter.ViewModels
+namespace Gouter.ViewModels;
+
+/// <summary>
+/// アルバムのトラック情報リスト
+/// </summary>
+internal class AlbumTrackViewModel : ViewModelBase
 {
     /// <summary>
-    /// アルバムのトラック情報リスト
+    /// アルバム情報
     /// </summary>
-    internal class AlbumTrackViewModel : ViewModelBase
+    public AlbumPlaylist Playlist { get; }
+
+    /// <summary>
+    /// アルバム情報
+    /// </summary>
+    public AlbumInfo Album { get; }
+
+    /// <summary>
+    /// トラックリスト
+    /// </summary>
+    public ObservableList<TrackInfo> Tracks { get; }
+
+    /// <summary>
+    /// </summary>
+    public CollectionViewSource TrackViewSource { get; }
+
+    /// <summary>
+    /// コンストラクタ
+    /// </summary>
+    /// <param name="playlist"></param>
+    public AlbumTrackViewModel(AlbumPlaylist playlist)
     {
-        /// <summary>
-        /// アルバム情報
-        /// </summary>
-        public AlbumPlaylist Playlist { get; }
+        this.Playlist = playlist;
+        this.Album = playlist.Album;
+        this.Tracks = playlist.Tracks;
 
-        /// <summary>
-        /// アルバム情報
-        /// </summary>
-        public AlbumInfo Album { get; }
+        var tracks = this.Tracks;
 
-        /// <summary>
-        /// トラックリスト
-        /// </summary>
-        public ObservableList<TrackInfo> Tracks { get; }
-
-        /// <summary>
-        /// </summary>
-        public CollectionViewSource TrackViewSource { get; }
-
-        /// <summary>
-        /// コンストラクタ
-        /// </summary>
-        /// <param name="playlist"></param>
-        public AlbumTrackViewModel(AlbumPlaylist playlist)
+        var trackViewSource = new CollectionViewSource
         {
-            this.Playlist = playlist;
-            this.Album = playlist.Album;
-            this.Tracks = playlist.Tracks;
+            Source = tracks,
+        };
 
-            var tracks = this.Tracks;
+        var groupDescriptions = trackViewSource.GroupDescriptions;
+        var liveGroupingProperties = trackViewSource.LiveGroupingProperties;
 
-            var trackViewSource = new CollectionViewSource
-            {
-                Source = tracks,
-            };
+        groupDescriptions.Add(new PropertyGroupDescription(nameof(TrackInfo.DiskNumber)));
+        liveGroupingProperties.Add(nameof(TrackInfo.DiskNumber));
 
-            var groupDescriptions = trackViewSource.GroupDescriptions;
-            var liveGroupingProperties = trackViewSource.LiveGroupingProperties;
+        var sortDescriptions = trackViewSource.SortDescriptions;
+        var liveSortingDescriptions = trackViewSource.LiveSortingProperties;
+        sortDescriptions.Add(new SortDescription(nameof(TrackInfo.DiskNumber), ListSortDirection.Ascending));
+        sortDescriptions.Add(new SortDescription(nameof(TrackInfo.TrackNumber), ListSortDirection.Ascending));
+        sortDescriptions.Add(new SortDescription(nameof(TrackInfo.Title), ListSortDirection.Ascending));
+        liveSortingDescriptions.Add(nameof(TrackInfo.DiskNumber));
+        liveSortingDescriptions.Add(nameof(TrackInfo.TrackNumber));
+        liveSortingDescriptions.Add(nameof(TrackInfo.Title));
 
-            groupDescriptions.Add(new PropertyGroupDescription(nameof(TrackInfo.DiskNumber)));
-            liveGroupingProperties.Add(nameof(TrackInfo.DiskNumber));
+        this.TrackViewSource = trackViewSource;
+    }
 
-            var sortDescriptions = trackViewSource.SortDescriptions;
-            var liveSortingDescriptions = trackViewSource.LiveSortingProperties;
-            sortDescriptions.Add(new SortDescription(nameof(TrackInfo.DiskNumber), ListSortDirection.Ascending));
-            sortDescriptions.Add(new SortDescription(nameof(TrackInfo.TrackNumber), ListSortDirection.Ascending));
-            sortDescriptions.Add(new SortDescription(nameof(TrackInfo.Title), ListSortDirection.Ascending));
-            liveSortingDescriptions.Add(nameof(TrackInfo.DiskNumber));
-            liveSortingDescriptions.Add(nameof(TrackInfo.TrackNumber));
-            liveSortingDescriptions.Add(nameof(TrackInfo.Title));
+    private Command<TrackInfo> _trackPlayCommand;
 
-            this.TrackViewSource = trackViewSource;
-        }
+    /// <summary>
+    /// トラックのダブルクリック時のコマンド
+    /// </summary>
+    public Command<TrackInfo> TrackPlayCommand => this._trackPlayCommand
+        ??= this.Commands.Create<TrackInfo>(this.OnPlayCommandExecute, track => track != null);
 
-        private Command<TrackInfo> _trackPlayCommand;
+    private void OnPlayCommandExecute(TrackInfo track)
+    {
+        var player = App.Instance.MediaPlayer;
 
-        /// <summary>
-        /// トラックのダブルクリック時のコマンド
-        /// </summary>
-        public Command<TrackInfo> TrackPlayCommand => this._trackPlayCommand
-            ??= this.Commands.Create<TrackInfo>(this.OnPlayCommandExecute, track => track != null);
-
-        private void OnPlayCommandExecute(TrackInfo track)
-        {
-            var player = App.Instance.MediaPlayer;
-
-            player.Play(track, this.Playlist);
-        }
+        player.Play(track, this.Playlist);
     }
 }

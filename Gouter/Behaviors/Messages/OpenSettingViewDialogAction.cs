@@ -4,25 +4,24 @@ using Gouter.Utils;
 using Livet.Behaviors.Messaging;
 using Livet.Messaging;
 
-namespace Gouter.Behaviors.Messages
+namespace Gouter.Behaviors.Messages;
+
+/// <summary>
+/// <see cref="OpenSettingDialogMessage"/>を実行するアクション
+/// </summary>
+internal sealed class OpenSettingViewDialogAction : InteractionMessageAction<FrameworkElement>
 {
     /// <summary>
-    /// <see cref="OpenSettingDialogMessage"/>を実行するアクション
+    /// Actionを実行する
     /// </summary>
-    internal sealed class OpenSettingViewDialogAction : InteractionMessageAction<FrameworkElement>
+    /// <param name="message"></param>
+    protected override void InvokeAction(InteractionMessage message)
     {
-        /// <summary>
-        /// Actionを実行する
-        /// </summary>
-        /// <param name="message"></param>
-        protected override void InvokeAction(InteractionMessage message)
+        if (message is not OpenSettingDialogMessage msg)
         {
-            if (message is not OpenSettingDialogMessage msg)
-            {
-                return;
-            }
-
-            DialogUtils.OpenSettingWindow(Window.GetWindow(this.AssociatedObject));
+            return;
         }
+
+        DialogUtils.OpenSettingWindow(Window.GetWindow(this.AssociatedObject));
     }
 }

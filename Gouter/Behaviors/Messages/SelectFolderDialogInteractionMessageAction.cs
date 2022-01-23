@@ -4,32 +4,31 @@ using Gouter.Messaging;
 using Livet.Behaviors.Messaging;
 using Livet.Messaging;
 
-namespace Gouter.Behaviors.Messages
+namespace Gouter.Behaviors.Messages;
+
+internal class SelectFolderDialogInteractionMessageAction : InteractionMessageAction<FrameworkElement>
 {
-    internal class SelectFolderDialogInteractionMessageAction : InteractionMessageAction<FrameworkElement>
+    protected override void InvokeAction(InteractionMessage message)
     {
-        protected override void InvokeAction(InteractionMessage message)
+        if (message is FolderSelectionMessage fsm)
         {
-            if (message is FolderSelectionMessage fsm)
+            var dialog = new FolderBrowserDialog
             {
-                var dialog = new FolderBrowserDialog
-                {
-                    AutoUpgradeEnabled = fsm.AutoUpgradeEnabled,
-                    ShowNewFolderButton = fsm.ShowNewFolderButton,
-                    SelectedPath = fsm.InitialPath,
-                    Description = fsm.Description,
-                    UseDescriptionForTitle = fsm.UseDescriptionForTitle,
-                };
+                AutoUpgradeEnabled = fsm.AutoUpgradeEnabled,
+                ShowNewFolderButton = fsm.ShowNewFolderButton,
+                SelectedPath = fsm.InitialPath,
+                Description = fsm.Description,
+                UseDescriptionForTitle = fsm.UseDescriptionForTitle,
+            };
 
-                if (fsm.RootFolder is not null)
-                {
-                    dialog.RootFolder = fsm.RootFolder.Value;
-                }
+            if (fsm.RootFolder is not null)
+            {
+                dialog.RootFolder = fsm.RootFolder.Value;
+            }
 
-                if (dialog.ShowDialog() == DialogResult.OK)
-                {
-                    fsm.Response = dialog.SelectedPath;
-                }
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                fsm.Response = dialog.SelectedPath;
             }
         }
     }

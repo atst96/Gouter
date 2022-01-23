@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace Gouter
+namespace Gouter;
+
+public interface IDisposableCommand : IDisposable, ICommand
 {
-    public interface IDisposableCommand : IDisposable, ICommand
-    {
-    }
 }

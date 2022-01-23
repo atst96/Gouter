@@ -1,8 +1,7 @@
-﻿namespace Gouter
+﻿namespace Gouter;
+
+internal static class Config
 {
-    internal static class Config
-    {
-        public const string @SettingFileName = "setting.gtmp";
-        public const string @LibraryFileName = "library.db";
-    }
+    public const string @SettingFileName = "setting.gtmp";
+    public const string @LibraryFileName = "library.db";
 }

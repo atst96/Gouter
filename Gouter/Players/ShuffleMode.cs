@@ -1,18 +1,17 @@
-﻿namespace Gouter.Players
+﻿namespace Gouter.Players;
+
+/// <summary>
+/// シャッフルモード
+/// </summary>
+internal enum ShuffleMode
 {
     /// <summary>
-    /// シャッフルモード
+    /// シャッフルなし
     /// </summary>
-    internal enum ShuffleMode
-    {
-        /// <summary>
-        /// シャッフルなし
-        /// </summary>
-        None,
+    None,
 
-        /// <summary>
-        /// ランダム
-        /// </summary>
-        Random,
-    }
+    /// <summary>
+    /// ランダム
+    /// </summary>
+    Random,
 }

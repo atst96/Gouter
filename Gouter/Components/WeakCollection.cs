@@ -2,80 +2,79 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Gouter
+namespace Gouter;
+
+class WeakCollection<T> : ICollection<WeakReference<T>>
+    where T : class
 {
-    class WeakCollection<T> : ICollection<WeakReference<T>>
-        where T : class
+    private IList<WeakReference<T>> _weakItems = new List<WeakReference<T>>();
+
+    public int Count => this._weakItems.Count;
+
+    public bool IsReadOnly => this._weakItems.IsReadOnly;
+
+    public void Add(T item)
     {
-        private IList<WeakReference<T>> _weakItems = new List<WeakReference<T>>();
+        this.Add(new WeakReference<T>(item));
+    }
 
-        public int Count => this._weakItems.Count;
+    public void Add(WeakReference<T> item)
+    {
+        this._weakItems.Add(item);
+    }
 
-        public bool IsReadOnly => this._weakItems.IsReadOnly;
+    public void Clear()
+    {
+        this._weakItems.Clear();
+    }
 
-        public void Add(T item)
+    public bool Contains(WeakReference<T> item)
+    {
+        return this._weakItems.Contains(item);
+    }
+
+    public void CopyTo(WeakReference<T>[] array, int arrayIndex)
+    {
+        this._weakItems.CopyTo(array, arrayIndex);
+    }
+
+    public IEnumerator<WeakReference<T>> GetEnumerator()
+    {
+        return this._weakItems.GetEnumerator();
+    }
+
+    public bool Remove(T item)
+    {
+        bool result = false;
+
+        for (int i = this._weakItems.Count - 1; i >= 0; --i)
         {
-            this.Add(new WeakReference<T>(item));
-        }
+            var weakItem = this._weakItems[i];
 
-        public void Add(WeakReference<T> item)
-        {
-            this._weakItems.Add(item);
-        }
-
-        public void Clear()
-        {
-            this._weakItems.Clear();
-        }
-
-        public bool Contains(WeakReference<T> item)
-        {
-            return this._weakItems.Contains(item);
-        }
-
-        public void CopyTo(WeakReference<T>[] array, int arrayIndex)
-        {
-            this._weakItems.CopyTo(array, arrayIndex);
-        }
-
-        public IEnumerator<WeakReference<T>> GetEnumerator()
-        {
-            return this._weakItems.GetEnumerator();
-        }
-
-        public bool Remove(T item)
-        {
-            bool result = false;
-
-            for (int i = this._weakItems.Count - 1; i >= 0; --i)
+            if (this._weakItems[i].TryGetTarget(out var targetItem))
             {
-                var weakItem = this._weakItems[i];
-
-                if (this._weakItems[i].TryGetTarget(out var targetItem))
-                {
-                    if (targetItem.Equals(item))
-                    {
-                        this._weakItems.RemoveAt(i);
-                        result = true;
-                    }
-                }
-                else
+                if (targetItem.Equals(item))
                 {
                     this._weakItems.RemoveAt(i);
+                    result = true;
                 }
             }
-
-            return result;
+            else
+            {
+                this._weakItems.RemoveAt(i);
+            }
         }
 
-        public bool Remove(WeakReference<T> item)
-        {
-            return item.TryGetTarget(out var target) ? this.Remove(target) : false;
-        }
+        return result;
+    }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return this._weakItems.GetEnumerator();
-        }
+    public bool Remove(WeakReference<T> item)
+    {
+        return item.TryGetTarget(out var target) ? this.Remove(target) : false;
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return this._weakItems.GetEnumerator();
     }
 }

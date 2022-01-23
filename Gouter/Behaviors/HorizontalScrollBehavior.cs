@@ -4,64 +4,63 @@ using System.Windows.Input;
 using Gouter.Extensions;
 using Microsoft.Xaml.Behaviors;
 
-namespace Gouter.Behaviors
+namespace Gouter.Behaviors;
+
+internal class HorizontalScrollBehavior : Behavior<ListBox>
 {
-    internal class HorizontalScrollBehavior : Behavior<ListBox>
+    private ScrollViewer _scrollViewer;
+
+    private void FindTemplateChild()
     {
-        private ScrollViewer _scrollViewer;
+        var element = this.AssociatedObject;
+        this._scrollViewer = element.FindVisualChild<ScrollViewer>();
+    }
 
-        private void FindTemplateChild()
+    protected override void OnAttached()
+    {
+        base.OnAttached();
+
+        var element = this.AssociatedObject;
+        element.Loaded += this.OnLoaded;
+        element.PreviewMouseWheel += this.OnPreviewMouseWheel;
+
+        this.FindTemplateChild();
+    }
+
+    protected override void OnDetaching()
+    {
+        base.OnDetaching();
+    }
+
+    /// <summary>
+    /// マウスホイール操作時
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private void OnPreviewMouseWheel(object sender, MouseWheelEventArgs e)
+    {
+        var scrollViewr = this._scrollViewer;
+        if (scrollViewr == null)
         {
-            var element = this.AssociatedObject;
-            this._scrollViewer = element.FindVisualChild<ScrollViewer>();
+            return;
         }
 
-        protected override void OnAttached()
+        if (e.Delta < 0)
         {
-            base.OnAttached();
-
-            var element = this.AssociatedObject;
-            element.Loaded += this.OnLoaded;
-            element.PreviewMouseWheel += this.OnPreviewMouseWheel;
-
-            this.FindTemplateChild();
+            scrollViewr.LineRight();
         }
-
-        protected override void OnDetaching()
+        else if (e.Delta > 0)
         {
-            base.OnDetaching();
+            scrollViewr.LineLeft();
         }
+    }
 
-        /// <summary>
-        /// マウスホイール操作時
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void OnPreviewMouseWheel(object sender, MouseWheelEventArgs e)
-        {
-            var scrollViewr = this._scrollViewer;
-            if (scrollViewr == null)
-            {
-                return;
-            }
-
-            if (e.Delta < 0)
-            {
-                scrollViewr.LineRight();
-            }
-            else if (e.Delta > 0)
-            {
-                scrollViewr.LineLeft();
-            }
-        }
-
-        /// <summary>
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void OnLoaded(object sender, RoutedEventArgs e)
-        {
-            this.FindTemplateChild();
-        }
+    /// <summary>
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        this.FindTemplateChild();
     }
 }

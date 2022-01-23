@@ -6,120 +6,119 @@ using System.Windows.Controls;
 using Gouter.Extensions;
 using Microsoft.Xaml.Behaviors;
 
-namespace Gouter.Behaviors
+namespace Gouter.Behaviors;
+
+internal class ListViewFillColumnBehavior : Behavior<ListView>
 {
-    internal class ListViewFillColumnBehavior : Behavior<ListView>
+    private ScrollViewer _scrollContainer;
+    private IList<GridViewColumnHeader> _freeWidthHeaders;
+    private GridViewColumnHeader _fillWidthHeader;
+
+    public int MinWidth { get; set; } = 60;
+
+    public int FillColumnIndex { get; set; } = -1;
+
+    protected override void OnAttached()
     {
-        private ScrollViewer _scrollContainer;
-        private IList<GridViewColumnHeader> _freeWidthHeaders;
-        private GridViewColumnHeader _fillWidthHeader;
+        base.OnAttached();
 
-        public int MinWidth { get; set; } = 60;
+        var container = this.AssociatedObject;
 
-        public int FillColumnIndex { get; set; } = -1;
-
-        protected override void OnAttached()
-        {
-            base.OnAttached();
-
-            var container = this.AssociatedObject;
-
-            if (container.IsLoaded)
-            {
-                this.InitializeBehavior();
-            }
-            else
-            {
-                container.Loaded += this.OnContaienrLoaded;
-            }
-        }
-
-        private void OnContaienrLoaded(object sender, RoutedEventArgs e)
+        if (container.IsLoaded)
         {
             this.InitializeBehavior();
         }
-
-        private void InitializeBehavior()
+        else
         {
-            var listView = this.AssociatedObject;
+            container.Loaded += this.OnContaienrLoaded;
+        }
+    }
 
-            if (listView?.IsLoaded != true)
-            {
-                return;
-            }
+    private void OnContaienrLoaded(object sender, RoutedEventArgs e)
+    {
+        this.InitializeBehavior();
+    }
 
-            int fillColumnIndex = this.FillColumnIndex;
+    private void InitializeBehavior()
+    {
+        var listView = this.AssociatedObject;
 
-            this._scrollContainer = this.AssociatedObject.FindVisualChild<ScrollViewer>();
-            this._scrollContainer.LayoutUpdated += this.OnLayoutUpdated;
-
-            var headerPresenter = listView.FindVisualChild<GridViewHeaderRowPresenter>();
-
-            var headers = headerPresenter
-                .EnumerateChildren<GridViewColumnHeader>()
-                .Where(h => h.Column != null)
-                .Reverse()
-                .ToList();
-
-            if (headers.Count <= fillColumnIndex)
-            {
-                return;
-            }
-
-            this._fillWidthHeader = fillColumnIndex == -1
-                ? headers.Last()
-                : headers[fillColumnIndex];
-
-            this._freeWidthHeaders = headers;
-            this._freeWidthHeaders.Remove(this._fillWidthHeader);
-
-            foreach (var header in this._freeWidthHeaders)
-            {
-                header.LayoutUpdated += this.OnLayoutUpdated;
-            }
-
-            this.AlignColumnSizes();
+        if (listView?.IsLoaded != true)
+        {
+            return;
         }
 
-        protected override void OnDetaching()
+        int fillColumnIndex = this.FillColumnIndex;
+
+        this._scrollContainer = this.AssociatedObject.FindVisualChild<ScrollViewer>();
+        this._scrollContainer.LayoutUpdated += this.OnLayoutUpdated;
+
+        var headerPresenter = listView.FindVisualChild<GridViewHeaderRowPresenter>();
+
+        var headers = headerPresenter
+            .EnumerateChildren<GridViewColumnHeader>()
+            .Where(h => h.Column != null)
+            .Reverse()
+            .ToList();
+
+        if (headers.Count <= fillColumnIndex)
         {
-            base.OnDetaching();
-
-            this._scrollContainer.LayoutUpdated -= this.OnLayoutUpdated;
-
-            if (this._fillWidthHeader == null)
-            {
-                return;
-            }
-
-            foreach (var header in this._freeWidthHeaders)
-            {
-                header.LayoutUpdated -= this.OnLayoutUpdated;
-            }
-
-            this._freeWidthHeaders = null;
-            this._fillWidthHeader = null;
+            return;
         }
 
-        private void OnLayoutUpdated(object sender, EventArgs e)
+        this._fillWidthHeader = fillColumnIndex == -1
+            ? headers.Last()
+            : headers[fillColumnIndex];
+
+        this._freeWidthHeaders = headers;
+        this._freeWidthHeaders.Remove(this._fillWidthHeader);
+
+        foreach (var header in this._freeWidthHeaders)
         {
-            this.AlignColumnSizes();
+            header.LayoutUpdated += this.OnLayoutUpdated;
         }
 
-        private void AlignColumnSizes()
+        this.AlignColumnSizes();
+    }
+
+    protected override void OnDetaching()
+    {
+        base.OnDetaching();
+
+        this._scrollContainer.LayoutUpdated -= this.OnLayoutUpdated;
+
+        if (this._fillWidthHeader == null)
         {
-            if (this._fillWidthHeader == null)
-            {
-                return;
-            }
+            return;
+        }
 
-            double otherColumnWidth = this._freeWidthHeaders.Sum(h => h.ActualWidth);
-            double columnWidth = Math.Max(this.MinWidth, this._scrollContainer.ViewportWidth - otherColumnWidth);
+        foreach (var header in this._freeWidthHeaders)
+        {
+            header.LayoutUpdated -= this.OnLayoutUpdated;
+        }
 
-            if (this._fillWidthHeader.Column.Width != columnWidth)
-            {
-                this._fillWidthHeader.Column.Width = columnWidth;
-            }
+        this._freeWidthHeaders = null;
+        this._fillWidthHeader = null;
+    }
+
+    private void OnLayoutUpdated(object sender, EventArgs e)
+    {
+        this.AlignColumnSizes();
+    }
+
+    private void AlignColumnSizes()
+    {
+        if (this._fillWidthHeader == null)
+        {
+            return;
+        }
+
+        double otherColumnWidth = this._freeWidthHeaders.Sum(h => h.ActualWidth);
+        double columnWidth = Math.Max(this.MinWidth, this._scrollContainer.ViewportWidth - otherColumnWidth);
+
+        if (this._fillWidthHeader.Column.Width != columnWidth)
+        {
+            this._fillWidthHeader.Column.Width = columnWidth;
         }
     }
 }

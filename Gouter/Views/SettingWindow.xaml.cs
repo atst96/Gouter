@@ -1,15 +1,14 @@
 ﻿using System.Windows;
 
-namespace Gouter.Views
+namespace Gouter.Views;
+
+/// <summary>
+/// SettingWindow.xaml の相互作用ロジック
+/// </summary>
+public partial class SettingWindow : Window
 {
-    /// <summary>
-    /// SettingWindow.xaml の相互作用ロジック
-    /// </summary>
-    public partial class SettingWindow : Window
+    public SettingWindow()
     {
-        public SettingWindow()
-        {
-            this.InitializeComponent();
-        }
+        this.InitializeComponent();
     }
 }
