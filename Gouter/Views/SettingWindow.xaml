@@ -10,6 +10,7 @@
     xmlns:l="http://schemas.livet-mvvm.net/2011/wpf"
     xmlns:b="clr-namespace:Gouter.Behaviors.Messages"
     xmlns:m="clr-namespace:Gouter.Messaging"
+    xmlns:behaviors="clr-namespace:Gouter.Behaviors"
     mc:Ignorable="d"
     Title="設定" Height="450" Width="620"
     FontFamily="Meiryo"
@@ -158,7 +159,6 @@
 
             <TabItem Header="サウンド出力">
                 <StackPanel
-                    IsEnabled="False"
                     Margin="{StaticResource PanelPadding}">
                     <Label
                         Style="{StaticResource HeaderTitleStyle}"
@@ -169,10 +169,6 @@
                             <ColumnDefinition Width="120" />
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition />
-                            <RowDefinition />
-                        </Grid.RowDefinitions>
 
                         <TextBlock
                             Grid.Row="0"
@@ -183,40 +179,99 @@
                             Margin="4"
                             Grid.Row="0"
                             Grid.Column="1"
-                            ItemsSource="{Binding SoundOutputTypes, Mode=OneTime}"
+                            ItemsSource="{Binding BackendTypes, Mode=OneTime}"
                             SelectedValuePath="Key"
                             DisplayMemberPath="Value"
-                            SelectedValue="{Binding SelectedSoundOutType, Mode=TwoWay}"/>
+                            SelectedValue="{Binding SelectedBackendType, Mode=TwoWay}"/>
+                    </Grid>
+
+                    <!-- DirectSound -->
+                    <Grid behaviors:ElementBehavior.Visible="{Binding IsVisibleDirectSoundOptions}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
 
                         <TextBlock
-                            Grid.Row="1"
                             VerticalAlignment="Center"
                             Text="出力デバイス:" />
 
                         <ComboBox
                             Margin="4"
+                            Grid.Column="1"
+                            SelectedValue="{Binding SelectedDirectSoundDevice, Mode=TwoWay}"
+                            SelectedValuePath="Id"
+                            DisplayMemberPath="Name"
+                            ItemsSource="{Binding SoundDevices, Mode=OneTime}" />
+                    </Grid>
+
+                    <!-- WASAPI -->
+                    <Grid behaviors:ElementBehavior.Visible="{Binding IsVisibleWasapiOptions}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Text="出力デバイス:" />
+
+                        <ComboBox
+                            Margin="4"
+                            Grid.Column="1"
+                            SelectedValue="{Binding SelectedWasapiDevice, Mode=TwoWay}"
+                            SelectedValuePath="Id"
+                            DisplayMemberPath="Name"
+                            ItemsSource="{Binding SoundDevices, Mode=OneTime}" />
+
+                        <CheckBox
+                            Margin="4"
+                            Grid.Column="1" Grid.Row="1"
+                            IsChecked="{Binding IsWasapiExclusiveMode, Mode=TwoWay}">
+                            <TextBlock TextWrapping="Wrap">
+                                <Run Text="占有モードを有効にする" /><LineBreak />
+                                <Run
+                                    Foreground="DarkRed"
+                                    Text="※占有モードを有効にすると、楽曲の再生中にほかのアプリケーションからの音声出力ができなくなります" />
+                            </TextBlock>
+                        </CheckBox>
+                    </Grid>
+
+                    <!-- ASIO -->
+                    <Grid behaviors:ElementBehavior.Visible="{Binding IsVisibleAsioOptions}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Text="出力デバイス:" />
+
+                        <ComboBox
+                            Margin="4"
+                            Grid.Column="1"
+                            SelectedItem="{Binding SelectedAsioDevice, Mode=TwoWay}"
+                            ItemsSource="{Binding AsioDeviceNames, Mode=OneWay}">
+                        </ComboBox>
+
+                        <Button
                             Grid.Row="1"
                             Grid.Column="1"
-                            SelectedValue="{Binding SelectedOutputDeviceId, Mode=TwoWay}"
-                            SelectedValuePath="Id"
-                            ItemsSource="{Binding SoundDevices, Mode=OneTime}">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate DataType="{x:Type app:SoundDeviceInfo}">
-                                    <TextBlock
-                                        x:Name="PART_DeviceName"
-                                        VerticalAlignment="Center"
-                                        Text="{Binding Name, Mode=OneWay}" />
-                                    <DataTemplate.Triggers>
-                                        <DataTrigger Binding="{Binding IsDefaultDevice, Mode=OneWay}" Value="True">
-                                            <Setter
-                                                TargetName="PART_DeviceName"
-                                                Property="Text"
-                                                Value="{Binding Name, Mode=OneWay, StringFormat='{}Primary Device [{0}]'}" />
-                                        </DataTrigger>
-                                    </DataTemplate.Triggers>
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
+                            Margin="4" Width="180"
+                            HorizontalAlignment="Left"
+                            Content="ASIOコントロールパネル"
+                            Command="{Binding OpenAsioControlPanel, Mode=OneTime}" />
                     </Grid>
                 </StackPanel>
             </TabItem>

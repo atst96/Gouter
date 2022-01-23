@@ -3,9 +3,11 @@ using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
+using Gouter.Devices;
 using Gouter.Managers;
 using Gouter.Players;
 using Gouter.Utils;
+using NAudio.CoreAudioApi;
 
 namespace Gouter;
 
@@ -113,6 +115,32 @@ internal partial class App : Application
         this.PlayerOptions = options;
 
         this.MediaPlayer = new PlaylistPlayer(this.MediaManager, options);
+
+        this.MediaPlayer.SetSoundDevice(this.GetAudioDevice());
+    }
+
+    private AudioDevice GetAudioDevice()
+    {
+
+        var setting = this.Setting;
+
+        switch (setting.SoundOutType)
+        {
+            //BackendType.DirectSound 
+            //=> throw new DirectSoundAudioDevice(),
+            case BackendType.Wasapi:
+                var listener = this.SoundDeviceListener;
+                var deviceInfo = setting.WasapiDevice == null ? listener.SystemDefault : listener[setting.WasapiDevice];
+                var shareMode = setting.IsWasapiExclusiveMode ? AudioClientShareMode.Exclusive : AudioClientShareMode.Shared;
+
+                return new WasapiAudioDevice(deviceInfo.GetDevice(), shareMode, true, 100);
+
+            case BackendType.ASIO:
+                return new AsioAudioDevice(setting.AsioDevice);
+
+            default:
+                throw new NotImplementedException();
+        };
     }
 
     /// <summary>

@@ -140,19 +140,17 @@ internal class PlaylistPlayer : NotificationObject, IDisposable
         this._player = player;
 
         this.MediaManager = mediaManager;
-
-        this._audioRenderer = GetTempAudioRenderer();
-        player.SetSoundDevice(this._audioRenderer);
     }
 
     /// <summary>
-    /// 仮の出力デバイスを取得する。
+    /// サウンドデバイスを変更する
     /// </summary>
-    /// <returns></returns>
-
-    private static AudioDevice GetTempAudioRenderer()
-        => new WasapiAudioDevice(App.Instance.SoundDeviceListener.SystemDefault.GetDevice(),
-            AudioClientShareMode.Shared, true, 100);
+    /// <param name="audioDevice"></param>
+    public void SetSoundDevice(AudioDevice audioDevice)
+    {
+        // TODO: 再生中に変更される時の処理
+        this._player.SetSoundDevice(audioDevice);
+    }
 
     /// <summary>
     /// トラックを切り替える。

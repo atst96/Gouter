@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Windows.Threading;
 using Gouter.SampleProviders;
 using NAudio.Wave;
@@ -232,7 +233,7 @@ internal class SoundFilePlayer : IDisposable
     /// 出力デバイスを設定する
     /// </summary>
     /// <param name="soundDevice"></param>
-    public void SetSoundDevice(AudioDevice soundDevice)
+    public void SetSoundDevice([NotNull] AudioDevice soundDevice)
     {
         // 再生停止状態でなければ操作を受け付けない。
         if (this.State != PlayState.Stop && !this._isStopRequested)

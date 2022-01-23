@@ -23,7 +23,9 @@ internal class SoundDeviceInfo : NotificationObject
     /// <summary>
     /// 表示名
     /// </summary>
-    public string Name => this._device.FriendlyName;
+    public string Name => this.IsDefaultDevice
+        ? $"システム既定 ({this._device.FriendlyName})"
+        : this._device.FriendlyName;
 
     /// <summary>
     /// コンストラクタ

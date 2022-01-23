@@ -17,25 +17,55 @@ internal class ApplicationSetting : NotificationObject
     [IgnoreMember]
     public ObservableList<string> ExcludeDirectories => this._excludeDirectories ??= new ObservableList<string>();
 
+    /// <summary>
+    /// プレーやの音量
+    /// </summary>
     [Key("player.volume")]
     public float SoundVolumne { get; set; } = 1.0f;
 
-    [Key("device.output_type")]
-    public ushort SoundOutTypeInt { get; set; } = 0;
+    /// <summary>
+    /// オーディオバックエンドの種別
+    /// </summary>
+    [Key("device.backend_type")]
+    public BackendType SoundOutType { get; set; } = BackendType.Wasapi;
 
-    [IgnoreMember]
-    public SoundOutType SoundOutType
-    {
-        get => (SoundOutType)this.SoundOutTypeInt;
-        set => this.SoundOutTypeInt = (ushort)value;
-    }
 
-    [Key("device.output_id")]
-    public string SoundOutDeviceId { get; set; } = null;
+    /// <summary>
+    /// DirectSoundオーディオデバイスのID
+    /// </summary>
+    [Key("device.direct_sound.device")]
+    public string DirectSoundDevice { get; set; } = null;
 
+
+    /// <summary>
+    /// ASIOオーディオデバイスのID
+    /// </summary>
+    [Key("device.wasapi.device")]
+    public string WasapiDevice { get; set; } = null;
+
+
+    /// <summary>
+    /// ASIOデバイスの占有モード設定
+    /// </summary>
+    [Key("device.wasapi.is_exclusive")]
+    public bool IsWasapiExclusiveMode { get; set; } = false;
+
+
+    /// <summary>
+    /// ASIOオーディオデバイスのID
+    /// </summary>
+    [Key("device.asio.device")]
+    public string AsioDevice { get; set; } = null;
+
+    /// <summary>
+    /// 最後に再生したトラックのID
+    /// </summary>
     [Key("player.last_track")]
     public int? LastTrackId { get; set; } = null;
 
+    /// <summary>
+    /// 最後の再生したプレイリストのID
+    /// </summary>
     [Key("player.last_playlist")]
     public int? LastPlaylistId { get; set; } = null;
 
