@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using CSCore.CoreAudioAPI;
-using CSCore.Win32;
+using NAudio.CoreAudioApi;
+using NAudio.CoreAudioApi.Interfaces;
 
 namespace Gouter.Managers
 {
@@ -70,7 +70,7 @@ namespace Gouter.Managers
 
             this._deviceInfosByDeviceId = new Dictionary<string, SoundDeviceInfo>();
 
-            var devices = enumerator.EnumAudioEndpoints(DataFlow.Render, DeviceState.Active);
+            var devices = enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
 
             this.Devices = new ObservableList<SoundDeviceInfo> { this.SystemDefault };
             this.Devices.AddRange(devices.Select(device => new SoundDeviceInfo(device)));
@@ -183,7 +183,7 @@ namespace Gouter.Managers
             else
             {
                 // デバイスの状態がActive以外に変化した
-                this.RemoveDeviceImpl(device.DeviceID);
+                this.RemoveDeviceImpl(device.ID);
             }
 
             var deviceInfo = this[deviceId];

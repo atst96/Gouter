@@ -1,46 +1,46 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows</TargetFramework>
-    <UseWPF>True</UseWPF>
-    <UseWindowsForms>True</UseWindowsForms>
-    <Authors>atst</Authors>
-    <Version>0.0.1.0</Version>
-    <Company />
-    <PackageProjectUrl>https://github.com/atst1996/Gouter</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/atst1996/Gouter</RepositoryUrl>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
-  </PropertyGroup>
-  <ItemGroup>
-    <None Remove="Resources\missing_album.png" />
-    <None Remove="Resources\missing_music.png" />
-    <None Include="..\LICENSE">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\missing_album.png" />
-    <Resource Include="Resources\missing_music.png" />
-    <EmbeddedResource Include="Xaml\Icons.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Xaml\Templates\CustomStyles.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </EmbeddedResource> 
-    <EmbeddedResource Include="Xaml\Templates\DataTemplates.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Xaml\Themes\General.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-      <PackageReference Include="CSCore" Version="1.2.1.2" />
-      <PackageReference Include="LiteDB" Version="5.0.11" />
-      <PackageReference Include="LivetCask" Version="4.0.2" />
-      <PackageReference Include="MessagePack" Version="2.3.85" />
-      <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
-      <PackageReference Include="z440.atl.core" Version="4.1.0" />
-  </ItemGroup>
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net6.0-windows</TargetFramework>
+        <UseWPF>True</UseWPF>
+        <UseWindowsForms>True</UseWindowsForms>
+        <Authors>atst</Authors>
+        <Version>0.0.1.0</Version>
+        <Company />
+        <PackageProjectUrl>https://github.com/atst1996/Gouter</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/atst1996/Gouter</RepositoryUrl>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    </PropertyGroup>
+    <ItemGroup>
+        <None Remove="Resources\missing_album.png" />
+        <None Remove="Resources\missing_music.png" />
+        <None Include="..\LICENSE">
+            <Pack>True</Pack>
+            <PackagePath></PackagePath>
+        </None>
+    </ItemGroup>
+    <ItemGroup>
+        <Resource Include="Resources\missing_album.png" />
+        <Resource Include="Resources\missing_music.png" />
+        <EmbeddedResource Include="Xaml\Icons.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </EmbeddedResource>
+        <EmbeddedResource Include="Xaml\Templates\CustomStyles.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </EmbeddedResource>
+        <EmbeddedResource Include="Xaml\Templates\DataTemplates.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </EmbeddedResource>
+        <EmbeddedResource Include="Xaml\Themes\General.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </EmbeddedResource>
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="LiteDB" Version="5.0.11" />
+        <PackageReference Include="LivetCask" Version="4.0.2" />
+        <PackageReference Include="MessagePack" Version="2.3.85" />
+        <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.39" />
+        <PackageReference Include="NAudio" Version="2.0.1" />
+        <PackageReference Include="z440.atl.core" Version="4.1.0" />
+    </ItemGroup>
 </Project>

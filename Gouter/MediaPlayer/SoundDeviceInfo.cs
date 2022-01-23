@@ -1,5 +1,5 @@
 ﻿using System;
-using CSCore.CoreAudioAPI;
+using NAudio.CoreAudioApi;
 
 namespace Gouter
 {
@@ -26,16 +26,6 @@ namespace Gouter
         public string Name => this._device.FriendlyName;
 
         /// <summary>
-        /// チャンネル数
-        /// </summary>
-        public int Channels => this._device.DeviceFormat.Channels;
-
-        /// <summary>
-        /// サンプリングレート
-        /// </summary>
-        public int SampleRate => this._device.DeviceFormat.SampleRate;
-
-        /// <summary>
         /// コンストラクタ
         /// </summary>
         /// <param name="device">デバイス情報</param>
@@ -52,7 +42,7 @@ namespace Gouter
         public SoundDeviceInfo(MMDevice device, bool isDefaultDevice = false)
         {
             this.IsDefaultDevice = isDefaultDevice;
-            this.Id = isDefaultDevice ? null : device.DeviceID;
+            this.Id = isDefaultDevice ? null : device.ID;
             this.Update(device);
         }
 
@@ -62,7 +52,7 @@ namespace Gouter
         /// <param name="device">デバイス情報</param>
         internal void Update(MMDevice device)
         {
-            if (!this.IsDefaultDevice && device.DeviceID != this.Id)
+            if (!this.IsDefaultDevice && device.ID != this.Id)
             {
                 // 異なるデバイスIDの場合
                 throw new InvalidOperationException();

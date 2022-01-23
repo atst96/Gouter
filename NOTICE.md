@@ -6,10 +6,6 @@ Copyright (c) 2017 Zeugma440
 Released under the MIT license  
 https://github.com/Zeugma440/atldotnet/blob/master/LICENSE  
 
-- [CSCore](https://github.com/filoe/cscore)  
-Released under the Ms-PL license  
-https://github.com/filoe/cscore/blob/master/license.md  
-
 - [LiteDB](https://github.com/mbdavid/LiteDB)  
 Copyright (c) 2014-2020 Mauricio David  
 Released under the MIT license  
@@ -28,6 +24,10 @@ https://www.apache.org/licenses/LICENSE-2.0.html
 Copyright (c) 2017 Yoshifumi Kawai and contributors  
 Released under the MIT License  
 https://github.com/neuecc/MessagePack-CSharp/blob/master/LICENSE
+
+- [NAudio](https://github.com/naudio/NAudio)  
+Released under the MIT license  
+https://github.com/naudio/NAudio/blob/master/license.txt
 
 - [XamlBehaviors for WPF](https://github.com/microsoft/XamlBehaviorsWpf)  
 Copyright (c) 2015 Microsoft  

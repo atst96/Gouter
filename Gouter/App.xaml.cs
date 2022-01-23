@@ -38,7 +38,8 @@ namespace Gouter
         /// <summary>
         /// サウンドデバイスのリスナー
         /// </summary>
-        internal SoundDeviceListener SoundDeviceListener { get; } = new SoundDeviceListener();
+        internal SoundDeviceListener SoundDeviceListener { get; }
+            = ThreadManager.DeviceDispatcher.Invoke(() => new SoundDeviceListener());
 
         /// <summary>
         /// アセンブリ情報

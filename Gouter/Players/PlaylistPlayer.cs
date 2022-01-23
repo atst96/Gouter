@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using CSCore.CoreAudioAPI;
-using CSCore.SoundOut;
+using Gouter.Devices;
 using Gouter.Extensions;
 using Gouter.Managers;
+using NAudio.CoreAudioApi;
 
 namespace Gouter.Players
 {
@@ -23,7 +23,7 @@ namespace Gouter.Players
         /// <summary>
         /// オーディオ出力先
         /// </summary>
-        private ISoundOut _audioRenderer;
+        private AudioDevice _audioRenderer;
 
         /// <summary>
         /// プレーや設定の内部変数
@@ -149,11 +149,10 @@ namespace Gouter.Players
         /// 仮の出力デバイスを取得する。
         /// </summary>
         /// <returns></returns>
-        private static ISoundOut GetTempAudioRenderer()
-            => new WasapiOut(false, AudioClientShareMode.Shared, 100)
-            {
-                Device = App.Instance.SoundDeviceListener.SystemDefault.GetDevice(),
-            };
+
+        private static AudioDevice GetTempAudioRenderer()
+            => new WasapiAudioDevice(App.Instance.SoundDeviceListener.SystemDefault.GetDevice(),
+                AudioClientShareMode.Shared, true, 100);
 
         /// <summary>
         /// トラックを切り替える。
@@ -464,7 +463,7 @@ namespace Gouter.Players
         /// <returns></returns>
         public TimeSpan GetDuration()
         {
-            return this._player.GetDuration();
+            return this._player.GetDuration() ?? this.Track.Duration;
         }
 
         /// <summary>
