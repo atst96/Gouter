@@ -38,10 +38,9 @@ internal partial class App : Application
     internal PlayerOptions PlayerOptions { get; private set; }
 
     /// <summary>
-    /// サウンドデバイスのリスナー
+    /// サウンドデバイス情報
     /// </summary>
-    internal SoundDeviceListener SoundDeviceListener { get; }
-        = ThreadManager.DeviceDispatcher.Invoke(() => new SoundDeviceListener());
+    public SoundDeviceManager DeviceManager { get; private set; } = new SoundDeviceManager();
 
     /// <summary>
     /// アセンブリ情報
@@ -116,27 +115,30 @@ internal partial class App : Application
 
         this.MediaPlayer = new PlaylistPlayer(this.MediaManager, options);
 
-        this.MediaPlayer.SetSoundDevice(this.GetAudioDevice());
+        this.MediaPlayer.SetSoundDevice(this.GetAudioDeviceFromSetting());
     }
 
-    private AudioDevice GetAudioDevice()
+    private AudioDevice GetAudioDeviceFromSetting()
     {
 
         var setting = this.Setting;
 
         switch (setting.SoundOutType)
         {
-            //BackendType.DirectSound 
-            //=> throw new DirectSoundAudioDevice(),
-            case BackendType.Wasapi:
-                var listener = this.SoundDeviceListener;
-                var deviceInfo = setting.WasapiDevice == null ? listener.SystemDefault : listener[setting.WasapiDevice];
-                var shareMode = setting.IsWasapiExclusiveMode ? AudioClientShareMode.Exclusive : AudioClientShareMode.Shared;
+            case BackendType.DirectSound:
+                return new DirectSoundAudioDevice(this.DeviceManager.GetDirectSoundDevice(setting.DirectSoundDevice ?? default));
 
-                return new WasapiAudioDevice(deviceInfo.GetDevice(), shareMode, true, 100);
+            case BackendType.Wasapi:
+                var device = this.DeviceManager.GetWasapiDevice(setting.WasapiDevice);
+
+                var shareMode = setting.IsWasapiExclusiveMode && !device.IsSytemDefault
+                    ? AudioClientShareMode.Exclusive
+                    : AudioClientShareMode.Shared;
+
+                return new WasapiAudioDevice(device, shareMode, true, 100);
 
             case BackendType.ASIO:
-                return new AsioAudioDevice(setting.AsioDevice);
+                return new AsioAudioDevice(this.DeviceManager.GetAsioDevice(setting.AsioDevice));
 
             default:
                 throw new NotImplementedException();

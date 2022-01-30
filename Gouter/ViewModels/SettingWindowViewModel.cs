@@ -17,7 +17,6 @@ internal class SettingWindowViewModel : ViewModelBase
 
     private readonly MediaManager _mediaManager = AppInstance.MediaManager;
     private readonly PlaylistPlayer _mediaPlayer = AppInstance.MediaPlayer;
-    private readonly SoundDeviceListener _soundDeviceListener = AppInstance.SoundDeviceListener;
 
     /// <summary>
     /// Messenger
@@ -39,10 +38,6 @@ internal class SettingWindowViewModel : ViewModelBase
             var musicDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
             this.MusicDirectories.Add(musicDirectory);
         }
-
-        this.SoundDevices = this._soundDeviceListener.Devices;
-
-        this.AsioDeviceNames = new Collection<string>(AsioOut.GetDriverNames().ToList());
 
         this.UpdateAudioDeviceOptions();
     }
@@ -122,7 +117,7 @@ internal class SettingWindowViewModel : ViewModelBase
     /// <summary>
     /// DirectSound出力デバイス
     /// </summary>
-    public string SelectedDirectSoundDevice
+    public Guid? SelectedDirectSoundDevice
     {
         get => this.Setting.DirectSoundDevice;
         set => this.Setting.DirectSoundDevice = value;
@@ -175,12 +170,7 @@ internal class SettingWindowViewModel : ViewModelBase
     /// <summary>
     /// サウンドデバイス情報リスト
     /// </summary>
-    public ObservableList<SoundDeviceInfo> SoundDevices { get; }
-
-    /// <summary>
-    /// ASIOデバイス名リスト
-    /// </summary>
-    public Collection<string> AsioDeviceNames { get; }
+    public SoundDeviceManager DeviceManager { get; } = App.Instance.DeviceManager;
 
     private Command _openAsioControlPanel;
 

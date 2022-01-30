@@ -1,4 +1,6 @@
-﻿using NAudio.CoreAudioApi;
+﻿using System;
+using Gouter.Managers;
+using NAudio.CoreAudioApi;
 using NAudio.Wave;
 
 namespace Gouter.Devices;
@@ -8,6 +10,11 @@ namespace Gouter.Devices;
 /// </summary>
 internal class WasapiAudioDevice : AudioDevice
 {
+    /// <summary>
+    /// デバイス情報
+    /// </summary>
+    public WasapiDeviceInfo Info { get; }
+
     /// <summary>
     /// オーディオデバイス
     /// </summary>
@@ -21,9 +28,10 @@ internal class WasapiAudioDevice : AudioDevice
     /// constructor
     /// </summary>
     /// <param name="device"></param>
-    public WasapiAudioDevice(MMDevice device, AudioClientShareMode shareMode, bool useEventAsync, int latency)
+    public WasapiAudioDevice(WasapiDeviceInfo device, AudioClientShareMode shareMode, bool useEventAsync, int latency)
     {
-        this._device = device;
+        this.Info = device;
+        this._device = GetDevice(device);
         this._shareMode = shareMode;
         this._useEventAsync = useEventAsync;
         this._latency = latency;
@@ -111,4 +119,19 @@ internal class WasapiAudioDevice : AudioDevice
 
         this._device = null;
     }
+
+    /// <summary>
+    /// デバイスを取得する
+    /// </summary>
+    /// <param name="device"></param>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
+    private static MMDevice GetDevice(WasapiDeviceInfo deviceInfo) => ThreadManager.DeviceDispatcher.Invoke(() =>
+      {
+          using var devices = new MMDeviceEnumerator();
+
+          return deviceInfo.Id is null
+              ? devices.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia)
+              : devices.GetDevice(deviceInfo.Id);
+      });
 }

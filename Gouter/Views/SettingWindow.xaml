@@ -200,9 +200,9 @@
                             Margin="4"
                             Grid.Column="1"
                             SelectedValue="{Binding SelectedDirectSoundDevice, Mode=TwoWay}"
-                            SelectedValuePath="Id"
+                            SelectedValuePath="Guid"
                             DisplayMemberPath="Name"
-                            ItemsSource="{Binding SoundDevices, Mode=OneTime}" />
+                            ItemsSource="{Binding DeviceManager.DirectSoundDevices, Mode=OneWay}" />
                     </Grid>
 
                     <!-- WASAPI -->
@@ -227,7 +227,7 @@
                             SelectedValue="{Binding SelectedWasapiDevice, Mode=TwoWay}"
                             SelectedValuePath="Id"
                             DisplayMemberPath="Name"
-                            ItemsSource="{Binding SoundDevices, Mode=OneTime}" />
+                            ItemsSource="{Binding DeviceManager.WasapiDevices, Mode=OneWay}" />
 
                         <CheckBox
                             Margin="4"
@@ -261,8 +261,10 @@
                         <ComboBox
                             Margin="4"
                             Grid.Column="1"
-                            SelectedItem="{Binding SelectedAsioDevice, Mode=TwoWay}"
-                            ItemsSource="{Binding AsioDeviceNames, Mode=OneWay}">
+                            SelectedValuePath="Id"
+                            SelectedValue="{Binding SelectedAsioDevice, Mode=TwoWay}"
+                            DisplayMemberPath="Name"
+                            ItemsSource="{Binding DeviceManager.AsioDevices, Mode=OneWay}">
                         </ComboBox>
 
                         <Button

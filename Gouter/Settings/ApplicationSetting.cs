@@ -1,4 +1,5 @@
-﻿using MessagePack;
+﻿using System;
+using MessagePack;
 
 namespace Gouter;
 
@@ -34,7 +35,7 @@ internal class ApplicationSetting : NotificationObject
     /// DirectSoundオーディオデバイスのID
     /// </summary>
     [Key("device.direct_sound.device")]
-    public string DirectSoundDevice { get; set; } = null;
+    public Guid? DirectSoundDevice { get; set; } = null;
 
 
     /// <summary>

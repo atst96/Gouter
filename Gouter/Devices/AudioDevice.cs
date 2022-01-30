@@ -62,11 +62,21 @@ internal abstract class AudioDevice : IDisposable
     /// </summary>
     public abstract void Stop();
 
+    /// <summary>
+    /// デバイス操作用スレッドで実行する
+    /// </summary>
+    /// <param name="action"></param>
     protected static void Invoke(Action action)
     {
         ThreadManager.DeviceDispatcher.Invoke(action);
     }
 
+    /// <summary>
+    /// デバイス操作用スレッドで実行する
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="action"></param>
+    /// <returns></returns>
     protected static T Invoke<T>(Func<T> action)
     {
         return ThreadManager.DeviceDispatcher.Invoke(action);

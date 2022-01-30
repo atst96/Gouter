@@ -1,5 +1,4 @@
-﻿using System;
-using NAudio.Wave;
+﻿using NAudio.Wave;
 
 namespace Gouter.Devices;
 
@@ -9,18 +8,22 @@ namespace Gouter.Devices;
 internal class DirectSoundAudioDevice : AudioDevice
 {
     /// <summary>
-    /// オーディオデバイス
+    /// デバイス情報
     /// </summary>
-    private Guid _deviceGuid;
+    public DirectSoundDeviceInfo Info { get; }
+
+    /// <summary>
+    /// オーディオレンダラ
+    /// </summary>
     private DirectSoundOut _audioRender;
 
     /// <summary>
     /// constructor
     /// </summary>
     /// <param name="deviceGuid"></param>
-    public DirectSoundAudioDevice(Guid deviceGuid)
+    public DirectSoundAudioDevice(DirectSoundDeviceInfo deviceInfo)
     {
-        this._deviceGuid = deviceGuid;
+        this.Info = deviceInfo;
     }
 
     /// <summary>
@@ -47,7 +50,7 @@ internal class DirectSoundAudioDevice : AudioDevice
     {
         this.ReleaseRender();
 
-        var newRender = this._audioRender = new DirectSoundOut(this._deviceGuid);
+        var newRender = this._audioRender = new DirectSoundOut(this.Info.Guid);
         newRender.PlaybackStopped += this.RaisePlaybackStopped;
 
         return newRender;

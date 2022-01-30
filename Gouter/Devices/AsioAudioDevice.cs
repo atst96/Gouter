@@ -8,18 +8,19 @@ namespace Gouter.Devices;
 internal class AsioAudioDevice : AudioDevice
 {
     /// <summary>
-    /// オーディオデバイス
+    /// デバイス情報
     /// </summary>
-    private string _driverName;
+    public AsioDeviceInfo Info { get; }
+
     private AsioOut _audioRender;
 
     /// <summary>
     /// constructor
     /// </summary>
     /// <param name="driverName">ASIOドライバ名</param>
-    public AsioAudioDevice(string driverName)
+    public AsioAudioDevice(AsioDeviceInfo deviceInfo)
     {
-        this._driverName = driverName;
+        this.Info = deviceInfo;
     }
 
     /// <summary>
@@ -46,7 +47,7 @@ internal class AsioAudioDevice : AudioDevice
     {
         this.ReleaseRender();
 
-        var newRender = this._audioRender = new AsioOut(this._driverName);
+        var newRender = this._audioRender = new AsioOut(this.Info.Id);
 
         newRender.PlaybackStopped += this.RaisePlaybackStopped;
 
