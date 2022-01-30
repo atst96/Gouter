@@ -3,22 +3,25 @@
 namespace Gouter.Devices;
 
 /// <summary>
-/// ASIO音声出力デバイス
+/// DirectSound音声出力デバイス
 /// </summary>
-internal class AsioAudioDevice : AudioDevice
+internal class DirectSoundDevice : SoundDevice
 {
     /// <summary>
     /// デバイス情報
     /// </summary>
-    public AsioDeviceInfo Info { get; }
+    public DirectSoundDeviceInfo Info { get; }
 
-    private AsioOut _audioRender;
+    /// <summary>
+    /// オーディオレンダラ
+    /// </summary>
+    private DirectSoundOut _audioRender;
 
     /// <summary>
     /// constructor
     /// </summary>
-    /// <param name="driverName">ASIOドライバ名</param>
-    public AsioAudioDevice(AsioDeviceInfo deviceInfo)
+    /// <param name="deviceGuid"></param>
+    public DirectSoundDevice(DirectSoundDeviceInfo deviceInfo)
     {
         this.Info = deviceInfo;
     }
@@ -43,12 +46,11 @@ internal class AsioAudioDevice : AudioDevice
     /// オーディオレンダラを更新する
     /// </summary>
     /// <returns>新しいオーディオレンダラ</returns>
-    private AsioOut UpdateAudioRender()
+    private DirectSoundOut UpdateAudioRender()
     {
         this.ReleaseRender();
 
-        var newRender = this._audioRender = new AsioOut(this.Info.Id);
-
+        var newRender = this._audioRender = new DirectSoundOut(this.Info.Guid);
         newRender.PlaybackStopped += this.RaisePlaybackStopped;
 
         return newRender;

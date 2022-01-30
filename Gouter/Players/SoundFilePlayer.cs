@@ -59,7 +59,7 @@ internal class SoundFilePlayer : IDisposable
     /// <summary>
     /// 音声出力デバイス
     /// </summary>
-    private AudioDevice _soundDevice;
+    private SoundDevice _soundDevice;
 
     /// <summary>
     /// フェード時の最大ボリューム
@@ -233,7 +233,7 @@ internal class SoundFilePlayer : IDisposable
     /// 出力デバイスを設定する
     /// </summary>
     /// <param name="soundDevice"></param>
-    public void SetSoundDevice([NotNull] AudioDevice soundDevice)
+    public void SetSoundDevice([NotNull] SoundDevice soundDevice)
     {
         // 再生停止状態でなければ操作を受け付けない。
         if (this.State != PlayState.Stop && !this._isStopRequested)

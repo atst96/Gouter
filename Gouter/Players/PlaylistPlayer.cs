@@ -23,7 +23,7 @@ internal class PlaylistPlayer : NotificationObject, IDisposable
     /// <summary>
     /// オーディオ出力先
     /// </summary>
-    private AudioDevice _audioRenderer;
+    private SoundDevice _audioRenderer;
 
     /// <summary>
     /// プレーや設定の内部変数
@@ -146,7 +146,7 @@ internal class PlaylistPlayer : NotificationObject, IDisposable
     /// サウンドデバイスを変更する
     /// </summary>
     /// <param name="audioDevice"></param>
-    public void SetSoundDevice(AudioDevice audioDevice)
+    public void SetSoundDevice(SoundDevice audioDevice)
     {
         // TODO: 再生中に変更される時の処理
         this._player.SetSoundDevice(audioDevice);

@@ -1,40 +1,26 @@
-﻿using System;
-using Gouter.Managers;
-using NAudio.CoreAudioApi;
-using NAudio.Wave;
+﻿using NAudio.Wave;
 
 namespace Gouter.Devices;
 
 /// <summary>
-/// WASAPI出力デバイス
+/// ASIO音声出力デバイス
 /// </summary>
-internal class WasapiAudioDevice : AudioDevice
+internal class AsioDevice : SoundDevice
 {
     /// <summary>
     /// デバイス情報
     /// </summary>
-    public WasapiDeviceInfo Info { get; }
+    public AsioDeviceInfo Info { get; }
 
-    /// <summary>
-    /// オーディオデバイス
-    /// </summary>
-    private MMDevice _device;
-    private AudioClientShareMode _shareMode;
-    private bool _useEventAsync;
-    private int _latency;
-    private WasapiOut _audioRender;
+    private AsioOut _audioRender;
 
     /// <summary>
     /// constructor
     /// </summary>
-    /// <param name="device"></param>
-    public WasapiAudioDevice(WasapiDeviceInfo device, AudioClientShareMode shareMode, bool useEventAsync, int latency)
+    /// <param name="driverName">ASIOドライバ名</param>
+    public AsioDevice(AsioDeviceInfo deviceInfo)
     {
-        this.Info = device;
-        this._device = GetDevice(device);
-        this._shareMode = shareMode;
-        this._useEventAsync = useEventAsync;
-        this._latency = latency;
+        this.Info = deviceInfo;
     }
 
     /// <summary>
@@ -57,12 +43,11 @@ internal class WasapiAudioDevice : AudioDevice
     /// オーディオレンダラを更新する
     /// </summary>
     /// <returns>新しいオーディオレンダラ</returns>
-    private WasapiOut UpdateAudioRender()
+    private AsioOut UpdateAudioRender()
     {
         this.ReleaseRender();
 
-        var newRender = this._audioRender = new WasapiOut(
-            this._device, this._shareMode, this._useEventAsync, this._latency);
+        var newRender = this._audioRender = new AsioOut(this.Info.Id);
 
         newRender.PlaybackStopped += this.RaisePlaybackStopped;
 
@@ -116,22 +101,5 @@ internal class WasapiAudioDevice : AudioDevice
             this._audioRender?.Dispose();
             this._audioRender = null;
         }
-
-        this._device = null;
     }
-
-    /// <summary>
-    /// デバイスを取得する
-    /// </summary>
-    /// <param name="device"></param>
-    /// <returns></returns>
-    /// <exception cref="NotImplementedException"></exception>
-    private static MMDevice GetDevice(WasapiDeviceInfo deviceInfo) => ThreadManager.DeviceDispatcher.Invoke(() =>
-      {
-          using var devices = new MMDeviceEnumerator();
-
-          return deviceInfo.Id is null
-              ? devices.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia)
-              : devices.GetDevice(deviceInfo.Id);
-      });
 }

@@ -118,7 +118,7 @@ internal partial class App : Application
         this.MediaPlayer.SetSoundDevice(this.GetAudioDeviceFromSetting());
     }
 
-    private AudioDevice GetAudioDeviceFromSetting()
+    private SoundDevice GetAudioDeviceFromSetting()
     {
 
         var setting = this.Setting;
@@ -126,7 +126,7 @@ internal partial class App : Application
         switch (setting.SoundOutType)
         {
             case BackendType.DirectSound:
-                return new DirectSoundAudioDevice(this.DeviceManager.GetDirectSoundDevice(setting.DirectSoundDevice ?? default));
+                return new DirectSoundDevice(this.DeviceManager.GetDirectSoundDevice(setting.DirectSoundDevice ?? default));
 
             case BackendType.Wasapi:
                 var device = this.DeviceManager.GetWasapiDevice(setting.WasapiDevice);
@@ -135,10 +135,10 @@ internal partial class App : Application
                     ? AudioClientShareMode.Exclusive
                     : AudioClientShareMode.Shared;
 
-                return new WasapiAudioDevice(device, shareMode, true, 100);
+                return new WasapiDevice(device, shareMode, true, 100);
 
             case BackendType.ASIO:
-                return new AsioAudioDevice(this.DeviceManager.GetAsioDevice(setting.AsioDevice));
+                return new AsioDevice(this.DeviceManager.GetAsioDevice(setting.AsioDevice));
 
             default:
                 throw new NotImplementedException();

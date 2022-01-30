@@ -8,7 +8,7 @@ namespace Gouter;
 /// <summary>
 /// 音声出力デバイス
 /// </summary>
-internal abstract class AudioDevice : IDisposable
+internal abstract class SoundDevice : IDisposable
 {
     /// <summary>
     /// 再生停止イベント
