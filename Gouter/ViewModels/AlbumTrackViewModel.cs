@@ -62,6 +62,17 @@ internal class AlbumTrackViewModel : ViewModelBase
         this.TrackViewSource = trackViewSource;
     }
 
+    private TrackInfo _selectedTrack;
+
+    /// <summary>
+    /// 選択中のトラック
+    /// </summary>
+    public TrackInfo SelectedTrack
+    {
+        get => this._selectedTrack;
+        set => this.SetProperty(ref this._selectedTrack, value);
+    }
+
     private Command<TrackInfo> _trackPlayCommand;
 
     /// <summary>
