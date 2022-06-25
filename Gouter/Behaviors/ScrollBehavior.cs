@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Forms;
 using Gouter.Extensions;
 using Microsoft.Xaml.Behaviors;
 
@@ -23,18 +24,26 @@ internal class ScrollBehavior : Behavior<FrameworkElement>
         var viewer = this.AssociatedObject;
         if (viewer.IsLoaded)
         {
-            this.InitializeBehavior();
+            // 初期化済みであればビヘイビアの初期化処理を行う
+            this.InitializeBehavior(true);
         }
         else
         {
-            void OnLoaded(object sender, RoutedEventArgs e)
-            {
-                viewer.Loaded -= OnLoaded;
-                this.InitializeBehavior();
-            }
-
-            viewer.Loaded += OnLoaded;
+            viewer.Loaded += this.OnLoaded;
         }
+    }
+
+    /// <summary>
+    /// オブジェクト初期化時(ビヘイビア初期化未実施時)
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        var viewer = this.AssociatedObject;
+        viewer.Loaded -= this.OnLoaded;
+
+        this.InitializeBehavior(true);
     }
 
     /// <summary>
@@ -48,18 +57,47 @@ internal class ScrollBehavior : Behavior<FrameworkElement>
     }
 
     /// <summary>
-    /// ビヘイビア初期足
+    /// 対象要素初期化時
+    /// (ビヘイビア初期化が行われていない場合のみ実行)
+    /// <param name="retry">初期化処理のリトライ実施フラグ</param>
     /// </summary>
-    private void InitializeBehavior()
+    private void InitializeBehavior(bool retry)
     {
-        var scrollViewer = this._scrollViewer = this.AssociatedObject.FindVisualChild<ScrollViewer>()
-            ?? throw new NotSupportedException();
+        var scrollViewer = this._scrollViewer = this.AssociatedObject.FindVisualChild<ScrollViewer>();
+        if (scrollViewer == null)
+        {
+            if (retry)
+            {
+                // テンプレート未適用により要素が取得できない場合はフォーカスイベントで初期化処理を行う
+                this.AssociatedObject.GotFocus += this.OnLoadFocus;
+            }
+
+            return;
+        }
 
         scrollViewer.ScrollChanged += this.OnScrollChanged;
 
         // 初期位置を設定する
         scrollViewer.ScrollToVerticalOffset(this.VerticalPosition);
         scrollViewer.ScrollToHorizontalOffset(this.HorizontalPosition);
+    }
+
+    /// <summary>
+    /// 要素フォーカス時
+    /// (ビヘイビア初期化が行われていない場合のみ実行)
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private void OnLoadFocus(object sender, RoutedEventArgs e)
+    {
+        var viewer = this.AssociatedObject;
+
+        // フォーカスイベントの購読を解除
+        viewer.GotFocus -= this.OnLoadFocus;
+
+        // 初期化処理を行う
+        // ここで要素が取得できなければ、以降 初期化処理のリトライは行わない
+        this.InitializeBehavior(retry: false);
     }
 
     /// <summary>
