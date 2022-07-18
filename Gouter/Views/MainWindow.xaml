@@ -321,6 +321,7 @@
         </StatusBar>
 
         <TabControl Grid.Row="1" Style="{StaticResource PlaylistSelectTabControlStyle}">
+            <!-- アルバム -->
             <TabItem>
                 <TabItem.Header>
                     <app:GeometryIcon

@@ -1,7 +1,5 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Forms;
 using Gouter.Extensions;
 using Microsoft.Xaml.Behaviors;
 

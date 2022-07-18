@@ -47,9 +47,14 @@ internal class AlbumInfo : NotificationObject, IPlaylistInfo
     public DateTimeOffset UpdatedAt { get; private set; }
 
     /// <summary>
-    /// アルバムアートの最大サイズ
+    /// コンピレーションアルバムか否かのフラグ
     /// </summary>
-    private const int MaxImageSize = 80;
+    public bool IsCompilation { get; private set; }
+
+    /// <summary>
+    /// プレイリスト情報
+    /// </summary>
+    public AlbumPlaylist Playlist { get; }
 
     /// <summary>
     /// トラック情報からアルバム情報を生成する
@@ -94,8 +99,6 @@ internal class AlbumInfo : NotificationObject, IPlaylistInfo
 
     private bool _isArtworkFound = false;
 
-    private object @_lockObj = new object();
-
     /// <summary>
     /// アートワーク
     /// </summary>
@@ -118,14 +121,4 @@ internal class AlbumInfo : NotificationObject, IPlaylistInfo
             }
         }
     }
-
-    /// <summary>
-    /// コンピレーションアルバムか否かのフラグ
-    /// </summary>
-    public bool IsCompilation { get; private set; }
-
-    /// <summary>
-    /// プレイリスト情報
-    /// </summary>
-    public AlbumPlaylist Playlist { get; }
 }
