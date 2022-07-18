@@ -48,6 +48,11 @@ internal class MediaManager : IDisposable
     public AlbumManager Albums { get; private set; }
 
     /// <summary>
+    /// プレイリスト
+    /// </summary>
+    public CustomPlaylistManager CustomPlaylists { get; private set; }
+
+    /// <summary>
     /// プレイリスト情報管理
     /// </summary>
     public PlaylistManager Playlists { get; private set; }
@@ -68,7 +73,8 @@ internal class MediaManager : IDisposable
         this.Tracks = new TrackManager(this._database);
         this.Artwork = new ArtworkManager(artworkPath);
         this.Albums = new AlbumManager(this._database, this.Artwork);
-        this.Playlists = new PlaylistManager(this._database, this.Albums);
+        this.CustomPlaylists = new CustomPlaylistManager(this._database, this.Tracks);
+        this.Playlists = new PlaylistManager(this._database, this.Albums, this.CustomPlaylists);
     }
 
     /// <summary>
@@ -110,6 +116,7 @@ internal class MediaManager : IDisposable
     {
         this.Albums.Load();
         this.Tracks.Load(this.Albums);
+        this.CustomPlaylists.Load();
         this.Playlists.Load();
         this.Loaded?.Invoke(this, new());
     });

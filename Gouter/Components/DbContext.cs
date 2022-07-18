@@ -30,6 +30,16 @@ internal class DbContext : IDisposable
     public DbSet<AlbumArtworksDataModel> AlbumArtworks { get; }
 
     /// <summary>
+    /// プレイリスト情報
+    /// </summary>
+    public DbSet<PlaylistDataModel> Playlists { get; }
+
+    /// <summary>
+    /// プレイリスト・トラック紐付け情報
+    /// </summary>
+    public DbSet<PlaylistTrackDataModel> PlaylistTracks { get; }
+
+    /// <summary>
     /// コンテキストを生成する。
     /// </summary>
     /// <param name="connection">DBのコネクション</param>
@@ -40,6 +50,8 @@ internal class DbContext : IDisposable
         this.Tracks = new DbSet<TrackDataModel>(connection);
         this.Albums = new DbSet<AlbumDataModel>(connection);
         this.AlbumArtworks = new DbSet<AlbumArtworksDataModel>(connection);
+        this.Playlists = new DbSet<PlaylistDataModel>(connection);
+        this.PlaylistTracks = new DbSet<PlaylistTrackDataModel>(connection);
     }
 
     /// <summary>
