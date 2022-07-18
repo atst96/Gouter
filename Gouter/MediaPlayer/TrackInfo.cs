@@ -9,6 +9,13 @@ namespace Gouter;
 /// </summary>
 internal class TrackInfo : NotificationObject
 {
+    public TrackInfo(TrackInfo info)
+    {
+        this.Id = info.Id;
+        this.RegisteredAt = info.RegisteredAt;
+        this.Update(info);
+    }
+
     /// <summary>
     /// トラック情報を生成する。
     /// </summary>
@@ -135,5 +142,25 @@ internal class TrackInfo : NotificationObject
             this.IsPlaying = isPlaying;
             this.RaisePropertyChanged(nameof(this.IsPlaying));
         }
+    }
+
+    /// <summary>
+    /// トラック情報を更新する
+    /// </summary>
+    /// <param name="info">トラック情報</param>
+    public void Update(TrackInfo info)
+    {
+        this.Id = info.Id;
+        this.Path = info.Path;
+        this.Duration = info.Duration;
+        this.DiskNumber = info.DiskNumber;
+        this.TrackNumber = info.TrackNumber;
+        this.Year = info.Year;
+        this.AlbumArtist = info.AlbumArtist;
+        this.Title = info.Title;
+        this.Artist = info.Artist;
+        this.Genre = info.Genre;
+        this.AlbumInfo = info.AlbumInfo;
+        this.UpdatedAt = info.UpdatedAt;
     }
 }

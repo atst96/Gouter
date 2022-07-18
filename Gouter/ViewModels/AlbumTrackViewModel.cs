@@ -1,47 +1,33 @@
 ﻿using System.ComponentModel;
 using System.Windows.Data;
+using Gouter.Playlists;
 
 namespace Gouter.ViewModels;
 
 /// <summary>
 /// アルバムのトラック情報リスト
 /// </summary>
-internal class AlbumTrackViewModel : ViewModelBase
+internal class AlbumTrackViewModel : TracksViewModelBase<AlbumPlaylist, AlbumInfo, TrackInfo>
 {
-    /// <summary>
-    /// アルバム情報
-    /// </summary>
-    public AlbumPlaylist Playlist { get; }
-
-    /// <summary>
-    /// アルバム情報
-    /// </summary>
-    public AlbumInfo Album { get; }
-
-    /// <summary>
-    /// トラックリスト
-    /// </summary>
-    public ObservableList<TrackInfo> Tracks { get; }
-
-    /// <summary>
-    /// </summary>
-    public CollectionViewSource TrackViewSource { get; }
-
     /// <summary>
     /// コンストラクタ
     /// </summary>
     /// <param name="playlist"></param>
-    public AlbumTrackViewModel(AlbumPlaylist playlist)
+    public AlbumTrackViewModel(AlbumPlaylist playlist, ObservableList<CustomPlaylist> playlists)
+        : base(playlist, playlist.Album, playlist.Tracks, CreateCollectionViewSource(playlist), playlists)
     {
-        this.Playlist = playlist;
-        this.Album = playlist.Album;
-        this.Tracks = playlist.Tracks;
+    }
 
-        var tracks = this.Tracks;
-
+    /// <summary>
+    /// CollectionViewSourceを生成する
+    /// </summary>
+    /// <param name="playlist">プレイリスト情報</param>
+    /// <returns></returns>
+    private static CollectionViewSource CreateCollectionViewSource(AlbumPlaylist playlist)
+    {
         var trackViewSource = new CollectionViewSource
         {
-            Source = tracks,
+            Source = playlist.Tracks,
         };
 
         var groupDescriptions = trackViewSource.GroupDescriptions;
@@ -59,32 +45,6 @@ internal class AlbumTrackViewModel : ViewModelBase
         liveSortingDescriptions.Add(nameof(TrackInfo.TrackNumber));
         liveSortingDescriptions.Add(nameof(TrackInfo.Title));
 
-        this.TrackViewSource = trackViewSource;
-    }
-
-    private TrackInfo _selectedTrack;
-
-    /// <summary>
-    /// 選択中のトラック
-    /// </summary>
-    public TrackInfo SelectedTrack
-    {
-        get => this._selectedTrack;
-        set => this.SetProperty(ref this._selectedTrack, value);
-    }
-
-    private Command<TrackInfo> _trackPlayCommand;
-
-    /// <summary>
-    /// トラックのダブルクリック時のコマンド
-    /// </summary>
-    public Command<TrackInfo> TrackPlayCommand => this._trackPlayCommand
-        ??= this.Commands.Create<TrackInfo>(this.OnPlayCommandExecute, track => track != null);
-
-    private void OnPlayCommandExecute(TrackInfo track)
-    {
-        var player = App.Instance.MediaPlayer;
-
-        player.Play(track, this.Playlist);
+        return trackViewSource;
     }
 }
