@@ -225,7 +225,8 @@
                 IsOpen="{TemplateBinding IsSubmenuOpen}"
                 AllowsTransparency="True"
                 Focusable="False"
-                PopupAnimation="None">
+                PopupAnimation="None"
+                TextElement.Foreground="{StaticResource MenuItem.Static.Foreground}">
                 <Themes:SystemDropShadowChrome
                     Color="#71000000" Margin="0 0 5 5">
                     <Grid
@@ -412,7 +413,8 @@
                     Focusable="False"
                     PopupAnimation="None"
                     HorizontalOffset="-2"
-                    VerticalOffset="-6">
+                    VerticalOffset="-6"
+                    TextElement.Foreground="{StaticResource MenuItem.Static.Foreground}">
                     <Themes:SystemDropShadowChrome
                         Color="#71000000" Margin="0 0 5 5">
                         <Grid
