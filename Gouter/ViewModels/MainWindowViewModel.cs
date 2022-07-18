@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Forms;
 using System.Windows.Threading;
+using Gouter.DataModels;
 using Gouter.Managers;
 using Gouter.Messaging;
 using Gouter.Players;
+using Gouter.Playlists;
+using Gouter.Validation;
 using Livet.Messaging;
 
 namespace Gouter.ViewModels;
@@ -36,6 +40,8 @@ internal sealed class MainWindowViewModel : ViewModelBase, IDisposable
 
     public SortedNotifiableCollectionWrapper<AlbumPlaylist> Albums { get; }
 
+    public ObservableList<CustomPlaylist> CustomPlaylists { get; }
+
     private AlbumPlaylist _selectedAlbumPlaylist;
     public AlbumPlaylist SelectedAlbumPlaylist
     {
@@ -44,7 +50,20 @@ internal sealed class MainWindowViewModel : ViewModelBase, IDisposable
         {
             if (this.SetProperty(ref this._selectedAlbumPlaylist, value))
             {
-                this.AlbumTracks = this._dispatcher.Invoke(() => value != null ? new AlbumTrackViewModel(value) : null);
+                this.AlbumTracks = this._dispatcher.Invoke(() => value != null ? new AlbumTrackViewModel(value, this.CustomPlaylists) : null);
+            }
+        }
+    }
+
+    private CustomPlaylist _selectedCustomPlaylist;
+    public CustomPlaylist SelectedCustomPlaylist
+    {
+        get => this._selectedCustomPlaylist;
+        set
+        {
+            if (this.SetProperty(ref this._selectedCustomPlaylist, value))
+            {
+                this.CustomPlaylistTracks = this._dispatcher.Invoke(() => value != null ? new CustomPlaylistTrackViewModel(value, this.CustomPlaylists) : null);
             }
         }
     }
@@ -56,11 +75,14 @@ internal sealed class MainWindowViewModel : ViewModelBase, IDisposable
         set => this.SetProperty(ref this._verticalOffset, value);
     }
 
+    public ValidationRule PlaylistNameValidation { get; }
+
     public MainWindowViewModel() : base()
     {
         _app.SettingSaving += this.OnSettingSaving;
 
         this.Albums = new SortedNotifiableCollectionWrapper<AlbumPlaylist>(this.Playlists.Albums, AlbumComparer.Instance);
+        this.CustomPlaylists = this.Playlists.CustomPlaylists;
 
         var player = this.Player;
         player.PlayStateChanged += this.OnPlayStateChanged;
@@ -69,7 +91,10 @@ internal sealed class MainWindowViewModel : ViewModelBase, IDisposable
         this._timer = new DispatcherTimer(timerInterval, DispatcherPriority.Render, this.OnTimerTick, Dispatcher.CurrentDispatcher);
         this._timer.Tick += this.OnTimerTick;
 
+        this.PlaylistNameValidation = new PlaylistNameValiationRule(this.CustomPlaylists.Select(p => p.Name));
+
         BindingOperations.EnableCollectionSynchronization(this.Albums, new object());
+        BindingOperations.EnableCollectionSynchronization(this.CustomPlaylists, new object());
     }
 
     private void OnSettingSaving(object? sender, ApplicationSetting e)
@@ -83,6 +108,14 @@ internal sealed class MainWindowViewModel : ViewModelBase, IDisposable
     {
         get => this._albumTracks;
         set => this.SetProperty(ref this._albumTracks, value);
+    }
+
+    private CustomPlaylistTrackViewModel _customPlaylistTracks;
+
+    public CustomPlaylistTrackViewModel CustomPlaylistTracks
+    {
+        get => this._customPlaylistTracks;
+        set => this.SetProperty(ref this._customPlaylistTracks, value);
     }
 
     private bool _isInitialized = false;
@@ -161,19 +194,19 @@ internal sealed class MainWindowViewModel : ViewModelBase, IDisposable
         switch (e.State)
         {
             case TrackRegisterState.Collecting:
-                    // 新規トラック情報収集中
-                    this.OnTrackCollecting(e);
+                // 新規トラック情報収集中
+                this.OnTrackCollecting(e);
                 break;
 
             case TrackRegisterState.InProgress:
-                    // トラック情報登録中
-                    this.OnTrackRegisterInProgress(e);
+                // トラック情報登録中
+                this.OnTrackRegisterInProgress(e);
                 break;
 
             case TrackRegisterState.NotFound:
             case TrackRegisterState.Complete:
-                    // トラック情報収集完了
-                    this.OnTrackRegisterFinished(e);
+                // トラック情報収集完了
+                this.OnTrackRegisterFinished(e);
                 break;
 
             default:
@@ -468,4 +501,10 @@ internal sealed class MainWindowViewModel : ViewModelBase, IDisposable
         this.Player.PlayStateChanged -= this.OnPlayStateChanged;
         this.MediaManager.TrackRegisterStateChanged += this.OnTrackRegisterStateChanged;
     }
+
+    private Command<PromptMessage> _createPlaylistCommand;
+    public Command<PromptMessage> CreatePlaylistCommand => this._createPlaylistCommand ??= (
+        this.Commands.Create<PromptMessage>(
+            n => this.MediaManager.CustomPlaylists.Create(n.Response),
+            n => n.Response != null));
 }

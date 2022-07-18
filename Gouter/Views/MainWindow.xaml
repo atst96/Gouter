@@ -376,6 +376,85 @@
                         ContentTemplate="{StaticResource AlbumTrackViewTemplate}" />
                 </Grid>
             </TabItem>
+
+            <!-- プレイリスト -->
+            <TabItem>
+                <TabItem.Header>
+                    <app:GeometryIcon
+                        Width="16" Height="16"
+                        Data="{StaticResource Icons.PlaylistPlay}" />
+                </TabItem.Header>
+
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="240" />
+                        <ColumnDefinition Width="8" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+
+                        <Button Content="Add" Padding="4" VerticalAlignment="Top">
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="Click">
+                                    <b:PromptAction>
+                                        <l:DirectInteractionMessage CallbackCommand="{Binding CreatePlaylistCommand, Mode=OneTime}">
+                                            <m:PromptMessage
+                                                Title="プレイリストを作成する"
+                                                Description="プレイリスト名を入力してください"
+                                                Validation="{Binding PlaylistNameValidation, Mode=OneTime}"/>
+                                        </l:DirectInteractionMessage>
+                                    </b:PromptAction>
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                        </Button>
+
+                        <ListBox
+                            Grid.Column="0" Grid.Row="1"
+                            SelectionMode="Single"
+                            AlternationCount="2"
+                            ItemsPanel="{StaticResource ItemsPanelTemplate}"
+                            VirtualizingPanel.ScrollUnit="Item"
+                            VirtualizingPanel.IsVirtualizing="True"
+                            VirtualizingPanel.VirtualizationMode="Recycling"
+                            ItemsSource="{Binding CustomPlaylists, Mode=OneTime}"
+                            SelectedItem="{Binding SelectedCustomPlaylist, Mode=TwoWay}">
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="MouseDoubleClick">
+                                    <i:InvokeCommandAction Command="{Binding DataContext.AlbumPlaylistSelectedCommand, Mode=OneTime, RelativeSource={RelativeSource AncestorType=view:MainWindow}}"  />
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                            <i:Interaction.Behaviors>
+                                <b:ScrollBehavior VerticalPosition="{Binding PlaylistVerticalOffset, Mode=TwoWay}" />
+                            </i:Interaction.Behaviors>
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                    <Setter Property="Padding" Value="8" />
+                                    <Setter Property="Height" Value="64" />
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                        </ListBox>
+                    </Grid>
+
+                    <GridSplitter
+                        Grid.Column="1"
+                        Width="6"
+                        VerticalAlignment="Stretch"
+                        HorizontalAlignment="Center"
+                        Background="Transparent"
+                        BorderThickness="2,0,0,0"
+                        Style="{StaticResource GridSplitterStyle}" />
+
+                    <ContentPresenter
+                        Grid.Column="2"
+                        Content="{Binding CustomPlaylistTracks, Mode=OneWay}"
+                        ContentTemplate="{StaticResource CustomPlaylistTrackViewTemplate}" />
+                </Grid>
+            </TabItem>
         </TabControl>
     </Grid>
 </Window>

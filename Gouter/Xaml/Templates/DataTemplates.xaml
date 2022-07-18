@@ -1,8 +1,14 @@
 ﻿<ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:l="http://schemas.livet-mvvm.net/2011/wpf"
+    xmlns:b="clr-namespace:Gouter.Behaviors"
+    xmlns:a="clr-namespace:Gouter.Behaviors.Messages"
+    xmlns:m="clr-namespace:Gouter.Messaging"
     xmlns:app="clr-namespace:Gouter"
     xmlns:vm="clr-namespace:Gouter.ViewModels"
+    xmlns:p="clr-namespace:Gouter.Playlists"
     xmlns:conv="clr-namespace:Gouter.Converters"
     xmlns:selectors="clr-namespace:Gouter.Selectors">
 
@@ -37,6 +43,33 @@
                     TextWrapping="NoWrap"
                     TextTrimming="CharacterEllipsis"
                     Text="{Binding Album.Artist, Mode=OneWay}" />
+            </StackPanel>
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type p:CustomPlaylist}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <Image
+                Margin="0,0,8,0"
+                Width="48" Height="48"
+                Stretch="Uniform"
+                Source="/Resources/missing_album.png"
+                RenderOptions.BitmapScalingMode="HighQuality" />
+
+            <StackPanel
+                Grid.Column="1"
+                Orientation="Vertical"
+                VerticalAlignment="Center">
+                <TextBlock
+                    FontWeight="Bold"
+                    TextWrapping="NoWrap"
+                    TextTrimming="CharacterEllipsis"
+                    Text="{Binding Name, Mode=OneWay}" />
             </StackPanel>
         </Grid>
     </DataTemplate>
@@ -151,6 +184,8 @@
         </DataTemplate.Resources>
 
         <Grid
+            x:Name="PART_Container"
+            DataContext="{Binding Path=., Mode=OneTime}"
             Background="White"
             Visibility="Visible">
             <Grid>
@@ -229,6 +264,9 @@
                     SetSelectingItemToCommandParameter="True"
                     ItemDoubleClickCommand="{Binding TrackPlayCommand, Mode=OneTime}"
                     ItemTemplate="{StaticResource TrackItemTemplate}">
+                    <i:Interaction.Behaviors>
+                        <app:ListBoxSelectionProxy SelectedItems="{Binding SelectedTracks, Mode=OneWayToSource}" />
+                    </i:Interaction.Behaviors>
                     <app:ListBoxEx.GroupStyle>
                         <GroupStyle
                             ContainerStyleSelector="{StaticResource TrackGroupContainerStyleSelector}">
@@ -242,14 +280,153 @@
                             </GroupStyle.HeaderTemplate>
                         </GroupStyle>
                     </app:ListBoxEx.GroupStyle>
+                    <app:ListBoxEx.ItemContainerStyle>
+                        <Style TargetType="{x:Type ListBoxItem}" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                            <Setter Property="Width" Value="{Binding ViewportWidth, Mode=OneWay, RelativeSource={RelativeSource AncestorType=ScrollViewer}}" />
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        </Style>
+                    </app:ListBoxEx.ItemContainerStyle>
+                    <app:ListBoxEx.ContextMenu>
+                        <ContextMenu>
+                            <!--<MenuItem
+                                Header="再生" />
+                            <MenuItem
+                                Header="エクスプローラで表示" />
+                            <Separator />-->
+                            <MenuItem Header="プレイリストに追加">
+                                <MenuItem.Resources>
+                                    <CollectionViewSource x:Key="vcs" Source="{Binding Playlists, Mode=OneTime}" />
+                                </MenuItem.Resources>
+                                <MenuItem.ItemsSource>
+                                    <CompositeCollection>
+                                        <!--<MenuItem Header="新しいプレイリストに追加" Command="{x:Null}">
+                                            <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="Click">
+                                                    <b:PromptAction>
+                                                        <l:DirectInteractionMessage CallbackCommand="{Binding CreatePlaylistCommand, Mode=OneTime}">
+                                                            <m:PromptMessage
+                                                                Title="プレイリストを作成する"
+                                                                Description="プレイリスト名を入力してください"
+                                                                Validation="{Binding DataContext.PlaylistNameValidation, RelativeSource={RelativeSource AncestorType=Window}, Mode=OneTime}"/>
+                                                        </l:DirectInteractionMessage>
+                                                    </b:PromptAction>
+                                                </i:EventTrigger>
+                                            </i:Interaction.Triggers>
+                                        </MenuItem>
+                                        <Separator />-->
+                                        <MenuItem Header="次のプレイリストに追加:" Command="{x:Null}" IsEnabled="False" />
+                                        <CollectionContainer Collection="{Binding Source={StaticResource vcs}, Mode=OneTime}" />
+                                    </CompositeCollection>
+                                </MenuItem.ItemsSource>
+                                <MenuItem.ItemContainerStyle>
+                                    <Style TargetType="MenuItem">
+                                        <Setter Property="Header" Value="{Binding Name, Mode=OneWay}" />
+                                        <Setter Property="CommandParameter" Value="{Binding Mode=OneWay}" />
+                                        <Setter Property="Command" Value="{Binding DataContext.AddPlaylistCommand, RelativeSource={RelativeSource AncestorType=app:ListBoxEx}, Mode=OneWay}" />
+                                    </Style>
+                                </MenuItem.ItemContainerStyle>
+                            </MenuItem>
+                        </ContextMenu>
+                    </app:ListBoxEx.ContextMenu>
+                </app:ListBoxEx>
+            </Grid>
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="CustomPlaylistTrackViewTemplate" DataType="{x:Type vm:CustomPlaylistTrackViewModel}">
+        <DataTemplate.Resources>
+            <ItemsPanelTemplate x:Key="ItemsPanelTemplate">
+                <VirtualizingStackPanel Orientation="Vertical" />
+            </ItemsPanelTemplate>
+        </DataTemplate.Resources>
+
+        <Grid
+            Background="White"
+            Visibility="Visible">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="79" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="210" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
+                <Grid
+                    Grid.Column="0"
+                    Grid.Row="0"
+                    Grid.RowSpan="2"
+                    Margin="14,12,0,0"
+                    VerticalAlignment="Top"
+                    HorizontalAlignment="Left"
+                    Width="180"
+                    Height="180">
+                    <Border
+                        BorderBrush="#EEEEEE"
+                        BorderThickness="1"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center">
+                        <Image
+                            Stretch="Uniform"
+                            RenderOptions.BitmapScalingMode="HighQuality"
+                            Source="/Resources/missing_album.png"
+                            VerticalAlignment="Stretch"
+                            HorizontalAlignment="Stretch"/>
+                    </Border>
+                </Grid>
+
+                <Grid
+                    Grid.Column="1"
+                    Margin="0,12,12,12"
+                    VerticalAlignment="Top"
+                    HorizontalAlignment="Stretch">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="36" />
+                        <RowDefinition Height="18" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock
+                        Grid.Row="0"
+                        FontSize="16pt"
+                        Text="{Binding Album.Name, Mode=OneWay}"
+                        TextTrimming="CharacterEllipsis"
+                        ToolTip="{Binding Album.Name, Mode=OneWay}"/>
+
+                    <TextBlock
+                        Grid.Row="1"
+                        Foreground="#0077CC"
+                        Text="{Binding Album.Artist, Mode=OneWay}"
+                        TextTrimming="CharacterEllipsis" />
+                </Grid>
+
+                <app:ListBoxEx
+                    x:Name="PART_TrackList"
+                    Grid.Column="1" Grid.Row="1"
+                    Padding="0"
+                    SelectionMode="Extended"
+                    VirtualizingPanel.IsVirtualizing="True"
+                    VirtualizingPanel.ScrollUnit="Pixel"
+                    VirtualizingPanel.IsVirtualizingWhenGrouping="True"
+                    VirtualizingPanel.VirtualizationMode="Recycling"
+                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                    ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                    AlternationCount="2"
+                    BorderThickness="0"
+                    ItemsPanel="{StaticResource ItemsPanelTemplate}"
+                    ItemsSource="{Binding TrackViewSource.View, Mode=OneTime}"
+                    SelectedItem="{Binding SelectedTrack, Mode=TwoWay}"
+                    SetSelectingItemToCommandParameter="True"
+                    ItemDoubleClickCommand="{Binding TrackPlayCommand, Mode=OneTime}"
+                    ItemTemplate="{StaticResource TrackItemTemplate}">
                     <app:ListBoxEx.Resources>
                         <ContextMenu
                             x:Key="ItemContextMenu"
                             DataContext="{Binding}">
-                            <MenuItem
+                            <!--<MenuItem
                                 Header="再生" />
                             <MenuItem
-                                Header="エクスプローラで表示" />
+                                Header="エクスプローラで表示" />-->
                         </ContextMenu>
                     </app:ListBoxEx.Resources>
                     <app:ListBoxEx.ItemContainerStyle>
