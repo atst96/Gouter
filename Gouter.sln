@@ -20,10 +20,12 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Gouter.Shared", "Gouter.Sha
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gouter.Test.UI", "Gouter.Test.UI\Gouter.Test.UI.csproj", "{708F71D8-1F89-4C30-9E32-506AC2655DB4}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ソリューション項目", "ソリューション項目", "{96B7FCF5-7391-46E9-8DBA-2DA577966DFE}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+	EndProjectSection
+EndProject
 Global
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		Gouter.Shared\Gouter.Shared.projitems*{119b695e-85cb-4c96-9f14-7e2736cb0d32}*SharedItemsImports = 13
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -47,5 +49,8 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BFFFEAB3-4B03-4E5E-A7B4-B185CF4F427E}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Gouter.Shared\Gouter.Shared.projitems*{119b695e-85cb-4c96-9f14-7e2736cb0d32}*SharedItemsImports = 13
 	EndGlobalSection
 EndGlobal
