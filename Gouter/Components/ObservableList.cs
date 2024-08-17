@@ -158,7 +158,7 @@ public class ObservableList<T> : IList<T>, IReadOnlyList<T>, INotifyCollectionCh
     {
         this._list.Add(item);
 
-        this.RaiseCollectionChanged(new(NotifyCollectionChangedAction.Add, item));
+        this.RaiseCollectionChanged(new(NotifyCollectionChangedAction.Add, item, this._list.Count));
         this.UpdateItemsCount();
     }
 
@@ -172,7 +172,7 @@ public class ObservableList<T> : IList<T>, IReadOnlyList<T>, INotifyCollectionCh
 
         this._list.AddRange(items);
 
-        this.RaiseCollectionChanged(new(NotifyCollectionChangedAction.Add, (IList)items));
+        this.RaiseCollectionChanged(new(NotifyCollectionChangedAction.Add, (IList)items, this._list.Count));
         this.UpdateItemsCount();
     }
 

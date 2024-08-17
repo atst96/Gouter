@@ -78,8 +78,8 @@ internal static class PathUtil
     /// </summary>
     public static readonly ImmutableHashSet<string> SupportedMediaExtensions = ImmutableHashSet.Create(new[]
     {
-            ".wav", ".mp3", ".acc", ".m4a", ".flac", ".ogg",
-        });
+        ".wav", ".mp3", ".acc", ".m4a", ".flac", ".ogg", ".opus"
+    });
 
     /// <summary>
     /// 対応するメディアの拡張子かどうかを判定する
