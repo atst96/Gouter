@@ -16,14 +16,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gouter", "Gouter\Gouter.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gouter.Test", "Gouter.Test\Gouter.Test.csproj", "{FC5D63ED-1BEB-4624-846E-04EC36FDF5F4}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Gouter.Shared", "Gouter.Shared\Gouter.Shared.shproj", "{119B695E-85CB-4C96-9F14-7E2736CB0D32}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gouter.Test.UI", "Gouter.Test.UI\Gouter.Test.UI.csproj", "{708F71D8-1F89-4C30-9E32-506AC2655DB4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ソリューション項目", "ソリューション項目", "{96B7FCF5-7391-46E9-8DBA-2DA577966DFE}"
 	ProjectSection(SolutionItems) = preProject
 		Directory.Build.props = Directory.Build.props
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gouter2", "Gouter2\Gouter2.csproj", "{CE40FDDB-9C7E-481B-B7A2-D5A7C36571AD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gouter.Share", "Gouter.Share\Gouter.Share.csproj", "{57DC480A-61C0-4B54-BCB0-FF32666CCE7F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,14 +45,19 @@ Global
 		{708F71D8-1F89-4C30-9E32-506AC2655DB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{708F71D8-1F89-4C30-9E32-506AC2655DB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{708F71D8-1F89-4C30-9E32-506AC2655DB4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE40FDDB-9C7E-481B-B7A2-D5A7C36571AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE40FDDB-9C7E-481B-B7A2-D5A7C36571AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE40FDDB-9C7E-481B-B7A2-D5A7C36571AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE40FDDB-9C7E-481B-B7A2-D5A7C36571AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57DC480A-61C0-4B54-BCB0-FF32666CCE7F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57DC480A-61C0-4B54-BCB0-FF32666CCE7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57DC480A-61C0-4B54-BCB0-FF32666CCE7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57DC480A-61C0-4B54-BCB0-FF32666CCE7F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BFFFEAB3-4B03-4E5E-A7B4-B185CF4F427E}
-	EndGlobalSection
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		Gouter.Shared\Gouter.Shared.projitems*{119b695e-85cb-4c96-9f14-7e2736cb0d32}*SharedItemsImports = 13
 	EndGlobalSection
 EndGlobal
