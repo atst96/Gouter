@@ -9,7 +9,7 @@ namespace Gouter.Utils;
 
 internal static class TrackUtil
 {
-    private static readonly Factory _audioFileUtil = AudioDataIOFactory.GetInstance();
+    private static readonly AudioDataIOFactory _audioFileUtil = AudioDataIOFactory.GetInstance();
 
     private static Dictionary<string, string> _extMimeTypeMap = new(StringComparer.OrdinalIgnoreCase);
 
