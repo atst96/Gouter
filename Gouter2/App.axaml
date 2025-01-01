@@ -1,0 +1,92 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="using:Gouter"
+             xmlns:theme="clr-namespace:CapriciousUI;assembly=CapriciousUI.Avalonia"
+             x:Class="Gouter.App">
+
+  <Application.Styles>
+
+    <!--Base Theme-->
+    <SimpleTheme />
+
+    <theme:CapriciousTheme />
+
+    <!-- MenuItem separator -->
+    <Style Selector="MenuItem Separator">
+      <Setter Property="Background" Value="{DynamicResource Theme.MenuItem.Separator.Normal.BackgroundBrush}"/>
+      <Setter Property="Opacity"  Value=".5" />
+      <Setter Property="Height" Value="1" />
+      <Setter Property="Margin" Value="6,2" />
+    </Style>
+
+    <!-- TabControl(special) -->
+    <Style Selector="TabControl.Setting">
+      <Setter Property="TabStripPlacement" Value="Left" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Background" Value="{DynamicResource Theme.TabControl.Normal.BackgroundBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Theme.TabControl.Normal.BorderBrush}" />
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Border Background="{TemplateBinding Background}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}">
+            <Grid ColumnDefinitions="Auto,*">
+
+              <Border BorderThickness="0,0,1,0"
+                      Background="{DynamicResource Theme.TabPanel.Normal.BackgroundBrush}"
+                      BorderBrush="{TemplateBinding BorderBrush}" />
+
+              <ItemsPresenter Name="PART_ItemsPresenter"
+                              Width="120" KeyboardNavigation.TabIndex="1"
+                              ItemsPanel="{TemplateBinding ItemsPanel}" />
+
+              <ContentPresenter Name="PART_SelectedContentHost"
+                                Grid.Column="1"
+                                Margin="{TemplateBinding Padding}"
+                                HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                Content="{TemplateBinding SelectedContent}"
+                                ContentTemplate="{TemplateBinding SelectedContentTemplate}" />
+            </Grid>
+          </Border>
+        </ControlTemplate>
+      </Setter>
+
+      <Style Selector="^ TabItem">
+        <Setter Property="Width" Value="120" />
+        <Setter Property="FontSize" Value="{Binding $parent[TabControl].FontSize}" />
+        <Setter Property="Padding" Value="14,8,8,8" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="TextElement.Foreground" Value="#FF444444" />
+        <Setter Property="Template">
+          <ControlTemplate>
+            <ContentPresenter Name="PART_Content"
+                  Padding="{TemplateBinding Padding}"
+                  HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                  Background="{TemplateBinding Background}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  Content="{TemplateBinding Header}"
+                  ContentTemplate="{TemplateBinding HeaderTemplate}"
+                  CornerRadius="{TemplateBinding CornerRadius}" />
+          </ControlTemplate>
+        </Setter>
+
+        <!-- Hover -->
+        <Style Selector="^:pointerover">
+          <Setter Property="Background" Value="{DynamicResource Theme.TabItem.MouseOver.BackgroundBrush}" />
+        </Style>
+
+        <!-- Selected -->
+        <Style Selector="^:selected">
+          <Setter Property="Background" Value="{DynamicResource Theme.TabItem.Selected.BackgroundBrush}" />
+          <Setter Property="TextElement.Foreground" Value="#FF222222" />
+        </Style>
+      </Style>
+    </Style>
+
+  </Application.Styles>
+</Application>

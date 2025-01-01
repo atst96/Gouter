@@ -1,0 +1,92 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Gouter.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        x:Class="Gouter.Views.PreferenceWindow"
+        Design.DataContext="{x:Type vm:PreferenceWindowViewModel}"
+        mc:Ignorable="d" d:DesignWidth="620" d:DesignHeight="450"
+        Title="設定" Width="620" Height="450"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False" ShowInTaskbar="False" FontFamily="Meiryo">
+  <Window.Resources>
+    <Thickness x:Key="PanelPadding">16,10</Thickness>
+    <Thickness x:Key="TopAdjacentMargin">0,8,0,0</Thickness>
+    <Thickness x:Key="LeftAdjacentMargin">8,0,0,0</Thickness>
+  </Window.Resources>
+  <Window.Styles>
+    <!--Label.Header-->
+    <Style Selector="Label.Header">
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Margin" Value="0" />
+      <Setter Property="FontSize" Value="18" />
+    </Style>
+
+  </Window.Styles>
+
+  <DockPanel LastChildFill="True">
+    <!--ダイアログ下部のボタン-->
+    <Border DockPanel.Dock="Bottom"
+            Background="#FAFAFA"
+            Padding="{StaticResource PanelPadding}"
+            BorderThickness="0,1,0,0" BorderBrush="#DDD">
+      <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+        <Button Padding="24,2" Content="閉じる" />
+      </StackPanel>
+    </Border>
+
+    <TabControl Classes="Setting">
+      <TabItem Header="ライブラリ">
+        <StackPanel Margin="{StaticResource PanelPadding}">
+          <Label Classes="Header" Content="ライブラリ設定" />
+
+          <TextBlock
+            Text="次の場所から楽曲ファイルを探します"
+            Margin="{StaticResource TopAdjacentMargin}" />
+
+          <ListBox Height="70" Margin="{StaticResource TopAdjacentMargin}"
+                   BorderThickness="1" BorderBrush="#bbbbbb"
+                   ItemsSource="{Binding FindDirectories, Mode=OneTime}">
+          </ListBox>
+
+          <ListBox Height="60">
+            <ListBoxItem Content="aaa" />
+            <ListBoxItem Content="bbb" />
+            <ListBoxItem Content="ccc" />
+            <ListBoxItem Content="ddd" />
+            <ListBoxItem Content="eee" />
+          </ListBox>
+
+          <StackPanel Margin="{StaticResource TopAdjacentMargin}"
+                      Orientation="Horizontal">
+            <Button Padding="24,3" Content="フォルダの追加" />
+            <Button Padding="24,3" Classes="Danger"
+                    Content="選択したフォルダを削除"
+                    Margin="{StaticResource LeftAdjacentMargin}" />
+          </StackPanel>
+
+          <Separator Margin="0,12,0,8" Background="#cccccc" />
+
+          <TextBlock Text="以下のディレクトリを検索から除外します"
+                     Margin="{StaticResource TopAdjacentMargin}"/>
+
+          <ListBox Height="70" Margin="{StaticResource TopAdjacentMargin}"
+                   BorderThickness="1" BorderBrush="#bbbbbb"
+                   ItemsSource="{Binding ExcludeDirectories, Mode=OneTime}">
+          </ListBox>
+
+          <StackPanel Margin="{StaticResource TopAdjacentMargin}"
+                      Orientation="Horizontal">
+            <Button Padding="24,3" Content="フォルダの追加" />
+            <Button Padding="24,3" Classes="Danger"
+                    Content="選択したフォルダを削除"
+                    Margin="{StaticResource LeftAdjacentMargin}" />
+          </StackPanel>
+
+        </StackPanel>
+      </TabItem>
+    </TabControl>
+
+  </DockPanel>
+
+</Window>
