@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+    <EnableAnalyzer>true</EnableAnalyzer>
+    <TrimmerSingleWarn>false</TrimmerSingleWarn>
+    <IsTrimmable>true</IsTrimmable>
+    <RootNamespace>CapriciousUI</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="$(AvaloniaVersion)" />
+  </ItemGroup>
+</Project>

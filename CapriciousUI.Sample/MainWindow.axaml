@@ -1,0 +1,86 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="CapriciousUI.Sample.MainWindow"
+        Title="CapriciousUI.Sample"
+        FontFamily="Meiryo UI">
+
+  <Grid RowDefinitions="Auto,*,Auto">
+
+    <Menu Grid.Row="0">
+      <MenuItem Header="ファイル(_F)">
+        <MenuItem Header="終了(_X)" InputGesture="Alt+F4" />
+      </MenuItem>
+      <MenuItem Header="編集(_E)">
+        <MenuItem Header="切り取り(_T)" InputGesture="Ctrl+X" />
+        <MenuItem Header="コピー(_C)" InputGesture="Ctrl+C" />
+        <MenuItem Header="切り取り(_T)" InputGesture="Ctrl+V" />
+        <Separator />
+        <MenuItem Header="すべて選択(_A)" InputGesture="Ctrl+A" />
+      </MenuItem>
+      <MenuItem Header="表示(_V)">
+        <MenuItem Header="オプション">
+          <MenuItem Header="SubItem" />
+          <MenuItem Header="Disabled" IsEnabled="False" />
+          <MenuItem Header="Checked" IsChecked="True" />
+          <MenuItem Header="Checked" IsChecked="True" IsEnabled="False" />
+        </MenuItem>
+        <MenuItem Header="Disabled" IsEnabled="False" />
+        <MenuItem Header="Checked" IsChecked="True" />
+        <MenuItem Header="Checked" IsChecked="True" IsEnabled="False" />
+      </MenuItem>
+    </Menu>
+    
+    <ScrollViewer Grid.Row="1">
+      <StackPanel Orientation="Horizontal">
+
+        <!-- Button -->
+        <StackPanel Orientation="Vertical" Margin="4" Width="120">
+          <TextBlock Margin="2" Text="Button" />
+          <Button Margin="2" Content="Default" />
+          <Button Margin="2" Content="Default" IsEnabled="False" />
+          <Button Margin="2" Content="Primary" Classes="Primary" />
+          <Button Margin="2" Content="Primary" Classes="Primary" IsEnabled="False" />
+          <Button Margin="2" Content="Danger" Classes="Danger" />
+          <Button Margin="2" Content="Danger" Classes="Danger" IsEnabled="False" />
+        </StackPanel>
+
+        <!-- CheckBox -->
+        <StackPanel Orientation="Vertical" Margin="4" Width="120">
+          <TextBlock Margin="2" Text="CheckBox" />
+          <CheckBox Margin="2" Content="Unchecked" />
+          <CheckBox Margin="2" Content="Checked" IsChecked="True" />
+          <CheckBox Margin="2" Content="Indermiediate" IsChecked="{x:Null}" IsThreeState="True" />
+          <CheckBox Margin="2" Content="Unchecked" IsEnabled="False" />
+          <CheckBox Margin="2" Content="Checked" IsChecked="True" IsEnabled="False" />
+          <CheckBox Margin="2" Content="Indermiediate" IsChecked="{x:Null}" IsThreeState="True" IsEnabled="False" />
+        </StackPanel>
+
+        <!--<StackPanel Orientation="Vertical" Margin="4" Width="120">
+          <TextBlock Margin="2" Text="RadioButton" />
+          <RadioButton Margin="2" Content="Unchecked" />
+          <RadioButton Margin="2" Content="Checked" IsChecked="True" />
+          <RadioButton Margin="2" Content="Indermiediate" IsChecked="{x:Null}" IsThreeState="True" />
+          <RadioButton Margin="2" Content="Unchecked" IsEnabled="False" />
+          <RadioButton Margin="2" Content="Checked" IsChecked="True" IsEnabled="False" />
+          <RadioButton Margin="2" Content="Indermiediate" IsChecked="{x:Null}" IsThreeState="True" IsEnabled="False" />
+        </StackPanel>-->
+
+
+
+        <!-- TextBox -->
+        <StackPanel Orientation="Vertical" Margin="4" Width="120">
+          <TextBlock Margin="2" Text="TextBox" />
+          <TextBox Margin="2,4" Text="TextBox" />
+          <TextBox Margin="2,4" Text="Disabled" IsEnabled="False" />
+          <TextBox Margin="2,4" Text="TextBox" Height="80" AcceptsReturn="True" />
+        </StackPanel>
+
+      </StackPanel>
+    </ScrollViewer>
+    
+  </Grid>
+
+</Window>

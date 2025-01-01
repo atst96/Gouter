@@ -7,6 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		.gitignore = .gitignore
+		Directory.Build.props = Directory.Build.props
 		LICENSE = LICENSE
 		NOTICE.md = NOTICE.md
 		README.md = README.md
@@ -26,6 +27,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gouter2", "Gouter2\Gouter2.csproj", "{CE40FDDB-9C7E-481B-B7A2-D5A7C36571AD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gouter.Share", "Gouter.Share\Gouter.Share.csproj", "{57DC480A-61C0-4B54-BCB0-FF32666CCE7F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CapriciousUI.Avalonia", "CapriciousUI.Avalonia\CapriciousUI.Avalonia.csproj", "{82CC1E66-95C9-4F20-8935-D8EFC819D023}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CapriciousUI.Sample", "CapriciousUI.Sample\CapriciousUI.Sample.csproj", "{75ED4865-6B2E-4370-974C-AA467741597E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,6 +58,14 @@ Global
 		{57DC480A-61C0-4B54-BCB0-FF32666CCE7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{57DC480A-61C0-4B54-BCB0-FF32666CCE7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{57DC480A-61C0-4B54-BCB0-FF32666CCE7F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82CC1E66-95C9-4F20-8935-D8EFC819D023}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82CC1E66-95C9-4F20-8935-D8EFC819D023}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82CC1E66-95C9-4F20-8935-D8EFC819D023}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82CC1E66-95C9-4F20-8935-D8EFC819D023}.Release|Any CPU.Build.0 = Release|Any CPU
+		{75ED4865-6B2E-4370-974C-AA467741597E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75ED4865-6B2E-4370-974C-AA467741597E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75ED4865-6B2E-4370-974C-AA467741597E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75ED4865-6B2E-4370-974C-AA467741597E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
