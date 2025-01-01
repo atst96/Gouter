@@ -4,7 +4,7 @@ using MessagePack;
 namespace Gouter;
 
 [MessagePackObject]
-internal class ApplicationSetting : NotificationObject
+internal partial class ApplicationSetting : NotificationObject
 {
     [Key("directory.musics")]
     private ObservableList<string> _musicDirectories;
